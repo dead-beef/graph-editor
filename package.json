@@ -5,7 +5,7 @@
   "license": "MIT",
   "private": true,
   "description": "Graph editor library module",
-  "main": "dist/graph-editor.js",
+  "main": "dist/js/graph-editor.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dead-beef/graph-editor"
