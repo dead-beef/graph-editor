@@ -49,8 +49,8 @@
   pointer-events: none;
   stroke-width: 2px;
   stroke: #a44;
-  marker-start: url("/#ge-dragline-start");
-  marker-end: url("/#ge-dragline-end"); }
+  marker-start: url("../#ge-dragline-start");
+  marker-end: url("../#ge-dragline-end"); }
 
 .ge-graph .ge-link {
   cursor: pointer;
@@ -156,27 +156,31 @@
   fill: #4477aa; }
 
 .ge-digraph .ge-link > path {
-  marker-end: url("/#ge-arrow-default"); }
+  marker-end: url("../#ge-arrow-default"); }
 
 .ge-digraph .ge-link:hover > path {
-  marker-end: url("/#ge-arrow-hover"); }
+  marker-end: url("../#ge-arrow-hover"); }
 
 .ge-digraph.ge-selection .ge-link {
   /*&.ge-link-selection, &.ge-selection.ge-link-selection {
-				& > path { marker-end: url("/#ge-arrow-selected"); }
-				&:hover > path { marker-end: url("/#ge-arrow-selected-hover"); }
+				& > path {
+					marker-end: url("../#ge-arrow-selected");
+				}
+				&:hover > path {
+					marker-end: url("../#ge-arrow-selected-hover");
+				}
 			}*/ }
   .ge-digraph.ge-selection .ge-link > path {
-    marker-end: url("/#ge-arrow-unselected"); }
+    marker-end: url("../#ge-arrow-unselected"); }
   .ge-digraph.ge-selection .ge-link:hover > path {
-    marker-end: url("/#ge-arrow-unselected-hover"); }
+    marker-end: url("../#ge-arrow-unselected-hover"); }
   .ge-digraph.ge-selection .ge-link.ge-selection > path {
-    marker-end: url("/#ge-arrow-selected-node"); }
+    marker-end: url("../#ge-arrow-selected-node"); }
   .ge-digraph.ge-selection .ge-link.ge-selection:hover > path {
-    marker-end: url("/#ge-arrow-selected-node-hover"); }
+    marker-end: url("../#ge-arrow-selected-node-hover"); }
 
 .ge-digraph.ge-selection .ge-link.ge-link-selection > path, .ge-digraph.ge-selection .ge-link.ge-selection.ge-link-selection > path, .ge-digraph.ge-link-selection .ge-link.ge-link-selection > path, .ge-digraph.ge-link-selection .ge-link.ge-selection.ge-link-selection > path {
-  marker-end: url("/#ge-arrow-selected"); }
+  marker-end: url("../#ge-arrow-selected"); }
 
 .ge-digraph.ge-selection .ge-link.ge-link-selection:hover > path, .ge-digraph.ge-selection .ge-link.ge-selection.ge-link-selection:hover > path, .ge-digraph.ge-link-selection .ge-link.ge-link-selection:hover > path, .ge-digraph.ge-link-selection .ge-link.ge-selection.ge-link-selection:hover > path {
-  marker-end: url("/#ge-arrow-selected-hover"); }
+  marker-end: url("../#ge-arrow-selected-hover"); }

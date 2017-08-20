@@ -12,6 +12,7 @@ $ge-node-bg:          #ddd !default;
 $ge-node-hover-fg:    #000 !default;
 $ge-node-hover-bg:    #aee !default;
 
+$ge-link-marker-path: "../";
 $ge-link-font-size:   14px !default;
 $ge-link-size:        2px !default;
 
@@ -93,8 +94,8 @@ $ge-selected-node-hover-bg:   mix($ge-selected-node-bg, $ge-node-hover-bg) !defa
 		pointer-events: none;
 		stroke-width: $ge-dragline-size;
 		stroke: $ge-dragline-fg;
-		marker-start: url("/#ge-dragline-start");
-		marker-end: url("/#ge-dragline-end");
+		marker-start: url("#{$ge-link-marker-path}#ge-dragline-start");
+		marker-end: url("#{$ge-link-marker-path}#ge-dragline-end");
 	}
 
 	.ge-link {
@@ -232,21 +233,37 @@ $ge-selected-node-hover-bg:   mix($ge-selected-node-bg, $ge-node-hover-bg) !defa
 
 .ge-digraph {
 	.ge-link {
-		& > path { marker-end: url("/#ge-arrow-default"); }
-		&:hover > path { marker-end: url("/#ge-arrow-hover"); }
+		& > path {
+			marker-end: url("#{$ge-link-marker-path}#ge-arrow-default");
+		}
+		&:hover > path {
+			marker-end: url("#{$ge-link-marker-path}#ge-arrow-hover");
+		}
 	}
 
 	&.ge-selection {
 		.ge-link {
-			& > path { marker-end: url("/#ge-arrow-unselected"); }
-			&:hover > path { marker-end: url("/#ge-arrow-unselected-hover"); }
+			& > path {
+				marker-end: url("#{$ge-link-marker-path}#ge-arrow-unselected");
+			}
+			&:hover > path {
+				marker-end: url("#{$ge-link-marker-path}#ge-arrow-unselected-hover");
+			}
 			&.ge-selection {
-				& > path { marker-end: url("/#ge-arrow-selected-node"); }
-				&:hover > path { marker-end: url("/#ge-arrow-selected-node-hover"); }
+				& > path {
+					marker-end: url("#{$ge-link-marker-path}#ge-arrow-selected-node");
+				}
+				&:hover > path {
+					marker-end: url("#{$ge-link-marker-path}#ge-arrow-selected-node-hover");
+				}
 			}
 			/*&.ge-link-selection, &.ge-selection.ge-link-selection {
-				& > path { marker-end: url("/#ge-arrow-selected"); }
-				&:hover > path { marker-end: url("/#ge-arrow-selected-hover"); }
+				& > path {
+					marker-end: url("#{$ge-link-marker-path}#ge-arrow-selected");
+				}
+				&:hover > path {
+					marker-end: url("#{$ge-link-marker-path}#ge-arrow-selected-hover");
+				}
 			}*/
 		}
 	}
@@ -254,8 +271,12 @@ $ge-selected-node-hover-bg:   mix($ge-selected-node-bg, $ge-node-hover-bg) !defa
 	&.ge-selection, &.ge-link-selection {
 		.ge-link {
 			&.ge-link-selection, &.ge-selection.ge-link-selection {
-				& > path { marker-end: url("/#ge-arrow-selected"); }
-				&:hover > path { marker-end: url("/#ge-arrow-selected-hover"); }
+				& > path {
+					marker-end: url("#{$ge-link-marker-path}#ge-arrow-selected");
+				}
+				&:hover > path {
+					marker-end: url("#{$ge-link-marker-path}#ge-arrow-selected-hover");
+				}
 			}
 		}
 	}
