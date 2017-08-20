@@ -1,0 +1,19 @@
+{
+	"root": false,
+	"globals": {
+		"ge": true,
+		"jasmine": true,
+		"beforeEach": true,
+		"beforeAll": true,
+		"afterEach": true,
+		"afterAll": true,
+		"describe": true,
+		"inject": true,
+		"expect": true,
+		"spyOn": true,
+		"it": true,
+		"element": true,
+		"by": true,
+		"browser": true
+	}
+}
