@@ -85,9 +85,9 @@ ge.GraphEditor.prototype.resized = function() {
 
 ge.GraphEditor.prototype.updateSimulation = function() {
 	if(this.state.simulation) {
-		this.simulation = this.options.simulation
+		this.state.simulation = this.options.simulation
 			.create(
-				this.simulation,
+				this.state.simulation,
 				this.options,
 				this.data.nodes,
 				this.data.links
