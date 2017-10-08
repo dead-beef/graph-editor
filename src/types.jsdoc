@@ -1,0 +1,275 @@
+/**
+ * D3 selection.
+ * @typedef {Object} D3Selection
+ * @see [d3-selection]{@link https://github.com/d3/d3-selection#api-reference}
+ */
+
+/**
+ * D3 force simulation.
+ * @typedef {Object} D3Simulation
+ * @see [d3-force]{@link https://github.com/d3/d3-force#api-reference}
+ */
+
+/**
+ * D3 drag behavior.
+ * @typedef {Object} D3Drag
+ * @see [d3.drag]{@link https://github.com/d3/d3-drag/blob/master/README.md#api-reference}
+ */
+
+/**
+ * D3 zoom behavior.
+ * @typedef {Object} D3Zoom
+ * @see [d3.zoom]{@link https://github.com/d3/d3-zoom/blob/master/README.md#api-reference}
+ */
+
+/**
+ * CSS selector.
+ * @typedef {string} Selector
+ */
+
+/**
+ * Node or link ID.
+ * @typedef {(number|string)} ID
+ */
+
+/**
+ * Point.
+ * @typedef {Array<number>} Point
+ * @property {number} 0  X coordinate.
+ * @property {number} 1  Y coordinate.
+ */
+
+/**
+ * Angle sine and cosine.
+ * @typedef {Array<number>} SinCos
+ * @property {number} 0  Sine.
+ * @property {number} 1  Cosine.
+ */
+
+/**
+ * Imported node data.
+ * @typedef {Object} ImportNodeData
+ * @property {ID}     [id]     Node ID.
+ * @property {number} [x]      Center X coordinate.
+ * @property {number} [y]      Center Y coordinate.
+ * @property {number} [size]   Size.
+ * @property {string} [title]  Title.
+ * @property {*}      [data]   User data.
+ */
+
+/**
+ * Imported link data.
+ * @typedef {Object} ImportLinkData
+ * @property {(ID|ImportNodeData)} source   Source node.
+ * @property {(ID|ImportNodeData)} target   Target node.
+ * @property {number}              [size]   Size.
+ * @property {string}              [title]  Title.
+ * @property {*}                   [data]   User data.
+ */
+
+/**
+ * Imported graph data.
+ * @typedef {Object} ImportGraphData
+ * @property {Array<ImportNodeData>} nodes  Node data.
+ * @property {Array<ImportLinkData>} links  Link data.
+ */
+
+/**
+ * Exported node data.
+ * @typedef {Object} ExportNodeData
+ * @property {ID}     id     Node ID.
+ * @property {number} x      Center X coordinate.
+ * @property {number} y      Center Y coordinate.
+ * @property {number} size   Size.
+ * @property {string} title  Title.
+ * @property {*}      data   User data.
+ */
+
+/**
+ * Exported link data.
+ * @typedef {Object} ExportLinkData
+ * @property {ID}     source   Source node ID.
+ * @property {ID}     target   Target node ID.
+ * @property {number} [size]   Size.
+ * @property {string} [title]  Title.
+ * @property {*}      [data]   User data.
+ */
+
+/**
+ * Exported graph data.
+ * @typedef {Object} ExportGraphData
+ * @property {Array<ExportNodeData>} nodes  Node data.
+ * @property {Array<ExportLinkData>} links  Link data.
+ */
+
+/**
+ * Node data.
+ * @typedef {Object} Node
+ * @property {ID}       id         Node ID.
+ * @property {number}   x          Center X coordinate.
+ * @property {number}   y          Center Y coordinate.
+ * @property {number}   size       Size.
+ * @property {string}   title      Title.
+ * @property {*}        data       User data.
+ * @property {string}   elementId  SVG element ID.
+ * @property {Selector} selector   SVG element selector.
+ * @property {string}   prevTitle  Title during last DOM update.
+ * @property {string}   textSize   Text element size.
+ * @property {string}   textOffset Text element offset.
+ */
+
+/**
+ * Link data.
+ * @typedef {Object} Link
+ * @property {Node}     source    Source node.
+ * @property {Node}     target    Target node.
+ * @property {number}   size      Size.
+ * @property {string}   title     Title.
+ * @property {*}        data      User data.
+ * @property {string}   defId     SVG <def> ID.
+ * @property {string}   pathId    SVG <path> ID.
+ * @property {Selector} selector  SVG <path> selector.
+ * @property {string}   path      SVG path.
+ * @property {string}   textPath  SVG text path.
+ * @property {number}   flip      0 if path == textPath, 1 if text path is reversed.
+ */
+
+/**
+ * Graph data.
+ * @typedef {Object} GraphData
+ * @property {Array<Node>} nodes  Node data.
+ * @property {Array<Link>} links  Link data.
+ */
+
+/**
+ * Node or link reference.
+ * @typedef {(D3Selection|SVGElement|Node|Link|ID|Selector)}  Reference
+ */
+
+/**
+ * Added nodes and links.
+ * @typedef {Array<number>} AddedObjects
+ * @property {Array<Node>} 0  Nodes.
+ * @property {Array<Link>} 1  Links.
+ */
+
+/**
+ * Selection.
+ * @typedef {Object} Selection
+ * @property {?Node} node  Selected node.
+ * @property {?Link} link  Selected link.
+ */
+
+
+/**
+ * Graph options.
+ * @typedef {Object} GraphOptions
+ * @property {?string}
+ *           [id='ge' + <random>]
+ *           Graph SVG ID.
+ * @property {boolean}
+ *           [directed=false]
+ *           Graph type.
+ * @property {number}
+ *           [node.border=2]
+ *           Node border size.
+ * @property {number}
+ *           [node.size.def=10]
+ *           Default node size.
+ * @property {number}
+ *           [node.size.min=10]
+ *           Minimal node size.
+ * @property {number|string}
+ *           [node.text.dx=0]
+ *           Node title X offset.
+ * @property {number|string}
+ *           [node.text.dy=0]
+ *           Node title Y offset.
+ * @property {boolean}
+ *           [node.text.inside=true]
+ *           Title inside/outside nodes.
+ * @property {function}
+ *           [link.path={@link ge.defaultLinkPath}]
+ *           Link SVG path generator.
+ * @property {number}
+ *           [link.size.def=2]
+ *           Default link size.
+ * @property {number|string}
+ *           [link.text.dx=0]
+ *           Link title X offset.
+ * @property {number|string}
+ *           [link.text.dy='1.1em']
+ *           Link title Y offset.
+ * @property {string}
+ *           [link.text.offset='50%' for undirected graphs, '20%' for directed]
+ *           Link title start-offset in %.
+ * @property {string}
+ *           [link.text.anchor='middle' for undirected graphs, 'start' for directed]
+ *           Link title text-anchor ('start' | 'middle' | 'end').
+ * @property {number}
+ *           [link.arc.start=180]
+ *           Reflexive link start angle in degrees.
+ * @property {number}
+ *           [link.arc.end=270]
+ *           Reflexive link end angle in degrees.
+ * @property {function}
+ *           [simulation.create={@link ge.defaultSimulation}]
+ *           Simulation start function.
+ * @property {boolean}
+ *           [simulation.start=false]
+ *           Start simulation after creating graph.
+ * @property {boolean}
+ *           [simulation.stop=true]
+ *           Stop simulation when it converges.
+ * @property {number}
+ *           [simulation.step=1]
+ *           DOM update interval in simulation ticks.
+ * @property {number}
+ *           [transition.zoom=250]
+ *           Zoom transition duration in milliseconds.
+ * @property {number}
+ *           [transition.drag=50]
+ *           Drag transition duration in milliseconds.
+ * @property {number}
+ *           [transition.simulation=50]
+ *           Simulation transition duration in milliseconds.
+ * @property {number}
+ *           [scale.min=0.25]
+ *           Minimal zoom level.
+ * @property {number}
+ *           [scale.max=8.0]
+ *           Maximal zoom level.
+ * @property {number}
+ *           [bbox.padding=80]
+ *           Graph bounding box padding.
+ * @property {function}
+ *           [export.node={@link ge.defaultExportNode}]
+ *           Node export function.
+ * @property {function}
+ *           [export.link={@link ge.defaultExportLink}]
+ *           Link export function.
+ * @property {string}
+ *           [css.graph='ge-graph']
+ *           Graph CSS classes.
+ * @property {string}
+ *           [css.digraph='ge-digraph']
+ *           Directed graph CSS classes.
+ * @property {string}
+ *           [css.node='ge-node']
+ *           Node CSS classes.
+ * @property {string}
+ *           [css.link='ge-link']
+ *           Link CSS classes.
+ * @property {string}
+ *           [css.hide='ge-hide']
+ *           Hidden element CSS classes.
+ * @property {string}
+ *           [css.dragline='ge-dragline']
+ *           Drag line CSS classes.
+ * @property {string}
+ *           [css.selection.node='ge-selection']
+ *           Selected node CSS classes.
+ * @property {string}
+ *           [css.selection.link='ge-link-selection']
+ *           Selected link CSS classes.
+ */

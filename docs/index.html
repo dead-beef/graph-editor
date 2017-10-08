@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Home</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Home</h1>
+
+    
+
+
+
+    
+
+
+    <h3>graph-editor 0.0.1</h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article><h1>GraphEditor - graph editor library module</h1><h2>Overview</h2><p>It exports a class which should be bound to an element and provided data for <a href="https://en.wikipedia.org/wiki/Graph_%28abstract_data_type%29">Graph</a> visualisation and editing.</p>
+<h2>Requirements</h2><ul>
+<li><a href="https://jquery.com/"><code>jQuery</code></a></li>
+<li><a href="https://d3js.org/"><code>D3 v4</code></a></li>
+</ul>
+<h2>Usage</h2><ul>
+<li><a href="https://dead-beef.github.io/graph-editor"><code>Documentation</code></a></li>
+<li><a href="https://dead-beef.github.io/graph-editor-usage-example"><code>Usage example</code></a></li>
+</ul>
+<pre class="prettyprint source lang-js"><code>var selector = 'svg';
+
+var data = {
+    nodes: [
+        { id: 0, size: 4, title: 'node1' },
+        { id: 1, size: 8, title: 'node2' }
+    ],
+    links: [
+        { source: 0, target: 0, size: 2, title: 'link2' },
+        { source: 0, target: 1, size: 4, title: 'link1' }
+    ]
+};
+
+var options = {
+    id: null,
+    directed: false,
+
+    node: {
+        border: 2,
+        size: {
+            def: 10,
+            min: 10
+        },
+        text: {
+            dx: 0,
+            dy: 0,
+            inside: true
+        }
+    },
+
+    link: {
+        path: ge.defaultLinkPath,
+        size: {
+            def: 2
+        },
+        text: {
+            dx: 0,
+            dy: '1.1em',
+            offset: null,
+            anchor: null
+        },
+        arc: {
+            start: 180,
+            end: 270
+        }
+    },
+
+    simulation: {
+        create: ge.defaultSimulation,
+        start: false,
+        stop: true,
+        step: 1
+    },
+
+    transition: {
+        zoom: 250,
+        drag: 50,
+        simulation: 50
+    },
+
+    scale: {
+        min: 0.25,
+        max: 8.0
+    },
+
+    bbox: {
+        padding: 80
+    },
+
+    'export': {
+        node: ge.defaultExportNode,
+        link: ge.defaultExportLink
+    },
+
+    css: {
+        markers: 'ge-markers',
+        node: 'ge-node',
+        graph: 'ge-graph',
+        digraph: 'ge-digraph',
+        hide: 'ge-hidden',
+        dragline: 'ge-dragline',
+        link: 'ge-link',
+        connect: 'ge-connect',
+        selection: {
+            node: 'ge-selection',
+            link: 'ge-link-selection'
+        }
+    }
+};
+
+var graph = new ge.GraphEditor(selector, data, options);</code></pre><h2>Requirements for advanced workflow</h2><p>To be able to rebuild the project you will need</p>
+<ul>
+<li><a href="https://nodejs.org/"><code>Node.js</code></a></li>
+<li><a href="https://nodejs.org/"><code>NPM</code></a></li>
+<li><a href="https://git-scm.com/"><code>Git</code></a></li>
+<li><a href="https://www.gnu.org/software/make/"><code>GNU Make</code></a></li>
+</ul>
+<h2>Installation</h2><pre class="prettyprint source"><code>git clone https://github.com/dead-beef/graph-editor.git
+cd graph-editor
+make install</code></pre><h2>Building</h2><pre class="prettyprint source lang-bash"><code># single run
+make
+# continuous
+make watch
+# single run, minify
+make min
+# continuous, minify
+make min-watch</code></pre><h2>Testing</h2><pre class="prettyprint source lang-bash"><code># unit, single run
+make test
+# unit, continuous
+make test-watch
+# test application bundle
+TEST_BUNDLE=1 make test
+# select browsers (default: Chromium)
+TEST_BROWSERS=&quot;Firefox Chrome&quot; make test</code></pre><h2>Code Linting</h2><pre class="prettyprint source"><code>make lint</code></pre><h2>Documentation</h2><pre class="prettyprint source"><code>make docs</code></pre><h2>Licenses</h2><ul>
+<li><a href="https://github.com/dead-beef/graph-editor/blob/master/LICENSE"><code>GraphEditor</code></a></li>
+</ul></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ge.GraphEditor.html">GraphEditor</a></li></ul><h3>Events</h3><ul><li><a href="global.html#event:click">click</a></li><li><a href="global.html#event:link-click">link-click</a></li><li><a href="global.html#event:new-link-cancel">new-link-cancel</a></li><li><a href="global.html#event:new-link-end">new-link-end</a></li><li><a href="global.html#event:new-link-start">new-link-start</a></li><li><a href="global.html#event:node-click">node-click</a></li><li><a href="global.html#event:simulation-start">simulation-start</a></li><li><a href="global.html#event:simulation-stop">simulation-stop</a></li></ul><h3>Namespaces</h3><ul><li><a href="ge.html">ge</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Oct 08 2017 13:11:31 GMT+0000 (UTC)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

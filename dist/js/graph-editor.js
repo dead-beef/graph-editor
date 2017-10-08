@@ -15,29 +15,93 @@
 'use strict';
 
 /* eslint-disable no-unused-vars */
+
+/**
+ * Graph editor module.
+ * @namespace
+ */
 var ge = exports;
 
-var GraphEditor = ge.GraphEditor = function() {
-	return this.constructor.apply(this, arguments);
+/**
+ * Graph editor constructor.
+ * @class
+ * @classdesc Graph editor class.
+ * @param {(SVGElement|Selector|D3Selection)} svg     SVG element.
+ * @param {ImportGraphData}                   data    Graph data.
+ * @param {GraphOptions}                      options Graph options.
+ */
+ge.GraphEditor = function GraphEditor(svg, data, options) {
+	if(!svg.select) {
+		svg = d3.select(svg);
+	}
+
+	this.initOptions(options, svg)
+		.initMarkers(svg)
+		.initSvg(svg)
+		.initData(data)
+		.initState();
+
+	this.dispatch = d3.dispatch(
+		'node-click', 'link-click',
+		'new-link-start', 'new-link-end', 'new-link-cancel',
+		'click',
+		'simulation-start', 'simulation-stop'
+	);
+
+	this.bbox = [[0, 0], [0, 0]];
+	this.zoom = this.zoomEvents(d3.zoom())
+		.scaleExtent([this.options.scale.min, this.options.scale.max]);
+	this.drag = this.dragEvents(d3.drag());
+	this.svg.call(this.zoom);
+
+	this.onresize = ge.bind(this, this.resized);
+	$(window).on('resize', this.onresize);
+
+	return this.resized()
+		.update()
+		.simulation(this.options.simulation.start);
 };
+
 /* eslint-enable no-unused-vars */
 'use strict';
 
-ge.id = function(data) {
-	return data && data.id;
+/**
+ * Get object ID.
+ * @param {?(Object|undefined)} obj
+ * @returns {?(ID|undefined)}
+ */
+ge.id = function(obj) {
+	return obj && obj.id;
 };
 
-ge.bind = function(_this, f) {
+/**
+ * @param {Object} _this
+ * @param {function} func
+ * @returns {function}
+ */
+ge.bind = function(_this, func) {
 	return function() {
-		return f.apply(_this, arguments);
+		return func.apply(_this, arguments);
 	};
 };
 
+/**
+ * Get angle sine and cosine.
+ * @param {number} angle Angle in degrees.
+ * @returns {SinCos}
+ */
 ge.sincos = function(angle) {
 	angle *= Math.PI / 180;
 	return [ Math.sin(angle), Math.cos(angle) ];
-}; 
+};
 
+/**
+ * Compare numbers or arrays of numbers.
+ * @param {(number|Array<number>)} u
+ * @param {(number|Array<number>)} v
+ * @param {number}                 [eps=1e-5] Precision.
+ * @returns {boolean}
+ */
 ge.equal = function(u, v, eps) {
 	eps = eps || 1e-5;
 	var eq = function(x, y) { return Math.abs(x - y) < eps; };
@@ -73,6 +137,11 @@ ge.equal = function(u, v, eps) {
 	return true;
 };
 
+/**
+ * Default node export function.
+ * @param   {Node}           node
+ * @returns {ExportNodeData}
+ */
 ge.defaultExportNode = function(node) {
 	return {
 		id: node.id,
@@ -84,6 +153,11 @@ ge.defaultExportNode = function(node) {
 	};
 };
 
+/**
+ * Default link export function.
+ * @param   {Link}           link
+ * @returns {ExportLinkData}
+ */
 ge.defaultExportLink = function(link) {
 	return {
 		source: link.source.id,
@@ -94,6 +168,11 @@ ge.defaultExportLink = function(link) {
 	};
 };
 
+/**
+ * Default link path function.
+ * @param   {GraphOptions} options Graph options
+ * @returns {string}               SVG path.
+ */
 ge.defaultLinkPath = function(options) {
 	return function(d) {
 		var x0, y0, x1, y1;
@@ -155,6 +234,14 @@ ge.defaultLinkPath = function(options) {
 	};
 };
 
+/**
+ * Default simulation start function.
+ * @param   {?D3Simulation} simulation  Old simulation object.
+ * @param   {GraphOptions}  options     Graph options.
+ * @param   {Array<Node>}   nodes       Graph nodes.
+ * @param   {Array<Link>}   links       Graph links.
+ * @returns {D3Simulation}              New/updated simulation object.
+ */
 ge.defaultSimulation = function(simulation, options, nodes, links) {
 	if(!simulation) {
 		simulation = d3.forceSimulation()
@@ -205,10 +292,21 @@ ge.defaultSimulation = function(simulation, options, nodes, links) {
 };*/
 'use strict';
 
-ge.GraphEditor.prototype.isLinkData = function(d) {
-	return d.source !== undefined;
+/**
+ * Return true if object is a [link]{@link Link}.
+ * @private
+ * @param   {Object} data
+ * @returns {boolean}
+ */
+ge.GraphEditor.prototype.isLinkData = function(obj) {
+	return obj.source !== undefined;
 };
 
+/**
+ * Get node/link SVG element.
+ * @param   {?Reference}   el
+ * @returns {?D3Selection}
+ */
 ge.GraphEditor.prototype.getElement = function(el) {
 	if(el === null) {
 		return null;
@@ -228,6 +326,11 @@ ge.GraphEditor.prototype.getElement = function(el) {
 	return this.svg.select(el.selector);
 };
 
+/**
+ * Get node/link data.
+ * @param   {?Reference}   el
+ * @returns {?(Node|Link)}
+ */
 ge.GraphEditor.prototype.getData = function(el) {
 	if(el === null) {
 		return null;
@@ -244,74 +347,12 @@ ge.GraphEditor.prototype.getData = function(el) {
 	return el;
 };
 
-ge.GraphEditor.prototype.initNode = function(node) {
-	if(node.id === undefined) {
-		node.id = 1 + d3.max(this.data.nodes, function(d) { return d.id; });
-		if(isNaN(node.id)) {
-			node.id = 0;
-		}
-	}
-
-	if(this.nodeById[node.id]) {
-		return false;
-	}
-
-	node.elementId = this.options.id.concat('n', node.id);
-	node.selector = '#' + node.elementId;
-	node.size = node.size || this.options.node.size.def;
-
-	if(node.x === undefined) {
-		node.x = node.size + Math.random() * 512;
-	}
-	if(node.y === undefined) {
-		node.y = node.size + Math.random() * 512;
-	}
-	if(node.title === undefined) {
-		node.title = node.id.toString();
-	}
-
-	this.nodeById[node.id] = node;
-	return true;
-};
-
-ge.GraphEditor.prototype.initLink = function(link) {
-	var source = link.source, target = link.target;
-
-	if(typeof source !== 'object') {
-		source = this.nodeById[source];
-	}
-	if(typeof target !== 'object') {
-		target = this.nodeById[target];
-	}
-
-	if(source === undefined || target === undefined) {
-		console.error(link, source, target);
-		return false;
-	}
-
-	link.source = source;
-	link.target = target;
-
-	var id = this.options.link.id(link);
-
-	if(this.linkById[id]) {
-		return false;
-	}
-
-	link.id = id;
-	link.size = link.size || this.options.link.size.def;
-	link.defId = this.options.id.concat('d', link.id);
-	link.pathId = this.options.id.concat('p', link.id);
-	link.selector = '#' + link.pathId;
-
-	if(link.title === undefined) {
-		link.title = link.id;
-	}
-
-	this.linkById[link.id] = link;
-	return true;
-};
-
+/**
+ * Add a node if it does not exist.
+ * @param   {ImportNodeData} node                Node data.
+ * @param   {boolean}        [skipUpdate=false]  Skip DOM update.
+ * @returns {?Node}                              Added node.
+ */
 ge.GraphEditor.prototype.addNode = function(node, skipUpdate) {
 	if(!this.initNode(node)) {
 		return null;
@@ -323,6 +364,12 @@ ge.GraphEditor.prototype.addNode = function(node, skipUpdate) {
 	return node;
 };
 
+/**
+ * Add a link if it does not exist.
+ * @param   {ImportLinkData} link                Link data.
+ * @param   {boolean}        [skipUpdate=false]  Skip DOM update.
+ * @returns {?Link}                              Added link.
+ */
 ge.GraphEditor.prototype.addLink = function(link, skipUpdate) {
 	if(!this.initLink(link)) {
 		return null;
@@ -334,6 +381,12 @@ ge.GraphEditor.prototype.addLink = function(link, skipUpdate) {
 	return link;
 };
 
+/**
+ * Add multiple nodes.
+ * @param   {Array<ImportNodeData>} nodes               Node data.
+ * @param   {boolean}               [skipUpdate=false]  Skip DOM update.
+ * @returns {Array<Node>}                               Added nodes.
+ */
 ge.GraphEditor.prototype.addNodes = function(nodes, skipUpdate) {
 	var newNodes = nodes.filter(ge.bind(this, this.initNode));
 	this.data.nodes.push.apply(this.data.nodes, newNodes);
@@ -343,6 +396,12 @@ ge.GraphEditor.prototype.addNodes = function(nodes, skipUpdate) {
 	return newNodes;
 };
 
+/**
+ * Add multiple links.
+ * @param   {Array<ImportLinkData>} links               Link data.
+ * @param   {boolean}               [skipUpdate=false]  Skip DOM update.
+ * @returns {Array<Link>}                               Added links.
+ */
 ge.GraphEditor.prototype.addLinks = function(links, skipUpdate) {
 	var newLinks = links.filter(ge.bind(this, this.initLink));
 	this.data.links.push.apply(this.data.links, newLinks);
@@ -352,6 +411,12 @@ ge.GraphEditor.prototype.addLinks = function(links, skipUpdate) {
 	return newLinks;
 };
 
+/**
+ * Add one or multiple nodes/links.
+ * @param   {ImportNodeData|ImportLinkData|Array<(ImportNodeData|ImportLinkData)>} data  Data.
+ * @param   {boolean} [skipUpdate=false]  Skip DOM update.
+ * @returns {?(Node|Link|AddedObjects)}   Added objects.
+ */
 ge.GraphEditor.prototype.add = function(data, skipUpdate) {
 	var self = this;
 
@@ -385,6 +450,11 @@ ge.GraphEditor.prototype.add = function(data, skipUpdate) {
 	return this.addNode(data, skipUpdate);
 };
 
+/**
+ * Remove a link by index.
+ * @private
+ * @param {number} idx  Link index.
+ */
 ge.GraphEditor.prototype._removeLink = function(idx) {
 	if(this.state.selectedLink === this.data.links[idx]) {
 		this.selectLink(null);
@@ -393,6 +463,12 @@ ge.GraphEditor.prototype._removeLink = function(idx) {
 	this.data.links.splice(idx, 1);
 };
 
+/**
+ * Remove a link.
+ * @param   {Reference} data                Link.
+ * @param   {boolean}   [skipUpdate=false]  Skip DOM update.
+ * @returns {boolean}                       False if link does not exist.
+ */
 ge.GraphEditor.prototype.removeLink = function(data, skipUpdate) {
 	if(!(data = this.getData(data))) {
 		return false;
@@ -412,6 +488,12 @@ ge.GraphEditor.prototype.removeLink = function(data, skipUpdate) {
 	return true;
 };
 
+/**
+ * Remove a node.
+ * @param   {Reference} data                Node.
+ * @param   {boolean}   [skipUpdate=false]  Skip DOM update.
+ * @returns {boolean}                       False if node does not exist.
+ */
 ge.GraphEditor.prototype.removeNode = function(data, skipUpdate) {
 	if(!(data = this.getData(data))) {
 		return false;
@@ -447,6 +529,13 @@ ge.GraphEditor.prototype.removeNode = function(data, skipUpdate) {
 	return true;
 };
 
+/**
+ * Remove a node or a link.
+ * @private
+ * @param   {Reference} data                Reference.
+ * @param   {boolean}   [skipUpdate=false]  Skip DOM update.
+ * @returns {boolean}                       False if object does not exist.
+ */
 ge.GraphEditor.prototype._remove = function(data, skipUpdate) {
 	data = this.getData(data);
 	if(this.isLinkData(data)) {
@@ -455,6 +544,11 @@ ge.GraphEditor.prototype._remove = function(data, skipUpdate) {
 	return this.removeNode(data, skipUpdate);
 };
 
+/**
+ * Remove one or multiple nodes/links.
+ * @param   {(Reference|Array<Reference>)} data                References.
+ * @param   {boolean}                      [skipUpdate=false]  Skip DOM update.
+ */
 ge.GraphEditor.prototype.remove = function(data, skipUpdate) {
 	var self = this;
 
@@ -472,6 +566,12 @@ ge.GraphEditor.prototype.remove = function(data, skipUpdate) {
 	return self._remove(data, skipUpdate);
 };
 
+/**
+ * Set or return selected node.
+ * @param   {?Reference}   [node]          Node.
+ * @param   {boolean}      [update=false]  Update DOM if the node is already selected.
+ * @returns {(Node|ge.GraphEditor)}
+ */
 ge.GraphEditor.prototype.selectNode = function(node, update) {
 	if(node === undefined) {
 		return this.state.selectedNode;
@@ -516,6 +616,12 @@ ge.GraphEditor.prototype.selectNode = function(node, update) {
 	return this;
 };
 
+/**
+ * Set or return selected link.
+ * @param   {?Reference}   [link]          Link.
+ * @param   {boolean}      [update=false]  Update DOM if the link is already selected.
+ * @returns {(Link|ge.GraphEditor)}
+ */
 ge.GraphEditor.prototype.selectLink = function(link, update) {
 	if(link === undefined) {
 		return this.state.selectedLink;
@@ -546,6 +652,12 @@ ge.GraphEditor.prototype.selectLink = function(link, update) {
 	return this;
 };
 
+/**
+ * Set or return selected node/link.
+ * @param   {?Reference}   [data]          Node or link.
+ * @param   {boolean}      [update=false]  Update DOM if the node/link is already selected.
+ * @returns {(Node|Link|Selection|ge.GraphEditor)}
+ */
 ge.GraphEditor.prototype.select = function(data, update) {
 	if(data === undefined) {
 		return {
@@ -566,6 +678,12 @@ ge.GraphEditor.prototype.select = function(data, update) {
 	return this.selectNode(data, update);
 };
 
+/**
+ * Start force simulation.
+ * @param   {boolean} [stopOnEnd=this.options.simulation.stop]  Stop the simulation when it converges.
+ * @fires   simulation-start
+ * @returns {ge.GraphEditor}
+ */
 ge.GraphEditor.prototype.startSimulation = function(stopOnEnd) {
 	var self = this;
 
@@ -577,7 +695,7 @@ ge.GraphEditor.prototype.startSimulation = function(stopOnEnd) {
 		if(stopOnEnd) {
 			this.state.simulation.on(
 				'end',
-				function() { self.simulation(false); }
+				function() { self.stopSimulation(); }
 			);
 		}
 		else {
@@ -600,8 +718,7 @@ ge.GraphEditor.prototype.startSimulation = function(stopOnEnd) {
 	this.state.simulation.on(
 		'tick',
 		function() {
-			++step;
-			if(step >= self.options.simulation.step) {
+			if(++step >= self.options.simulation.step) {
 				step = 0;
 				self.update(true);
 			}
@@ -611,7 +728,7 @@ ge.GraphEditor.prototype.startSimulation = function(stopOnEnd) {
 	if(stopOnEnd) {
 		this.state.simulation.on(
 			'end',
-			function() { self.simulation(false); }
+			function() { self.stopSimulation(); }
 		);
 	}
 	else {
@@ -625,6 +742,11 @@ ge.GraphEditor.prototype.startSimulation = function(stopOnEnd) {
 	return this;
 };
 
+/**
+ * Stop force simulation.
+ * @fires   simulation-stop
+ * @returns {ge.GraphEditor}
+ */
 ge.GraphEditor.prototype.stopSimulation = function() {
 	if(!this.state.simulationStarted) {
 		return this;
@@ -637,6 +759,13 @@ ge.GraphEditor.prototype.stopSimulation = function() {
 	return this;
 };
 
+/**
+ * Set or return force simulation state.
+ * @param   {boolean|string} [on]  state | 'start' | 'stop' | 'restart' | 'toggle'
+ * @fires   simulation-start
+ * @fires   simulation-stop
+ * @returns {(boolean|ge.GraphEditor)}
+ */
 ge.GraphEditor.prototype.simulation = function(on) {
 	if(on === undefined) {
 		return this.state.simulationStarted;
@@ -657,6 +786,11 @@ ge.GraphEditor.prototype.simulation = function(on) {
 	return this.stopSimulation();
 };
 
+/**
+ * Set or return 'drag to link nodes' state.
+ * @param   {boolean|string}           [on]  state | 'toggle'
+ * @returns {(boolean|ge.GraphEditor)}
+ */
 ge.GraphEditor.prototype.dragToLink = function(on) {
 	if(on === undefined) {
 		return this.state.dragToLink;
@@ -668,6 +802,13 @@ ge.GraphEditor.prototype.dragToLink = function(on) {
 	return this;
 };
 
+
+/**
+ * Clear graph DOM.
+ * @param   {boolean}        [clearData=true]  Clear graph data.
+ * @fires   simulation-stop
+ * @returns {ge.GraphEditor}
+ */
 ge.GraphEditor.prototype.clear = function(clearData) {
 	clearData = clearData || (clearData === undefined);
 
@@ -695,10 +836,21 @@ ge.GraphEditor.prototype.clear = function(clearData) {
 	return this;
 };
 
+
+/**
+ * Regenerate graph DOM.
+ * @fires   simulation-stop
+ * @returns {ge.GraphEditor}
+ */
 ge.GraphEditor.prototype.redraw = function() {
 	return this.clear(false).update();
 };
 
+/**
+ * Destroy the graph.
+ * @fires   simulation-stop
+ * @returns {ge.GraphEditor}
+ */
 ge.GraphEditor.prototype.destroy = function() {
 	var cls = this.options.css;
 
@@ -717,6 +869,10 @@ ge.GraphEditor.prototype.destroy = function() {
 	return this;
 };
 
+/**
+ * Export graph data.
+ * @returns {ExportGraphData}
+ */
 ge.GraphEditor.prototype.exportData = function() {
 	var exp = this.options['export'];
 	return {
@@ -726,16 +882,38 @@ ge.GraphEditor.prototype.exportData = function() {
 };
 'use strict';
 
+/**
+ * Add an event handler.
+ * @param   {string}         event
+ * @param   {?function}      handler
+ * @returns {ge.GraphEditor}
+ * @see [d3.dispatch.on]{@link https://github.com/d3/d3-dispatch#dispatch_on}
+ */
 ge.GraphEditor.prototype.on = function(event, handler) {
 	this.dispatch.on(event, handler);
 	return this;
 };
 
+
+/**
+ * Get mouse or touch position.
+ * @private
+ * @returns {Point}
+ * @see [d3.mouse]{@link https://github.com/d3/d3-selection/blob/master/README.md#mouse}
+ * @see [d3.touch]{@link https://github.com/d3/d3-selection/blob/master/README.md#touch}
+ */
 ge.GraphEditor.prototype.clickPosition = function() {
 	var node = this.container.node();
 	return d3.touch(node) || d3.mouse(node);
 };
 
+/**
+ * Get touched node.
+ * @private
+ * @returns {?Node}
+ * @see [d3.event]{@link https://github.com/d3/d3-selection/blob/master/README.md#event}
+ * @see [document.elementFromPoint]{@link https://developer.mozilla.org/en-US/docs/Web/API/Document/elementFromPoint}
+ */
 ge.GraphEditor.prototype.touchedNode = function() {
 	var x = d3.event.touches[0].pageX;
 	var y = d3.event.touches[0].pageY;
@@ -764,6 +942,16 @@ ge.GraphEditor.prototype.touchedNode = function() {
 	}
 };
 
+/**
+ * Set node drag event handlers.
+ * @private
+ * @param {D3Drag} drag  Node drag behavior.
+ * @fires node-click
+ * @fires new-link-start
+ * @fires new-link-end
+ * @fires new-link-cancel
+ * @returns {D3Drag}
+ */
 ge.GraphEditor.prototype.dragEvents = function(drag) {
 	var self = this;
 
@@ -773,14 +961,14 @@ ge.GraphEditor.prototype.dragEvents = function(drag) {
 			self.state.dragPos = null;
 			d3.select(this).raise();
 
-			if(self.simulation() && !self.dragToLink()) {
+			if(self.state.simulationStarted && !self.state.dragToLink) {
 				d.fx = d.x;
 				d.fy = d.y;
 				self.simulation('restart');
 			}
 		})
 		.on('drag', function(d) {
-			if(self.dragToLink()) {
+			if(self.state.dragToLink) {
 				var mouse = self.clickPosition();
 				var path = ''.concat(
 					'M', d.x, ',', d.y,
@@ -803,7 +991,7 @@ ge.GraphEditor.prototype.dragEvents = function(drag) {
 				self.state.dragged = true;
 				d.x += d3.event.dx;
 				d.y += d3.event.dy;
-				if(self.simulation()) {
+				if(self.state.simulationStarted) {
 					d.fx = d.x;
 					d.fy = d.y;
 					self.simulation('restart');
@@ -819,7 +1007,7 @@ ge.GraphEditor.prototype.dragEvents = function(drag) {
 
 			if(self.state.dragged) {
 				self.state.dragged = false;
-				if(self.dragToLink()) {
+				if(self.state.dragToLink) {
 					self.dragLine.classed(self.options.css.hide, true);
 					if(self.state.newLinkTarget) {
 						var target = self.state.newLinkTarget;
@@ -833,7 +1021,7 @@ ge.GraphEditor.prototype.dragEvents = function(drag) {
 						self.dispatch.call('new-link-cancel', self, d);
 					}
 				}
-				else if(self.simulation()) {
+				else if(self.state.simulationStarted) {
 					self.simulation('restart');
 				}
 			}
@@ -843,6 +1031,13 @@ ge.GraphEditor.prototype.dragEvents = function(drag) {
 		});
 };
 
+/**
+ * Set zoom event handlers.
+ * @private
+ * @param {D3Zoom} zoom  Graph zoom behavior.
+ * @fires click
+ * @returns {D3Zoom}
+ */
 ge.GraphEditor.prototype.zoomEvents = function(zoom) {
 	var self = this;
 	//var prevScale = 1;
@@ -904,6 +1099,13 @@ ge.GraphEditor.prototype.zoomEvents = function(zoom) {
 		});
 };
 
+/**
+ * Set link event handlers.
+ * @private
+ * @param {D3Selection} links
+ * @fires link-click
+ * @returns {D3Selection}
+ */
 ge.GraphEditor.prototype.linkEvents = function(links) {
 	var self = this;
 
@@ -922,10 +1124,17 @@ ge.GraphEditor.prototype.linkEvents = function(links) {
 		});
 };
 
+
+/**
+ * Set node event handlers.
+ * @private
+ * @param {D3Selection} nodes
+ * @returns {D3Selection}
+ */
 ge.GraphEditor.prototype.nodeEvents = function(nodes) {
 	var self = this;
 
-	nodes
+	return nodes
 		.attr(
 			'transform',
 			function(d) {
@@ -933,7 +1142,7 @@ ge.GraphEditor.prototype.nodeEvents = function(nodes) {
 			}
 		)
 		.on('mouseover', function(d) {
-			if(self.dragToLink()) {
+			if(self.state.dragToLink) {
 				self.state.newLinkTarget = d;
 				/*d3.select(this).classed(
 					self.options.css.connect,
@@ -942,7 +1151,7 @@ ge.GraphEditor.prototype.nodeEvents = function(nodes) {
 			}
 		})
 		.on('mouseout', function(/*d*/) {
-			if(self.dragToLink()) {
+			if(self.state.dragToLink) {
 				self.state.newLinkTarget = null;
 			}
 			/*d3.select(this).classed(
@@ -951,7 +1160,7 @@ ge.GraphEditor.prototype.nodeEvents = function(nodes) {
 			);*/
 		})
 		.on('touchmove', function() {
-			if(self.dragToLink()) {
+			if(self.state.dragToLink) {
 				self.state.newLinkTarget = self.touchedNode();
 			}
 		})
@@ -959,6 +1168,12 @@ ge.GraphEditor.prototype.nodeEvents = function(nodes) {
 };
 'use strict';
 
+/**
+ * Create SVG markers.
+ * @private
+ * @param   {D3Selection}    svg
+ * @returns {ge.GraphEditor}
+ */
 ge.GraphEditor.prototype.initMarkers = function(svg) {
 	/*var defs = d3.select('#' + this.options.css.markers).node();
 	if(defs !== null) {
@@ -1009,6 +1224,13 @@ ge.GraphEditor.prototype.initMarkers = function(svg) {
 	return this;
 };
 
+/**
+ * Initialize SVG.
+ * @private
+ * @param   {D3Selection}    svg
+ * @this    ge.GraphEditor
+ * @returns {ge.GraphEditor}
+ */
 ge.GraphEditor.prototype.initSvg = function(svg) {
 	svg
 		.attr('id', this.options.id)
@@ -1020,27 +1242,81 @@ ge.GraphEditor.prototype.initSvg = function(svg) {
 	var linksContainer = g.append('g');
 	var nodesContainer = g.append('g');
 
+	/**
+	 * Graph container element.
+	 * @readonly
+	 * @member {D3Selection}
+	 */
 	this.container = g;
+	/**
+	 * Link text path elements.
+	 * @readonly
+	 * @member {D3Selection}
+	 */
 	this.defs = defsContainer.selectAll('.ge-text-path');
+	/**
+	 * Link elements.
+	 * @readonly
+	 * @member {D3Selection}
+	 */
 	this.links = linksContainer.selectAll('g');
+	/**
+	 * Node elements.
+	 * @readonly
+	 * @member {D3Selection}
+	 */
 	this.nodes = nodesContainer.selectAll('g');
-
+	/**
+	 * 'Drag to link nodes' line.
+	 * @readonly
+	 * @member {D3Selection}
+	 */
 	this.dragLine = g.append('path')
 		.classed(this.options.css.dragline, true)
 		.classed(this.options.css.hide, true)
 		.attr('d', 'M0,0L0,0');
-
+	/**
+	 * Hidden element for text size calculation.
+	 * @private
+	 * @member {D3Selection}
+	 */
 	this.tmpText = svg.append('text')
 		.style('stroke', 'none')
 		.style('fill', 'none');
-
+	/**
+	 * Graph SVG element.
+	 * @readonly
+	 * @member {D3Selection}
+	 */
 	this.svg = svg;
 	return this;
 };
 
+/**
+ * Initialize graph data.
+ * @private
+ * @param   {ImportGraphData} data
+ * @this    ge.GraphEditor
+ * @returns {ge.GraphEditor}
+ */
 ge.GraphEditor.prototype.initData = function(data) {
+	/**
+	 * Node data dictionary.
+	 * @readonly
+	 * @member {Object<ID,Node>}
+	 */
 	this.nodeById = {};
+	/**
+	 * Link data dictionary.
+	 * @readonly
+	 * @member {Object<ID,Link>}
+	 */
 	this.linkById = {};
+	/**
+	 * Graph data.
+	 * @readonly
+	 * @member {GraphData}
+	 */
 	this.data = {
 		nodes: [],
 		links: []
@@ -1050,7 +1326,28 @@ ge.GraphEditor.prototype.initData = function(data) {
 	return this;
 };
 
+/**
+ * Initialize graph state.
+ * @private
+ * @this    ge.GraphEditor
+ * @returns {ge.GraphEditor}
+ */
 ge.GraphEditor.prototype.initState = function() {
+	/**
+	 * Graph editor state.
+     * @readonly
+	 * @member {Object}
+	 * @property {boolean}       zoomed             False if the graph is clicked.
+	 * @property {boolean}       dragged            False if a node is clicked.
+	 * @property {?D3Simulation} simulation         Current simulation object.
+	 * @property {boolean}       simulationStarted  True if a simulation is started.
+	 * @property {boolean}       dragToLink         True in 'drag to link nodes' mode.
+	 * @property {?Node}         newLinkTarget      New link target in 'drag to link nodes' mode.
+	 * @property {?Node}         selectedNode       Selected node.
+	 * @property {?Link}         selectedLink       Selected link.
+	 * @property {?Point}        dragPos            Last drag end position.
+	 * @property {number}        zoom               Zoom level.
+	 */
 	this.state = {
 		zoomed: false,
 		dragged: false,
@@ -1067,39 +1364,91 @@ ge.GraphEditor.prototype.initState = function() {
 	return this;
 };
 
-ge.GraphEditor.prototype.constructor = function(svg, data, options) {
-	if(!svg.select) {
-		svg = d3.select(svg);
+/**
+ * Initialize node data.
+ * @private
+ * @param   {ImportNodeData} node  Node data.
+ * @returns {boolean}              False if node exists.
+ */
+ge.GraphEditor.prototype.initNode = function(node) {
+	if(node.id === undefined) {
+		node.id = 1 + d3.max(this.data.nodes, function(d) { return d.id; });
+		if(isNaN(node.id)) {
+			node.id = 0;
+		}
 	}
 
-	this.initOptions(options, svg)
-		.initMarkers(svg)
-		.initSvg(svg)
-		.initData(data)
-		.initState();
+	if(this.nodeById[node.id]) {
+		return false;
+	}
 
-	this.dispatch = d3.dispatch(
-		'node-click', 'link-click',
-		'new-link-start', 'new-link-end', 'new-link-cancel',
-		'click',
-		'simulation-start', 'simulation-stop'
-	);
+	node.elementId = this.options.id.concat('n', node.id);
+	node.selector = '#' + node.elementId;
+	node.size = node.size || this.options.node.size.def;
 
-	this.bbox = [[0, 0], [0, 0]];
-	this.zoom = this.zoomEvents(d3.zoom())
-		.scaleExtent([this.options.scale.min, this.options.scale.max]);
-	this.drag = this.dragEvents(d3.drag());
-	this.svg.call(this.zoom);
+	if(node.x === undefined) {
+		node.x = node.size + Math.random() * 512;
+	}
+	if(node.y === undefined) {
+		node.y = node.size + Math.random() * 512;
+	}
+	if(node.title === undefined) {
+		node.title = node.id.toString();
+	}
 
-	this.onresize = ge.bind(this, this.resized);
-	$(window).on('resize', this.onresize);
+	this.nodeById[node.id] = node;
+	return true;
+};
 
-	return this.resized()
-		.update()
-		.simulation(this.options.simulation.start);
+/**
+ * Initialize link data.
+ * @private
+ * @param   {ImportLinkData} link  Link data.
+ * @returns {boolean}              False if data is invalid or link exists.
+ */
+ge.GraphEditor.prototype.initLink = function(link) {
+	var source = link.source, target = link.target;
+
+	if(typeof source !== 'object') {
+		source = this.nodeById[source];
+	}
+	if(typeof target !== 'object') {
+		target = this.nodeById[target];
+	}
+
+	if(source === undefined || target === undefined) {
+		console.error(link, source, target);
+		return false;
+	}
+
+	link.source = source;
+	link.target = target;
+
+	var id = this.options.link.id(link);
+
+	if(this.linkById[id]) {
+		return false;
+	}
+
+	link.id = id;
+	link.size = link.size || this.options.link.size.def;
+	link.defId = this.options.id.concat('d', link.id);
+	link.pathId = this.options.id.concat('p', link.id);
+	link.selector = '#' + link.pathId;
+
+	if(link.title === undefined) {
+		link.title = link.id;
+	}
+
+	this.linkById[link.id] = link;
+	return true;
 };
 'use strict';
 
+/**
+ * Default options for all graph types.
+ * @type GraphOptions
+ */
 ge.GraphEditor.prototype.defaults = {
 	id: null,
 	directed: false,
@@ -1166,14 +1515,14 @@ ge.GraphEditor.prototype.defaults = {
 	},
 
 	css: {
-		markers: 'ge-markers',
+		//markers: 'ge-markers',
 		node: 'ge-node',
 		graph: 'ge-graph',
 		digraph: 'ge-digraph',
 		hide: 'ge-hidden',
 		dragline: 'ge-dragline',
 		link: 'ge-link',
-		connect: 'ge-connect',
+		//connect: 'ge-connect',
 		selection: {
 			node: 'ge-selection',
 			link: 'ge-link-selection'
@@ -1181,6 +1530,10 @@ ge.GraphEditor.prototype.defaults = {
 	}
 };
 
+/**
+ * Default options by graph type.
+ * @type Array<GraphOptions>
+ */
 ge.GraphEditor.prototype.typeDefaults = [
 	{
 		link: {
@@ -1210,6 +1563,13 @@ ge.GraphEditor.prototype.typeDefaults = [
 	}
 ];
 
+/**
+ * Initialize graph options.
+ * @private
+ * @param   {GraphOptions}    options
+ * @param   {D3Selection}     svg
+ * @returns {ge.GraphEditor}
+ */
 ge.GraphEditor.prototype.initOptions = function(options, svg) {
 	var directed;
 	if(options && options.hasOwnProperty('directed')) {
@@ -1255,6 +1615,15 @@ ge.GraphEditor.prototype.initOptions = function(options, svg) {
 };
 'use strict';
 
+/**
+ * Create a transition if necessary.
+ * @private
+ * @param   {D3Selection}    selection
+ * @param   {string}         type       duration = options.transition[type]
+ * @param   {string}         name
+ * @returns {ge.GraphEditor}
+ * @see [d3.transition]{@link https://github.com/d3/d3-transition/blob/master/README.md#api-reference}
+ */
 ge.GraphEditor.prototype.transition = function(selection, type, name) {
 	var duration = this.options.transition[type];
 	if(!duration) {
@@ -1268,6 +1637,12 @@ ge.GraphEditor.prototype.transition = function(selection, type, name) {
 		.duration(duration);
 };
 
+/**
+ * Resize node to fit text inside.
+ * @private
+ * @param   {Node}     node
+ * @returns {boolean}        False if node text did not change.
+ */
 ge.GraphEditor.prototype.getNodeSize = function(node) {
 	if(node.title === node.prevTitle) {
 		return false;
@@ -1332,17 +1707,26 @@ ge.GraphEditor.prototype.getNodeSize = function(node) {
 	return true;
 };
 
+/**
+ * Handle graph SVG element resize.
+ * @returns {ge.GraphEditor}
+ */
 ge.GraphEditor.prototype.resized = function() {
 	this.updateExtent();
 	this.zoom.translateTo(this.container, 0, 0);
 	return this;
 };
 
+/**
+ * Update force simulation.
+ * @private
+ * @returns {ge.GraphEditor}
+ */
 ge.GraphEditor.prototype.updateSimulation = function() {
 	if(this.state.simulation) {
-		this.simulation = this.options.simulation
+		this.state.simulation = this.options.simulation
 			.create(
-				this.simulation,
+				this.state.simulation,
 				this.options,
 				this.data.nodes,
 				this.data.links
@@ -1352,6 +1736,12 @@ ge.GraphEditor.prototype.updateSimulation = function() {
 	return this;
 };
 
+/**
+ * Update bounding box.
+ * @private
+ * @param   {Node}           [node]  Moved node.
+ * @returns {ge.GraphEditor}
+ */
 ge.GraphEditor.prototype.updateBBox = function(node) {
 	var data = this.data.nodes;
 	var padding = this.options.bbox.padding;
@@ -1385,6 +1775,11 @@ ge.GraphEditor.prototype.updateBBox = function(node) {
 	return this;
 };
 
+/**
+ * Update zoom behavior extent.
+ * @private
+ * @returns {ge.GraphEditor}
+ */
 ge.GraphEditor.prototype.updateExtent = function() {
 	var bbox = this.svg.node().getBoundingClientRect();
 	var extent = [
@@ -1395,6 +1790,11 @@ ge.GraphEditor.prototype.updateExtent = function() {
 	return this;
 };
 
+/**
+ * Update link element.
+ * @param   {Reference}       link  Changed link.
+ * @returns {ge.GraphEditor}
+ */
 ge.GraphEditor.prototype.updateLink = function(link) {
 	var self = this;
 	var transition = function(selection) {
@@ -1417,6 +1817,12 @@ ge.GraphEditor.prototype.updateLink = function(link) {
 	return this;
 };
 
+
+/**
+ * Update node element. If it was moved or resized, update its links.
+ * @param   {Reference}       node  Changed node.
+ * @returns {ge.GraphEditor}
+ */
 ge.GraphEditor.prototype.updateNode = function(node) {
 	var self = this;
 	var opt = this.options;
@@ -1536,6 +1942,11 @@ ge.GraphEditor.prototype.updateNode = function(node) {
 	return this;
 };*/
 
+/**
+ * Update everything.
+ * @param   {boolean}        [simulation=false]  True if called from the simulation tick handler.
+ * @returns {ge.GraphEditor}
+ */
 ge.GraphEditor.prototype.update = function(simulation) {
 	var self = this;
 	var opt = this.options;

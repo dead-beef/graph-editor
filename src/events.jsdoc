@@ -1,0 +1,54 @@
+/**
+ * Graph SVG click/touch event.
+ * @event click
+ * @this ge.GraphEditor
+ * @param {Point} pos  Click/touch position.
+ */
+
+/**
+ * Node click/touch event.
+ * @event node-click
+ * @this ge.GraphEditor
+ * @param {Node} node  Clicked/touched node.
+ */
+
+/**
+ * Link click/touch event.
+ * @event link-click
+ * @this ge.GraphEditor
+ * @param {Link} link  Clicked/touched link.
+ */
+
+/**
+ * New link start event.
+ * @event new-link-start
+ * @this ge.GraphEditor
+ * @param {Node} source  New link source.
+ */
+
+/**
+ * New link end event.
+ * @event new-link-end
+ * @this ge.GraphEditor
+ * @param {Node} source  New link source.
+ * @param {Node} target  New link target.
+ */
+
+/**
+ * New link cancel event.
+ * @event new-link-cancel
+ * @this ge.GraphEditor
+ * @param {Node} source  Cancelled link source.
+ */
+
+/**
+ * Simulation start event.
+ * @event simulation-start
+ * @this ge.GraphEditor
+ */
+
+/**
+ * Simulation stop event.
+ * @event simulation-stop
+ * @this ge.GraphEditor
+ */

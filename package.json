@@ -20,6 +20,7 @@
     "eslint": "^4.2.0",
     "jasmine-core": "^2.6.4",
     "jasmine-jquery": "^2.1.1",
+    "jsdoc": "^3.5.5",
     "karma": "^1.7.0",
     "karma-chrome-launcher": "^2.2.0",
     "karma-firefox-launcher": "^1.0.1",
@@ -31,6 +32,7 @@
     "uglify-js": "^3.0.25"
   },
   "scripts": {
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "docs": "rm -rf docs/* && jsdoc -c config/jsdoc.conf.js && mv docs/graph-editor/*/* docs/ && rm -rf docs/graph-editor"
   }
 }
