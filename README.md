@@ -2,14 +2,17 @@
 
 ## Overview
 
-It exports a class which should be bound to an element and provided data for [Graph](https://en.wikipedia.org/wiki/Graph_(abstract_data_type)) visualisation and editing.
+It exports a class which should be bound to an element and provided data for [Graph](https://en.wikipedia.org/wiki/Graph_%28abstract_data_type%29) visualisation and editing.
 
 ## Requirements
 
 - [`jQuery`](https://jquery.com/)
-- [`D3`](https://d3js.org/)
+- [`D3 v4`](https://d3js.org/)
 
 ## Usage
+
+- [`Documentation`](https://dead-beef.github.io/graph-editor)
+- [`Usage example`](https://dead-beef.github.io/graph-editor-usage-example)
 
 ```js
 var selector = 'svg';
@@ -105,56 +108,6 @@ var options = {
 var graph = new ge.GraphEditor(selector, data, options);
 ```
 
-### Events
-
-```js
-graph.on(event, handler);
-```
-
-- `click (position)`
-- `node-click (datum)`
-- `link-click (datum)`
-- `new-link-start (datum)`
-- `new-link-end (source_datum, target_datum)`
-- `new-link-cancel (datum)`
-- `simulation-start ()`
-- `simulation-stop ()`
-
-### State
-
-- `graph.state.simulation`
-- `graph.state.dragToLink`
-- `graph.state.selectedNode`
-- `graph.state.selectedLink`
-
-### Editing
-
-- `graph.addNode(datum[, skipUpdate])`
-- `graph.addNodes(data[, skipUpdate])`
-
-- `graph.addLink(datum[, skipUpdate])`
-- `graph.addLinks(data[, skipUpdate])`
-
-- `graph.add(data[, skipUpdate])`
-- `graph.remove(data[, skipUpdate])`
-
-- `graph.selectNode([datum[, update]])`
-- `graph.selectLink([datum[, update]])`
-- `graph.select([datum[, update]])`
-
-- `graph.simulation([on])`
-
-- `graph.updateLink(datum)`
-- `graph.updateNode(datum)`
-- `graph.update()`
-- `graph.resized()`
-
-- `graph.clear([clearData])`
-- `graph.redraw()`
-- `graph.destroy()`
-
-- `graph.exportData()`
-
 ## Requirements for advanced workflow
 
 To be able to rebuild the project you will need
@@ -204,6 +157,12 @@ TEST_BROWSERS="Firefox Chrome" make test
 make lint
 ```
 
+## Documentation
+
+```
+make docs
+```
+
 ## Licenses
 
-* [`GraphEditor`](LICENSE)
+* [`GraphEditor`](https://github.com/dead-beef/graph-editor/blob/master/LICENSE)
