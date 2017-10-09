@@ -173,7 +173,6 @@ ge.defaultLinkPath = function(d) {
 /**
  * Default simulation update function.
  * @param   {?D3Simulation} simulation  Old simulation object.
- * @param   {GraphOptions}  options     Graph options.
  * @param   {Array<Node>}   nodes       Graph nodes.
  * @param   {Array<Link>}   links       Graph links.
  * @this    ge.GraphEditor

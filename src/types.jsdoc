@@ -5,6 +5,12 @@
  */
 
 /**
+ * D3 dispatch.
+ * @typedef {Object} D3Dispatch
+ * @see [d3.dispatch]{@link https://github.com/d3/d3-dispatch#api-reference}
+ */
+
+/**
  * D3 force simulation.
  * @typedef {Object} D3Simulation
  * @see [d3-force]{@link https://github.com/d3/d3-force#api-reference}
@@ -37,6 +43,13 @@
  * @typedef {Array<number>} Point
  * @property {number} 0  X coordinate.
  * @property {number} 1  Y coordinate.
+ */
+
+/**
+ * Bounding box.
+ * @typedef {Array<Point>} BBox
+ * @property {Point} 0  Top left corner.
+ * @property {Point} 1  Bottom right corner.
  */
 
 /**

@@ -140,7 +140,7 @@ ge.equal = function(u, v, eps) {
 /**
  * Default node export function.
  * @param   {Node}           node
- * @this    {ge.GraphEditor}
+ * @this    ge.GraphEditor
  * @returns {ExportNodeData}
  */
 ge.defaultExportNode = function(node) {
@@ -157,7 +157,7 @@ ge.defaultExportNode = function(node) {
 /**
  * Default link export function.
  * @param   {Link}           link
- * @this    {ge.GraphEditor}
+ * @this    ge.GraphEditor
  * @returns {ExportLinkData}
  */
 ge.defaultExportLink = function(link) {
@@ -173,7 +173,7 @@ ge.defaultExportLink = function(link) {
 /**
  * Default link path function.
  * @param   {GraphOptions} options Graph options
- * @this    {ge.GraphEditor}
+ * @this    ge.GraphEditor
  * @returns {string}               SVG text path.
  */
 ge.defaultLinkPath = function(d) {
@@ -236,12 +236,12 @@ ge.defaultLinkPath = function(d) {
 };
 
 /**
- * Default simulation start function.
+ * Default simulation update function.
  * @param   {?D3Simulation} simulation  Old simulation object.
  * @param   {GraphOptions}  options     Graph options.
  * @param   {Array<Node>}   nodes       Graph nodes.
  * @param   {Array<Link>}   links       Graph links.
- * @this    {ge.GraphEditor}
+ * @this    ge.GraphEditor
  * @returns {D3Simulation}              New/updated simulation object.
  */
 ge.defaultSimulation = function(simulation, nodes, links) {

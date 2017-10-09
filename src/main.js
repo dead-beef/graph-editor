@@ -27,6 +27,10 @@ ge.GraphEditor = function GraphEditor(svg, data, options) {
 		.initData(data)
 		.initState();
 
+	/**
+	 * @readonly
+	 * @member {D3Dispatch}
+	 */
 	this.dispatch = d3.dispatch(
 		'node-click', 'link-click',
 		'new-link-start', 'new-link-end', 'new-link-cancel',
@@ -34,12 +38,32 @@ ge.GraphEditor = function GraphEditor(svg, data, options) {
 		'simulation-start', 'simulation-stop'
 	);
 
+	/**
+	 * Graph bounding box.
+	 * @readonly
+	 * @member {BBox}
+	 */
 	this.bbox = [[0, 0], [0, 0]];
+	/**
+	 * Graph zoom behavior.
+	 * @readonly
+	 * @member {D3Zoom}
+	 */
 	this.zoom = this.zoomEvents(d3.zoom())
 		.scaleExtent([this.options.scale.min, this.options.scale.max]);
+	/**
+	 * Node drag behavior.
+	 * @readonly
+	 * @member {D3Drag}
+	 */
 	this.drag = this.dragEvents(d3.drag());
 	this.svg.call(this.zoom);
 
+	/**
+	 * Window resize event handler.
+	 * @readonly
+	 * @member {function}
+	 */
 	this.onresize = ge.bind(this, this.resized);
 	$(window).on('resize', this.onresize);
 
