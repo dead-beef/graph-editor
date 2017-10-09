@@ -163,8 +163,6 @@ ge.GraphEditor.prototype.initOptions = function(options, svg) {
 	}
 	opt.link.text.anchor = [ opt.link.text.anchor, flip ];
 
-	opt.link.def = opt.link.path(opt);
-
 	this.options = opt;
 	return this;
 };

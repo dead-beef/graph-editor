@@ -414,9 +414,9 @@ ge.GraphEditor.prototype.startSimulation = function(stopOnEnd) {
 
 	this.state.simulationStarted = true;
 
-	this.state.simulation = this.options.simulation.create(
+	this.state.simulation = this.options.simulation.create.call(
+		this,
 		this.state.simulation,
-		this.options,
 		this.data.nodes,
 		this.data.links
 	);

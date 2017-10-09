@@ -110,9 +110,9 @@ ge.GraphEditor.prototype.resized = function() {
 ge.GraphEditor.prototype.updateSimulation = function() {
 	if(this.state.simulation) {
 		this.state.simulation = this.options.simulation
-			.create(
+			.create.call(
+				this,
 				this.state.simulation,
-				this.options,
 				this.data.nodes,
 				this.data.links
 			)
@@ -190,7 +190,7 @@ ge.GraphEditor.prototype.updateLink = function(link) {
 	var def = d3.select('#' + link.datum().defId);
 
 	transition(def)
-		.attr('d', self.options.link.def);
+		.attr('d', ge.bind(self, self.options.link.path));
 
 	transition(link.select('path'))
 		.attr('d', function(d) { return d.path; })
@@ -269,7 +269,7 @@ ge.GraphEditor.prototype.updateNode = function(node) {
 		var links = this.links.filter(updateLink);
 
 		transition(defs)
-			.attr('d', opt.link.def);
+			.attr('d', ge.bind(this, opt.link.path));
 
 		transition(links.select('path'))
 			.attr('d', function(d) { return d.path; });
@@ -352,7 +352,7 @@ ge.GraphEditor.prototype.update = function(simulation) {
 		.attr('id', function(d) { return d.defId; })
 		.merge(this.defs);
 
-	transition(this.defs).attr('d', opt.link.def);
+	transition(this.defs).attr('d', ge.bind(this, opt.link.path));
 
 	this.links = this.links.data(this.data.links, ge.id);
 	this.links.exit().remove();

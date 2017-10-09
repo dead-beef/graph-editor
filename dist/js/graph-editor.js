@@ -68,10 +68,10 @@ ge.GraphEditor = function GraphEditor(svg, data, options) {
 /**
  * Get object ID.
  * @param {?(Object|undefined)} obj
- * @returns {?(ID|undefined)}
+ * @returns {?ID}
  */
 ge.id = function(obj) {
-	return obj && obj.id;
+	return obj && obj.id || null;
 };
 
 /**
@@ -106,14 +106,14 @@ ge.equal = function(u, v, eps) {
 	eps = eps || 1e-5;
 	var eq = function(x, y) { return Math.abs(x - y) < eps; };
 
-	if(u === null || v === null || u === undefined || v === undefined) {
+	if(u === null || v === null
+	   || u === undefined || v === undefined
+	   || typeof u === 'number' && Array.isArray(v)
+	   || typeof v === 'number' && Array.isArray(u)) {
 		return false;
 	}
 
-	if(typeof u === 'number') {
-		if(typeof v !== 'number') {
-			return false;
-		}
+	if(typeof u === 'number' && typeof v === 'number') {
 		return eq(u, v);
 	}
 
@@ -140,6 +140,7 @@ ge.equal = function(u, v, eps) {
 /**
  * Default node export function.
  * @param   {Node}           node
+ * @this    {ge.GraphEditor}
  * @returns {ExportNodeData}
  */
 ge.defaultExportNode = function(node) {
@@ -156,6 +157,7 @@ ge.defaultExportNode = function(node) {
 /**
  * Default link export function.
  * @param   {Link}           link
+ * @this    {ge.GraphEditor}
  * @returns {ExportLinkData}
  */
 ge.defaultExportLink = function(link) {
@@ -171,67 +173,66 @@ ge.defaultExportLink = function(link) {
 /**
  * Default link path function.
  * @param   {GraphOptions} options Graph options
- * @returns {string}               SVG path.
+ * @this    {ge.GraphEditor}
+ * @returns {string}               SVG text path.
  */
-ge.defaultLinkPath = function(options) {
-	return function(d) {
-		var x0, y0, x1, y1;
+ge.defaultLinkPath = function(d) {
+	var x0, y0, x1, y1;
 
-		if(d.source === d.target) {
-			var arc = options.link.arc;
-			var r = d.source.size + d.size;
+	if(d.source === d.target) {
+		var arc = this.options.link.arc;
+		var r = d.source.size + d.size;
 
-			x0 = d.source.x + arc.start[1] * d.source.size;
-			y0 = d.source.y - arc.start[0] * d.source.size;
-			x1 = d.source.x + arc.end[1] * r;
-			y1 = d.source.y - arc.end[0] * r;
+		x0 = d.source.x + arc.start[1] * d.source.size;
+		y0 = d.source.y - arc.start[0] * d.source.size;
+		x1 = d.source.x + arc.end[1] * r;
+		y1 = d.source.y - arc.end[0] * r;
 
-			d.textPath = ''.concat(
-				'M', x0, ',', y0,
-				'A', d.source.size, ',', d.source.size,
-				',0,1,0,', x1, ',', y1
-			);
-			d.path = d.textPath;
-			d.flip = 0;
-
-			return d.textPath;
-		}
-
-		x0 = d.source.x;
-		y0 = d.source.y;
-		x1 = d.target.x - x0;
-		y1 = d.target.y - y0;
-
-		var length = Math.sqrt(x1 * x1 + y1 * y1);
-
-		x1 /= length;
-		y1 /= length;
-
-		length -= d.source.size + d.target.size + d.size;
-
-		x0 += x1 * d.source.size;
-		y0 += y1 * d.source.size;
-
-		x1 = x0 + x1 * length;
-		y1 = y0 + y1 * length;
-
-		d.path = ''.concat(
+		d.textPath = ''.concat(
 			'M', x0, ',', y0,
-			'L', x1, ',', y1
+			'A', d.source.size, ',', d.source.size,
+			',0,1,0,', x1, ',', y1
 		);
-
-		if((d.flip = +(x0 > x1))) {
-			d.textPath = ''.concat(
-				'M', x1, ',', y1,
-				'L', x0, ',', y0
-			);
-		}
-		else {
-			d.textPath = d.path;
-		}
+		d.path = d.textPath;
+		d.flip = 0;
 
 		return d.textPath;
-	};
+	}
+
+	x0 = d.source.x;
+	y0 = d.source.y;
+	x1 = d.target.x - x0;
+	y1 = d.target.y - y0;
+
+	var length = Math.sqrt(x1 * x1 + y1 * y1);
+
+	x1 /= length;
+	y1 /= length;
+
+	length -= d.source.size + d.target.size + d.size;
+
+	x0 += x1 * d.source.size;
+	y0 += y1 * d.source.size;
+
+	x1 = x0 + x1 * length;
+	y1 = y0 + y1 * length;
+
+	d.path = ''.concat(
+		'M', x0, ',', y0,
+		'L', x1, ',', y1
+	);
+
+	if((d.flip = +(x0 > x1))) {
+		d.textPath = ''.concat(
+			'M', x1, ',', y1,
+			'L', x0, ',', y0
+		);
+	}
+	else {
+		d.textPath = d.path;
+	}
+
+	return d.textPath;
 };
 
 /**
@@ -240,9 +241,10 @@ ge.defaultLinkPath = function(options) {
  * @param   {GraphOptions}  options     Graph options.
  * @param   {Array<Node>}   nodes       Graph nodes.
  * @param   {Array<Link>}   links       Graph links.
+ * @this    {ge.GraphEditor}
  * @returns {D3Simulation}              New/updated simulation object.
  */
-ge.defaultSimulation = function(simulation, options, nodes, links) {
+ge.defaultSimulation = function(simulation, nodes, links) {
 	if(!simulation) {
 		simulation = d3.forceSimulation()
 			.force('charge', d3.forceManyBody())
@@ -706,9 +708,9 @@ ge.GraphEditor.prototype.startSimulation = function(stopOnEnd) {
 
 	this.state.simulationStarted = true;
 
-	this.state.simulation = this.options.simulation.create(
+	this.state.simulation = this.options.simulation.create.call(
+		this,
 		this.state.simulation,
-		this.options,
 		this.data.nodes,
 		this.data.links
 	);
@@ -1608,8 +1610,6 @@ ge.GraphEditor.prototype.initOptions = function(options, svg) {
 	}
 	opt.link.text.anchor = [ opt.link.text.anchor, flip ];
 
-	opt.link.def = opt.link.path(opt);
-
 	this.options = opt;
 	return this;
 };
@@ -1725,9 +1725,9 @@ ge.GraphEditor.prototype.resized = function() {
 ge.GraphEditor.prototype.updateSimulation = function() {
 	if(this.state.simulation) {
 		this.state.simulation = this.options.simulation
-			.create(
+			.create.call(
+				this,
 				this.state.simulation,
-				this.options,
 				this.data.nodes,
 				this.data.links
 			)
@@ -1805,7 +1805,7 @@ ge.GraphEditor.prototype.updateLink = function(link) {
 	var def = d3.select('#' + link.datum().defId);
 
 	transition(def)
-		.attr('d', self.options.link.def);
+		.attr('d', ge.bind(self, self.options.link.path));
 
 	transition(link.select('path'))
 		.attr('d', function(d) { return d.path; })
@@ -1884,7 +1884,7 @@ ge.GraphEditor.prototype.updateNode = function(node) {
 		var links = this.links.filter(updateLink);
 
 		transition(defs)
-			.attr('d', opt.link.def);
+			.attr('d', ge.bind(this, opt.link.path));
 
 		transition(links.select('path'))
 			.attr('d', function(d) { return d.path; });
@@ -1967,7 +1967,7 @@ ge.GraphEditor.prototype.update = function(simulation) {
 		.attr('id', function(d) { return d.defId; })
 		.merge(this.defs);
 
-	transition(this.defs).attr('d', opt.link.def);
+	transition(this.defs).attr('d', ge.bind(this, opt.link.path));
 
 	this.links = this.links.data(this.data.links, ge.id);
 	this.links.exit().remove();
