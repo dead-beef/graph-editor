@@ -2,13 +2,27 @@
   "name": "graph-editor",
   "version": "0.0.1",
   "author": "dead-beef",
+  "contributors": [],
   "license": "MIT",
-  "private": true,
+  "private": false,
   "description": "Graph editor library module",
+  "keywords": [
+    "dom",
+    "svg",
+    "graph",
+    "editor"
+  ],
   "main": "dist/js/graph-editor.js",
+  "homepage": "https://dead-beef.github.io/graph-editor",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dead-beef/graph-editor"
+  },
+  "bugs": {
+    "url": "https://github.com/dead-beef/graph-editor/issues"
+  },
+  "engines" : {
+    "node" : ">=6.11.4"
   },
   "dependencies": {
     "jquery": "^3.2.1",
