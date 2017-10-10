@@ -1,4 +1,4 @@
-# GraphEditor - graph editor library module
+# graph-editor - graph editor library module
 
 ## Overview
 
@@ -8,6 +8,12 @@ It exports a class which should be bound to an element and provided data for [Gr
 
 - [`jQuery`](https://jquery.com/)
 - [`D3 v4`](https://d3js.org/)
+
+## Installation
+
+```
+npm install graph-editor
+```
 
 ## Usage
 
@@ -19,12 +25,12 @@ var selector = 'svg';
 
 var data = {
 	nodes: [
-		{ id: 0, size: 4, title: 'node1' },
-		{ id: 1, size: 8, title: 'node2' }
+		{ id: 0, size: 4, title: 'node1', data: 'userdata0' },
+		{ id: 1, size: 8, title: 'node2', data: 'userdata1' }
 	],
 	links: [
-		{ source: 0, target: 0, size: 2, title: 'link2' },
-		{ source: 0, target: 1, size: 4, title: 'link1' }
+		{ source: 0, target: 0, size: 2, title: 'link2', data: 'userdata2' },
+		{ source: 0, target: 1, size: 4, title: 'link1', data: 'userdata3' }
 	]
 };
 
@@ -145,7 +151,7 @@ make min-watch
 make test
 # unit, continuous
 make test-watch
-# test application bundle
+# test library bundle
 TEST_BUNDLE=1 make test
 # select browsers (default: Chromium)
 TEST_BROWSERS="Firefox Chrome" make test
@@ -165,4 +171,4 @@ make docs
 
 ## Licenses
 
-* [`GraphEditor`](https://github.com/dead-beef/graph-editor/blob/master/LICENSE)
+* [`graph-editor`](https://github.com/dead-beef/graph-editor/blob/master/LICENSE)
