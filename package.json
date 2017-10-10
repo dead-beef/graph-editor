@@ -13,6 +13,9 @@
     "editor"
   ],
   "main": "dist/js/graph-editor.js",
+  "files": [
+    "dist/"
+  ],
   "homepage": "https://dead-beef.github.io/graph-editor",
   "repository": {
     "type": "git",
