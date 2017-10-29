@@ -2,21 +2,44 @@ const path = require('path');
 const rootRequire = require('root-require');
 const packpath = require('packpath');
 const packageJson = rootRequire('package.json');
-const mainFiles = require('./main-files');
+const overridePackageJson = require('./override');
 
 const root = packpath.parent();
 
+const getPackageJson = (pack) => {
+	let override = overridePackageJson[pack];
+	pack = require(path.join(pack, 'package.json'));
+	if(override === undefined) {
+		return pack;
+	}
+	return Object.assign({}, pack, override);
+};
+
 const resolve = (pack) => {
 	let main = require.resolve(pack);
-	let override = mainFiles[pack];
+	let override = overridePackageJson[pack];
+	override = override && override.main;
 
-	if(override === undefined) {
-		return main;
+	if(override !== undefined) {
+		let packRoot = main.substr(0, main.indexOf(pack) + pack.length);
+		main = path.join(packRoot, override);
 	}
 
-	let root = main.substr(0, main.indexOf(pack) + pack.length + 1);
-	return root + override;
+	return path.relative(root, main);
 };
+
+const _getDeps = (pack, res, used) => {
+	for(let dep in pack.dependencies) {
+		if(!used[dep]) {
+			_getDeps(getPackageJson(dep), res, used);
+			res.push(resolve(dep));
+			used[dep] = true;
+		}
+	}
+	return res;
+};
+
+const getDeps = (pack) => _getDeps(pack, [], {});
 
 let scripts = [];
 
@@ -26,12 +49,10 @@ for(let script in packageJson.scripts) {
 	}
 }
 
-let jsDeps = Object.keys(packageJson.dependencies)
-	.map(resolve)
-	.filter((dep) => dep.endsWith('.js'))
-	.map((dep) => path.relative(root, dep));
+let jsDeps = getDeps(packageJson)
+	.filter((dep) => dep.endsWith('.js'));
 
 console.log('NPM_SCRIPTS :=', scripts.join(' '));
-console.log('ifeq "$(LIB_JS_FILES)" ""');
+console.log('ifeq "$(strip $(LIB_JS_FILES))" ""');
 console.log('LIB_JS_FILES :=', jsDeps.join(' '));
 console.log('endif');

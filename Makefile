@@ -281,7 +281,7 @@ $(eval $(call make-copy-target,$(BUILD_COPY),$(APP_DIR),$(DIST_DIR)))
 #--------
 
 ifneq "$(MAKECMDGOALS)" "install"
-$(VARS_FILE): package.json | $(BUILD_DIR) $(MAKE_VARS) node_modules
+$(VARS_FILE): package.json config/make-vars.js config/override.js | $(BUILD_DIR) $(MAKE_VARS) node_modules
 	$(call prefix,[vars]     ,$(MAKE_VARS_CMD) >$@.tmp)
 	$(call prefix,[vars]     ,$(MV) $@.tmp $@)
 endif
