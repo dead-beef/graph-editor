@@ -100,11 +100,16 @@ endif
 
 ifneq "$(strip $(LIBRARY))" ""
 BUILD_FILES := $(APP_JS) $(APP_CSS)
+BUILD_FILES_MIN := $(BUILD_FILES:%.js=%.min.js)
+BUILD_FILES_MIN := $(BUILD_FILES_MIN:%.css=%.min.css)
+
+BUILD_FILES += $(BUILD_FILES_MIN)
+BUILD_FILES_MIN := $(BUILD_FILES)
 else
 BUILD_FILES := $(LIB_JS) $(LIB_CSS) $(APP_JS) $(APP_CSS)
+BUILD_FILES_MIN := $(BUILD_FILES:$(BUILD_DIR)%=$(MIN_DIR)%)
 endif
 
-BUILD_FILES_MIN := $(BUILD_FILES:$(BUILD_DIR)%=$(MIN_DIR)%)
 BUILD_COPY := $(foreach p,$(COPY_FILES),$(p:$(APP_DIR)%=$(DIST_DIR)%))
 BUILD_COPY_ALL := $(BUILD_FONTS) $(BUILD_COPY)
 
@@ -226,6 +231,13 @@ $(MIN_DIR)/%.css: $(BUILD_DIR)/%.css | $(MIN_DIR)
 	$(call prefix,[min-css]  ,$(MINCSS) -i $< -o $@)
 
 $(MIN_DIR)/%.js: $(BUILD_DIR)/%.js | $(MIN_DIR)
+	$(call prefix,[min-js]   ,$(MINJS) $< -c -m >$@.tmp)
+	$(call prefix,[min-js]   ,$(MV) $@.tmp $@)
+
+$(BUILD_DIR)/%.min.css: $(BUILD_DIR)/%.css | $(MIN_DIR)
+	$(call prefix,[min-css]  ,$(MINCSS) -i $< -o $@)
+
+$(BUILD_DIR)/%.min.js: $(BUILD_DIR)/%.js | $(MIN_DIR)
 	$(call prefix,[min-js]   ,$(MINJS) $< -c -m >$@.tmp)
 	$(call prefix,[min-js]   ,$(MV) $@.tmp $@)
 
