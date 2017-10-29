@@ -153,6 +153,8 @@ make test
 make test-watch
 # test library bundle
 TEST_BUNDLE=1 make test
+# test minified library bundle
+TEST_MIN_BUNDLE=1 make test
 # select browsers (default: Chromium)
 TEST_BROWSERS="Firefox Chrome" make test
 ```

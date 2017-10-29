@@ -18,7 +18,10 @@ module.exports = (config) => {
 		});
 	}
 
-	if(process.env.TEST_BUNDLE) {
+	if(process.env.TEST_MIN_BUNDLE) {
+		files.push('./dist/js/graph-editor.min.js');
+	}
+	else if(process.env.TEST_BUNDLE) {
 		files.push('./dist/js/graph-editor.js');
 	}
 	else {
