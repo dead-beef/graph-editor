@@ -35,27 +35,21 @@ ge.GraphEditor.prototype.clickPosition = function(container) {
 ge.GraphEditor.prototype.touchedNode = function() {
 	var x = d3.event.touches[0].pageX;
 	var y = d3.event.touches[0].pageY;
-
 	var el = document.elementFromPoint(x, y);
-	var tag, cls;
-
-	var node = this.options.css.node;
-
+	var nodeClass = this.options.css.node;
 	while(true) {
 		if(!el) {
 			return null;
 		}
-
-		tag = el.tagName.toLowerCase();
-		if(tag === 'svg' || tag === 'body') {
-			return null;
+		switch(el.tagName.toLowerCase()) {
+			case 'svg':
+			case 'body':
+				return null;
+			case 'g':
+				if(el.classList.contains(nodeClass)) {
+					return d3.select(el).datum();
+				}
 		}
-
-		cls = el.getAttribute('class');
-		if(el.tagName === 'g' && cls && cls.indexOf(node) >= 0) {
-			return d3.select(el).datum();
-		}
-
 		el = el.parentNode;
 	}
 };
