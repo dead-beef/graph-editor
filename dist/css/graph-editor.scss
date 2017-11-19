@@ -104,6 +104,8 @@ $ge-selected-node-hover-bg:   mix($ge-selected-node-bg, $ge-node-hover-bg) !defa
 		font-size: $ge-link-font-size;
 		stroke-width: $ge-link-size;
 
+		/* * { vector-effect: non-scaling-stroke } */
+
 		path {
 			stroke: $ge-link-fg;
 			fill: none;
@@ -121,6 +123,8 @@ $ge-selected-node-hover-bg:   mix($ge-selected-node-bg, $ge-node-hover-bg) !defa
 
 	.ge-node {
 		cursor: pointer;
+
+		/* * { vector-effect: non-scaling-stroke } */
 
 		circle {
 			stroke-width: $ge-node-border;

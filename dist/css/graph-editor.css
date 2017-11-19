@@ -55,7 +55,8 @@
 .ge-graph .ge-link {
   cursor: pointer;
   font-size: 14px;
-  stroke-width: 2px; }
+  stroke-width: 2px;
+  /* * { vector-effect: non-scaling-stroke } */ }
   .ge-graph .ge-link path {
     stroke: #000;
     fill: none; }
@@ -65,7 +66,8 @@
     fill: #4aa; }
 
 .ge-graph .ge-node {
-  cursor: pointer; }
+  cursor: pointer;
+  /* * { vector-effect: non-scaling-stroke } */ }
   .ge-graph .ge-node circle {
     stroke-width: 2px;
     stroke: #000;
