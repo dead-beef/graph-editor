@@ -12,17 +12,17 @@ ge.GraphEditor.prototype.on = function(event, handler) {
 	return this;
 };
 
-
 /**
- * Get mouse or touch position.
+ * Get mouse or touch coordinates relative to container.
  * @private
+ * @param {(HTMLElement|SVGElement)} [container=this.container.node()]
  * @returns {Point}
  * @see [d3.mouse]{@link https://github.com/d3/d3-selection/blob/master/README.md#mouse}
  * @see [d3.touch]{@link https://github.com/d3/d3-selection/blob/master/README.md#touch}
  */
-ge.GraphEditor.prototype.clickPosition = function() {
-	var node = this.container.node();
-	return d3.touch(node) || d3.mouse(node);
+ge.GraphEditor.prototype.clickPosition = function(container) {
+	container = container || this.container.node();
+	return d3.touch(container) || d3.mouse(container);
 };
 
 /**
