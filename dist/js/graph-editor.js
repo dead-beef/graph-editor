@@ -81,9 +81,15 @@ ge.GraphEditor = function GraphEditor(svg, data, options) {
 	this.onresize = ge.bind(this, this.resized);
 	$(window).on('resize', this.onresize);
 
-	return this.resized()
-		.update()
-		.simulation(this.options.simulation.start);
+	this.updateBBox();
+
+	setTimeout(ge.bind(this, function() {
+		this.update()
+			.resized()
+			.simulation(this.options.simulation.start);
+	}), 10);
+
+	return this;
 };
 
 /* eslint-enable no-unused-vars */
@@ -919,17 +925,17 @@ ge.GraphEditor.prototype.on = function(event, handler) {
 	return this;
 };
 
-
 /**
- * Get mouse or touch position.
+ * Get mouse or touch coordinates relative to container.
  * @private
+ * @param {(HTMLElement|SVGElement)} [container=this.container.node()]
  * @returns {Point}
  * @see [d3.mouse]{@link https://github.com/d3/d3-selection/blob/master/README.md#mouse}
  * @see [d3.touch]{@link https://github.com/d3/d3-selection/blob/master/README.md#touch}
  */
-ge.GraphEditor.prototype.clickPosition = function() {
-	var node = this.container.node();
-	return d3.touch(node) || d3.mouse(node);
+ge.GraphEditor.prototype.clickPosition = function(container) {
+	container = container || this.container.node();
+	return d3.touch(container) || d3.mouse(container);
 };
 
 /**
@@ -942,27 +948,21 @@ ge.GraphEditor.prototype.clickPosition = function() {
 ge.GraphEditor.prototype.touchedNode = function() {
 	var x = d3.event.touches[0].pageX;
 	var y = d3.event.touches[0].pageY;
-
 	var el = document.elementFromPoint(x, y);
-	var tag, cls;
-
-	var node = this.options.css.node;
-
+	var nodeClass = this.options.css.node;
 	while(true) {
 		if(!el) {
 			return null;
 		}
-
-		tag = el.tagName.toLowerCase();
-		if(tag === 'svg' || tag === 'body') {
-			return null;
+		switch(el.tagName.toLowerCase()) {
+			case 'svg':
+			case 'body':
+				return null;
+			case 'g':
+				if(el.classList.contains(nodeClass)) {
+					return d3.select(el).datum();
+				}
 		}
-
-		cls = el.getAttribute('class');
-		if(el.tagName === 'g' && cls && cls.indexOf(node) >= 0) {
-			return d3.select(el).datum();
-		}
-
 		el = el.parentNode;
 	}
 };
