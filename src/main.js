@@ -67,9 +67,15 @@ ge.GraphEditor = function GraphEditor(svg, data, options) {
 	this.onresize = ge.bind(this, this.resized);
 	$(window).on('resize', this.onresize);
 
-	return this.resized()
-		.update()
-		.simulation(this.options.simulation.start);
+	this.updateBBox();
+
+	setTimeout(ge.bind(this, function() {
+		this.update()
+			.resized()
+			.simulation(this.options.simulation.start);
+	}), 10);
+
+	return this;
 };
 
 /* eslint-enable no-unused-vars */
