@@ -1,5 +1,15 @@
 # graph-editor - graph editor library module
 
+[![npm](https://img.shields.io/npm/v/graph-editor.svg)](
+    https://www.npmjs.com/package/graph-editor
+) [![node](https://img.shields.io/node/v/graph-editor.svg)](
+    https://nodejs.org/
+) [![Libraries.io for GitHub](https://img.shields.io/librariesio/github/dead-beef/graph-editor.svg)](
+    https://libraries.io/npm/graph-editor/
+) [![license](https://img.shields.io/github/license/dead-beef/graph-editor.svg)](
+    https://github.com/dead-beef/graph-editor/blob/master/LICENSE
+)
+
 ## Overview
 
 It exports a class which should be bound to an element and provided data for [Graph](https://en.wikipedia.org/wiki/Graph_%28abstract_data_type%29) visualisation and editing.
@@ -114,24 +124,24 @@ var options = {
 var graph = new ge.GraphEditor(selector, data, options);
 ```
 
-## Requirements for advanced workflow
+## Development
 
-To be able to rebuild the project you will need
+### Requirements
 
 - [`Node.js`](https://nodejs.org/)
 - [`NPM`](https://nodejs.org/)
 - [`Git`](https://git-scm.com/)
 - [`GNU Make`](https://www.gnu.org/software/make/)
 
-## Installation
+### Installation
 
-```
+```bash
 git clone https://github.com/dead-beef/graph-editor.git
 cd graph-editor
 make install
 ```
 
-## Building
+### Building
 
 ```bash
 # single run
@@ -144,7 +154,7 @@ make min
 make min-watch
 ```
 
-## Testing
+### Testing
 
 ```bash
 # unit, single run
@@ -159,13 +169,13 @@ TEST_MIN_BUNDLE=1 make test
 TEST_BROWSERS="Firefox Chrome" make test
 ```
 
-## Code Linting
+### Code Linting
 
 ```
 make lint
 ```
 
-## Documentation
+### Documentation
 
 ```
 make docs
