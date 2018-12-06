@@ -1,14 +1,10 @@
 module.exports = (config) => {
-	const fs = require('fs');
-	const rootRequire = require('root-require');
-	const packageJson = rootRequire('package.json');
+	const packageJson = require('./package.json');
 
-	let vendor = './dist/js/vendor.js';
-	if(!fs.existsSync(vendor)) {
-		vendor = './build/vendor.js';
-	}
-
-	let files = [ vendor ];
+	let files = [
+		require.resolve('jquery'),
+		require.resolve('d3')
+	];
 
 	if(packageJson.dependencies.jquery !== undefined) {
 		files.push({
