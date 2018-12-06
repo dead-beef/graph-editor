@@ -11,8 +11,8 @@ ge.GraphEditor.prototype.updateBBox = function(node) {
 	if(node === undefined) {
 		var left = d3.min(data, function(d) { return d.x; });
 		var up = d3.min(data, function(d) { return d.y; });
-		var right = d3.min(data, function(d) { return d.x + d.width; });
-		var down = d3.min(data, function(d) { return d.y + d.height; });
+		var right = d3.max(data, function(d) { return d.x + d.width; });
+		var down = d3.max(data, function(d) { return d.y + d.height; });
 
 		this.bbox[0][0] = (left || 0) - padding;
 		this.bbox[1][0] = (right || 0) + padding;
