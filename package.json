@@ -28,7 +28,6 @@
     "node" : ">=6.11.4"
   },
   "dependencies": {
-    "jquery": "^3.2.1",
     "d3": "^4.10.0"
   },
   "devDependencies": {

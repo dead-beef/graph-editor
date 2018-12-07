@@ -198,6 +198,63 @@ ge.defaultSimulation = function(simulation, nodes, links) {
 	return simulation;
 };
 
+/**
+ * Extend an object.
+ * @param   {object}  dst  Object to extend.
+ * @param   {object}  src  Source object.
+ * @returns {object}       Extended object.
+ */
+ge._extend = function(dst, src) {
+	if(!src) {
+		return dst;
+	}
+	if(typeof src !== 'object') {
+		throw new Error('src is not an object: ' + src.toString());
+	}
+
+	if(!dst) {
+		dst = {};
+	}
+	else if(typeof dst !== 'object') {
+		throw new Error('dst is not an object: ' + dst.toString());
+	}
+
+	for(var key in src) {
+		var value = src[key];
+		if(typeof value === 'object' && value !== null) {
+			if(Array.isArray(value)) {
+				dst[key] = value.slice();
+			}
+			else {
+				var dstValue = dst[key];
+				if(!dstValue
+				   || typeof dstValue !== 'object'
+				   || Array.isArray(dstValue)) {
+					dst[key] = dstValue = {};
+				}
+				ge._extend(dstValue, value);
+			}
+		}
+		else {
+			dst[key] = value;
+		}
+	}
+	return dst;
+};
+
+/**
+ * Extend an object.
+ * @param   {object}     dst  Object to extend.
+ * @param   {...object}  src  Source objects.
+ * @returns {object}          Extended object.
+ */
+ge.extend = function(dst, src) { // eslint-disable-line no-unused-vars
+	for(var i = 1; i < arguments.length; ++i) {
+		dst = ge._extend(dst, arguments[i]);
+	}
+	return dst;
+};
+
 /*ge.debounceD3 = function(func, delay) {
 	var timeout = null;
 

@@ -562,8 +562,6 @@ ge.GraphEditor.prototype.redraw = function() {
 ge.GraphEditor.prototype.destroy = function() {
 	var cls = this.options.css;
 
-	$(window).off('resize', this.onresize);
-
 	this.clear();
 
 	this.svg

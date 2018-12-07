@@ -102,6 +102,53 @@ describe('functions', function() {
 		});
 	});
 
+	describe('ge.extend', function() {
+		it('should be defined', function() {
+			expect(ge.extend).toBeDefined();
+		});
+
+		it('should throw if an argument is not an object', function() {
+			expect(function() { ge.extend(1, {}); }).toThrow();
+			expect(function() { ge.extend({}, true); }).toThrow();
+			expect(function() { ge.extend({}, {}, 'x'); }).toThrow();
+		});
+
+		it('should work if an argument is null', function() {
+			expect(ge.extend({}, null)).toEqual({});
+			expect(ge.extend(null, {})).toEqual({});
+			expect(ge.extend(null, null)).toBe(null);
+		});
+
+		it('should work', function() {
+			var obj = {x: 0};
+			expect(ge.extend(obj, {y: 1})).toBe(obj);
+			expect(obj).toEqual({x: 0, y: 1});
+		});
+
+		it('should work for multiple arguments', function() {
+			expect(ge.extend({}, {x: 0, y: 1}, {x:2})).toEqual({x: 2, y: 1});
+		});
+
+		it('should extend nested objects', function() {
+			expect(ge.extend(
+				{x: {y: 0, z: 1}},
+				{x: {y: 2, w: 0}, y: {a: 0, b: 1}}
+			)).toEqual(
+				{x: {y: 2, z: 1, w: 0}, y: {a: 0, b: 1}}
+			);
+		});
+
+		it('should replace arrays', function() {
+			var arr = [0];
+			var obj = {x: arr};
+			var ext = {x: [1, 2, 3]};
+			ge.extend(obj, ext);
+			expect(obj).toEqual(ext);
+			expect(obj.x).not.toBe(arr);
+			expect(obj.x).not.toBe(ext.x);
+		});
+	});
+
 	describe('ge.defaultExportNode', function() {
 		it('should be defined', function() {
 			expect(ge.defaultExportNode).toBeDefined();

@@ -136,7 +136,7 @@ ge.GraphEditor.prototype.initOptions = function(options, svg) {
 
 	var typeDefaults = this.typeDefaults[+directed];
 
-	var opt = $.extend(true, {}, this.defaults, typeDefaults, options || {});
+	var opt = ge.extend({}, this.defaults, typeDefaults, options);
 
 	opt.id = opt.id
 		|| svg.attr('id')
