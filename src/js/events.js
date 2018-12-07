@@ -7,7 +7,7 @@
  * @returns {ge.GraphEditor}
  * @see [d3.dispatch.on]{@link https://github.com/d3/d3-dispatch#dispatch_on}
  */
-ge.GraphEditor.prototype.on = function(event, handler) {
+ge.GraphEditor.prototype.on = function on(event, handler) {
 	this.dispatch.on(event, handler);
 	return this;
 };
@@ -20,7 +20,7 @@ ge.GraphEditor.prototype.on = function(event, handler) {
  * @see [d3.mouse]{@link https://github.com/d3/d3-selection/blob/master/README.md#mouse}
  * @see [d3.touch]{@link https://github.com/d3/d3-selection/blob/master/README.md#touch}
  */
-ge.GraphEditor.prototype.clickPosition = function(container) {
+ge.GraphEditor.prototype.clickPosition = function clickPosition(container) {
 	container = container || this.container.node();
 	return d3.touch(container) || d3.mouse(container);
 };
@@ -32,7 +32,7 @@ ge.GraphEditor.prototype.clickPosition = function(container) {
  * @see [d3.event]{@link https://github.com/d3/d3-selection/blob/master/README.md#event}
  * @see [document.elementFromPoint]{@link https://developer.mozilla.org/en-US/docs/Web/API/Document/elementFromPoint}
  */
-ge.GraphEditor.prototype.touchedNode = function() {
+ge.GraphEditor.prototype.touchedNode = function touchedNode() {
 	var x = d3.event.touches[0].pageX;
 	var y = d3.event.touches[0].pageY;
 	var el = document.elementFromPoint(x, y);
@@ -64,11 +64,11 @@ ge.GraphEditor.prototype.touchedNode = function() {
  * @fires new-link-cancel
  * @returns {D3Drag}
  */
-ge.GraphEditor.prototype.dragEvents = function(drag) {
+ge.GraphEditor.prototype.dragEvents = function dragEvents(drag) {
 	var self = this;
 
 	return drag
-		.on('start', function(d) {
+		.on('start', function dragStart(d) {
 			self.state.dragged = false;
 			self.state.dragPos = null;
 			d3.select(this).raise();
@@ -79,7 +79,7 @@ ge.GraphEditor.prototype.dragEvents = function(drag) {
 				self.simulation('restart');
 			}
 		})
-		.on('drag', function(d) {
+		.on('drag', function drag(d) {
 			if(self.state.dragToLink) {
 				var mouse = self.clickPosition();
 				var path = ''.concat(
@@ -111,7 +111,7 @@ ge.GraphEditor.prototype.dragEvents = function(drag) {
 				self.updateNode(this);
 			}
 		})
-		.on('end', function(d) {
+		.on('end', function dragEnd(d) {
 			d.fx = null;
 			d.fy = null;
 			
@@ -150,13 +150,13 @@ ge.GraphEditor.prototype.dragEvents = function(drag) {
  * @fires click
  * @returns {D3Zoom}
  */
-ge.GraphEditor.prototype.zoomEvents = function(zoom) {
+ge.GraphEditor.prototype.zoomEvents = function zoomEvents(zoom) {
 	var self = this;
 	//var prevScale = 1;
 
 	return zoom
 		.duration(self.options.transition.zoom)
-		.on('end', function() {
+		.on('end', function zoomEnd() {
 			if(!self.state.zoomed) {
 				var pos = self.clickPosition();
 				if(!ge.equal(self.state.dragPos, pos)) {
@@ -168,7 +168,7 @@ ge.GraphEditor.prototype.zoomEvents = function(zoom) {
 			}
 			self.state.zoomed = false;
 		})
-		.on('zoom', function() {
+		.on('zoom', function zoom() {
 			self.state.zoomed = true;
 
 			/*var scale = d3.event.transform.k;
@@ -218,7 +218,7 @@ ge.GraphEditor.prototype.zoomEvents = function(zoom) {
  * @fires link-click
  * @returns {D3Selection}
  */
-ge.GraphEditor.prototype.linkEvents = function(links) {
+ge.GraphEditor.prototype.linkEvents = function linkEvents(links) {
 	var self = this;
 
 	return links
@@ -243,7 +243,7 @@ ge.GraphEditor.prototype.linkEvents = function(links) {
  * @param {D3Selection} nodes
  * @returns {D3Selection}
  */
-ge.GraphEditor.prototype.nodeEvents = function(nodes) {
+ge.GraphEditor.prototype.nodeEvents = function nodeEvents(nodes) {
 	var self = this;
 
 	return nodes
@@ -253,7 +253,7 @@ ge.GraphEditor.prototype.nodeEvents = function(nodes) {
 				return 'translate('.concat(d.x, ',', d.y, ')');
 			}
 		)
-		.on('mouseover', function(d) {
+		.on('mouseover', function mouseOver(d) {
 			if(self.state.dragToLink) {
 				self.state.newLinkTarget = d;
 				/*d3.select(this).classed(
@@ -262,7 +262,7 @@ ge.GraphEditor.prototype.nodeEvents = function(nodes) {
 				);*/
 			}
 		})
-		.on('mouseout', function(/*d*/) {
+		.on('mouseout', function mouseOut(/*d*/) {
 			if(self.state.dragToLink) {
 				self.state.newLinkTarget = null;
 			}
@@ -271,7 +271,7 @@ ge.GraphEditor.prototype.nodeEvents = function(nodes) {
 				false
 			);*/
 		})
-		.on('touchmove', function() {
+		.on('touchmove', function touchMove() {
 			if(self.state.dragToLink) {
 				self.state.newLinkTarget = self.touchedNode();
 			}

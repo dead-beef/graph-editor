@@ -4,7 +4,7 @@
  * @param   {Node}           [node]  Moved node.
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.updateBBox = function(node) {
+ge.GraphEditor.prototype.updateBBox = function updateBBox(node) {
 	var data = this.data.nodes;
 	var padding = this.options.bbox.padding;
 
@@ -42,7 +42,7 @@ ge.GraphEditor.prototype.updateBBox = function(node) {
  * @param   {Reference}       link  Changed link.
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.updateLink = function(link) {
+ge.GraphEditor.prototype.updateLink = function updateLink(link) {
 	// ...
 };
 
@@ -51,7 +51,7 @@ ge.GraphEditor.prototype.updateLink = function(link) {
  * @param   {Reference}       node  Changed node.
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.updateNode = function(node) {
+ge.GraphEditor.prototype.updateNode = function updateNode(node) {
 	// ...
 };
 
@@ -60,6 +60,6 @@ ge.GraphEditor.prototype.updateNode = function(node) {
  * @param   {boolean}        [simulation=false]  True if called from the simulation tick handler.
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.update = function(simulation) {
+ge.GraphEditor.prototype.update = function update(simulation) {
 	// ...
 };

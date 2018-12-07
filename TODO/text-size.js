@@ -4,7 +4,7 @@
  * @classdesc Text size calculator class.
  * @param {SVGElement} el  SVG <text> element.
  */
-ge.TextSize = function(el) {
+ge.TextSize = function TextSize(el) {
 	el.setAttribute('style', 'stroke:none;fill:none');
 	this.el = el;
 	return this;
@@ -15,7 +15,7 @@ ge.TextSize = function(el) {
  * @param {string} text
  * @returns {number}
  */
-ge.TextSize.prototype.getLength = function(text) {
+ge.TextSize.prototype.getLength = function getLength(text) {
 	this.el.textContent = text;
 	return this.el.getComputedTextLength();
 };
@@ -25,7 +25,7 @@ ge.TextSize.prototype.getLength = function(text) {
  * @param {string} text
  * @returns {Point}
  */
-ge.TextSize.prototype.getSize = function(text) {
+ge.TextSize.prototype.getSize = function getSize(text) {
 	this.el.textContent = text;
 	var bbox = this.el.getBBox();
 	return [bbox.width, bbox.height];

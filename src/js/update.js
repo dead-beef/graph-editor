@@ -9,7 +9,7 @@
  * @returns {ge.GraphEditor}
  * @see [d3.transition]{@link https://github.com/d3/d3-transition/blob/master/README.md#api-reference}
  */
-ge.GraphEditor.prototype.transition = function(selection, type, name) {
+ge.GraphEditor.prototype.transition = function transition(selection, type, name) {
 	var duration = this.options.transition[type];
 	if(!duration) {
 		return selection;
@@ -28,7 +28,7 @@ ge.GraphEditor.prototype.transition = function(selection, type, name) {
  * @param   {Node}     node
  * @returns {boolean}        False if node text did not change.
  */
-ge.GraphEditor.prototype.getNodeSize = function(node) {
+ge.GraphEditor.prototype.getNodeSize = function getNodeSize(node) {
 	if(node.title === node.prevTitle) {
 		return false;
 	}
@@ -96,7 +96,7 @@ ge.GraphEditor.prototype.getNodeSize = function(node) {
  * Handle graph SVG element resize.
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.resized = function() {
+ge.GraphEditor.prototype.resized = function resized() {
 	this.updateExtent();
 	this.zoom.translateTo(this.container, 0, 0);
 	return this;
@@ -107,7 +107,7 @@ ge.GraphEditor.prototype.resized = function() {
  * @private
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.updateSimulation = function() {
+ge.GraphEditor.prototype.updateSimulation = function updateSimulation() {
 	if(this.state.simulation) {
 		this.state.simulation = this.options.simulation
 			.create.call(
@@ -127,7 +127,7 @@ ge.GraphEditor.prototype.updateSimulation = function() {
  * @param   {Node}           [node]  Moved node.
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.updateBBox = function(node) {
+ge.GraphEditor.prototype.updateBBox = function updateBBox(node) {
 	var data = this.data.nodes;
 	var padding = this.options.bbox.padding;
 
@@ -165,7 +165,7 @@ ge.GraphEditor.prototype.updateBBox = function(node) {
  * @private
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.updateExtent = function() {
+ge.GraphEditor.prototype.updateExtent = function updateExtent() {
 	var bbox = this.svg.node().getBoundingClientRect();
 	var extent = [
 		[ 0, 0 ],
@@ -180,7 +180,7 @@ ge.GraphEditor.prototype.updateExtent = function() {
  * @param   {Reference}       link  Changed link.
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.updateLink = function(link) {
+ge.GraphEditor.prototype.updateLink = function updateLink(link) {
 	var self = this;
 	var transition = function(selection) {
 		return self.transition(selection, 'drag', 'update-link');
@@ -208,7 +208,7 @@ ge.GraphEditor.prototype.updateLink = function(link) {
  * @param   {Reference}       node  Changed node.
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.updateNode = function(node) {
+ge.GraphEditor.prototype.updateNode = function updateNode(node) {
 	var self = this;
 	var opt = this.options;
 
@@ -287,7 +287,7 @@ ge.GraphEditor.prototype.updateNode = function(node) {
 	return this;
 };
 
-/*ge.GraphEditor.prototype.updateSize = function(nodes, links) {
+/*ge.GraphEditor.prototype.updateSize = function updateSize(nodes, links) {
 	nodes = nodes || this.nodes;
 	links = links || this.links;
 	var opt = this.options;
@@ -332,7 +332,7 @@ ge.GraphEditor.prototype.updateNode = function(node) {
  * @param   {boolean}        [simulation=false]  True if called from the simulation tick handler.
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.update = function(simulation) {
+ge.GraphEditor.prototype.update = function update(simulation) {
 	var self = this;
 	var opt = this.options;
 	var ttype = simulation ? 'simulation' : 'drag';

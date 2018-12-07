@@ -3,7 +3,7 @@
  * @private
  * @returns {ID}
  */
-ge.GraphEditor.prototype.newNodeId = function() {
+ge.GraphEditor.prototype.newNodeId = function newNodeId() {
 	// ...
 };
 
@@ -12,7 +12,7 @@ ge.GraphEditor.prototype.newNodeId = function() {
  * @private
  * @returns {ID}
  */
-ge.GraphEditor.prototype.newLinkId = function() {
+ge.GraphEditor.prototype.newLinkId = function newLinkId() {
 	// ...
 };
 
@@ -22,7 +22,7 @@ ge.GraphEditor.prototype.newLinkId = function() {
  * @param   {boolean}        [skipUpdate=false]  Skip DOM update.
  * @returns {?ge.Node}                           Added node.
  */
-ge.GraphEditor.prototype.addNode = function(node, skipUpdate) {
+ge.GraphEditor.prototype.addNode = function addNode(node, skipUpdate) {
 	// ...
 };
 
@@ -32,7 +32,7 @@ ge.GraphEditor.prototype.addNode = function(node, skipUpdate) {
  * @param   {boolean}        [skipUpdate=false]  Skip DOM update.
  * @returns {?ge.Link}                           Added link.
  */
-ge.GraphEditor.prototype.addLink = function(link, skipUpdate) {
+ge.GraphEditor.prototype.addLink = function addLink(link, skipUpdate) {
 	// ...
 };
 
@@ -42,7 +42,7 @@ ge.GraphEditor.prototype.addLink = function(link, skipUpdate) {
  * @param   {boolean}               [skipUpdate=false]  Skip DOM update.
  * @returns {Array<Node>}                               Added nodes.
  */
-ge.GraphEditor.prototype.addNodes = function(nodes, skipUpdate) {
+ge.GraphEditor.prototype.addNodes = function addNodes(nodes, skipUpdate) {
 	// ...
 };
 
@@ -52,7 +52,7 @@ ge.GraphEditor.prototype.addNodes = function(nodes, skipUpdate) {
  * @param   {boolean}               [skipUpdate=false]  Skip DOM update.
  * @returns {Array<Link>}                               Added links.
  */
-ge.GraphEditor.prototype.addLinks = function(links, skipUpdate) {
+ge.GraphEditor.prototype.addLinks = function addLinks(links, skipUpdate) {
 	// ...
 };
 
@@ -62,7 +62,7 @@ ge.GraphEditor.prototype.addLinks = function(links, skipUpdate) {
  * @param   {boolean} [skipUpdate=false]  Skip DOM update.
  * @returns {?(Node|Link|AddedObjects)}   Added objects.
  */
-ge.GraphEditor.prototype.add = function(data, skipUpdate) {
+ge.GraphEditor.prototype.add = function add(data, skipUpdate) {
 	// ...
 };
 
@@ -71,7 +71,7 @@ ge.GraphEditor.prototype.add = function(data, skipUpdate) {
  * @returns {ExportGraphData}
  * @see ge.GraphEditor.exportData
  */
-ge.GraphEditor.prototype.toJson = function() {
+ge.GraphEditor.prototype.toJson = function toJson() {
 	// ...
 };
 
@@ -79,6 +79,6 @@ ge.GraphEditor.prototype.toJson = function() {
  * Convert to SVG image.
  * @returns {string}
  */
-ge.GraphEditor.prototype.toSvg = function() {
+ge.GraphEditor.prototype.toSvg = function toSvg() {
 	// ...
 };

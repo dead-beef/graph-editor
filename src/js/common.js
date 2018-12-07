@@ -5,7 +5,7 @@
  * @param {?(Object|undefined)} obj
  * @returns {?ID}
  */
-ge.id = function(obj) {
+ge.id = function id(obj) {
 	return obj && obj.id || null;
 };
 
@@ -14,8 +14,8 @@ ge.id = function(obj) {
  * @param {function} func
  * @returns {function}
  */
-ge.bind = function(_this, func) {
-	return function() {
+ge.bind = function bind(_this, func) {
+	return function bound() {
 		return func.apply(_this, arguments);
 	};
 };
@@ -25,7 +25,7 @@ ge.bind = function(_this, func) {
  * @param {number} angle Angle in degrees.
  * @returns {SinCos}
  */
-ge.sincos = function(angle) {
+ge.sincos = function sincos(angle) {
 	angle *= Math.PI / 180;
 	return [ Math.sin(angle), Math.cos(angle) ];
 };
@@ -37,7 +37,7 @@ ge.sincos = function(angle) {
  * @param {number}                 [eps=1e-5] Precision.
  * @returns {boolean}
  */
-ge.equal = function(u, v, eps) {
+ge.equal = function equal(u, v, eps) {
 	eps = eps || 1e-5;
 	var eq = function(x, y) { return Math.abs(x - y) < eps; };
 
@@ -78,7 +78,7 @@ ge.equal = function(u, v, eps) {
  * @this    ge.GraphEditor
  * @returns {ExportNodeData}
  */
-ge.defaultExportNode = function(node) {
+ge.defaultExportNode = function defaultExportNode(node) {
 	return {
 		id: node.id,
 		x: node.x - this.bbox[0][0],
@@ -95,7 +95,7 @@ ge.defaultExportNode = function(node) {
  * @this    ge.GraphEditor
  * @returns {ExportLinkData}
  */
-ge.defaultExportLink = function(link) {
+ge.defaultExportLink = function defaultExportLink(link) {
 	return {
 		source: link.source.id,
 		target: link.target.id,
@@ -111,7 +111,7 @@ ge.defaultExportLink = function(link) {
  * @this    ge.GraphEditor
  * @returns {string}               SVG text path.
  */
-ge.defaultLinkPath = function(d) {
+ge.defaultLinkPath = function defaultLinkPath(d) {
 	var x0, y0, x1, y1;
 
 	if(d.source === d.target) {
@@ -178,7 +178,7 @@ ge.defaultLinkPath = function(d) {
  * @this    ge.GraphEditor
  * @returns {D3Simulation}              New/updated simulation object.
  */
-ge.defaultSimulation = function(simulation, nodes, links) {
+ge.defaultSimulation = function defaultSimulation(simulation, nodes, links) {
 	if(!simulation) {
 		simulation = d3.forceSimulation()
 			.force('charge', d3.forceManyBody())
@@ -204,7 +204,7 @@ ge.defaultSimulation = function(simulation, nodes, links) {
  * @param   {object}  src  Source object.
  * @returns {object}       Extended object.
  */
-ge._extend = function(dst, src) {
+ge._extend = function _extend(dst, src) {
 	if(!src) {
 		return dst;
 	}
@@ -248,14 +248,14 @@ ge._extend = function(dst, src) {
  * @param   {...object}  src  Source objects.
  * @returns {object}          Extended object.
  */
-ge.extend = function(dst, src) { // eslint-disable-line no-unused-vars
+ge.extend = function extend(dst, src) { // eslint-disable-line no-unused-vars
 	for(var i = 1; i < arguments.length; ++i) {
 		dst = ge._extend(dst, arguments[i]);
 	}
 	return dst;
 };
 
-/*ge.debounceD3 = function(func, delay) {
+/*ge.debounceD3 = function debounceD3(func, delay) {
 	var timeout = null;
 
 	return function() {

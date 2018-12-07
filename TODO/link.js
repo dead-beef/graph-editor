@@ -5,7 +5,7 @@
  * @param {ge.GraphEditor}  graph  Link container.
  * @param {ImportLinkData}  data   Link data.
  */
-ge.Link = function(graph, data) {
+ge.Link = function Link(graph, data) {
 	/**
 	 * ID.
 	 * @readonly
@@ -84,7 +84,7 @@ ge.Link = function(graph, data) {
  * @see ge.GraphEditor.update
  * @see ge.GraphEditor.linkEvents
  */
-ge.Link.prototype.initSelection = ge.Link.initSelection = function(links) {
+ge.Link.prototype.initSelection = ge.Link.initSelection = function initSelection(links) {
 	// ...
 };
 
@@ -94,14 +94,14 @@ ge.Link.prototype.initSelection = ge.Link.initSelection = function(links) {
  * @param {D3Selection} links  SVG element selection.
  * @see ge.GraphEditor.updateLink
  */
-ge.Link.prototype.updateSelection = ge.Link.updateSelection = function(links) {
+ge.Link.prototype.updateSelection = ge.Link.updateSelection = function updateSelection(links) {
 	// ...
 };
 
 /**
  * Update link data.
  */
-ge.Link.prototype.update = function() {
+ge.Link.prototype.update = function update() {
 	this.shape(this);
 };
 
@@ -109,7 +109,7 @@ ge.Link.prototype.update = function() {
  * Convert to JSON.
  * @returns {ExportLinkData}  JSON data.
  */
-ge.Link.prototype.toJson = function() {
+ge.Link.prototype.toJson = function toJson() {
 	return {
 		id: this.id,
 		source: this.source.id,

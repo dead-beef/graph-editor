@@ -8,7 +8,7 @@
  * @returns {ge.GraphEditor}
  * @see ge.GraphEditor.initMarkers
  */
-ge.GraphEditor.prototype.createMarkers = function() {
+ge.GraphEditor.prototype.createMarkers = function createMarkers() {
 	// ...
 	return this;
 };
@@ -20,7 +20,7 @@ ge.GraphEditor.prototype.createMarkers = function() {
  * @this    ge.GraphEditor
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.initSvg = function(svg) {
+ge.GraphEditor.prototype.initSvg = function initSvg(svg) {
 	svg.attr('id', this.options.id)
 		.classed(this.options.css.graph, true)
 		.classed(this.options.css.digraph, this.options.directed);

@@ -92,7 +92,7 @@ ge.GraphEditor.prototype.defaults = {
 ge.GraphEditor.prototype.typeDefaults = [
 	{
 		link: {
-			id: function(link) {
+			id: function linkId(link) {
 				return ''.concat(
 					Math.min(link.source.id, link.target.id),
 					'-',
@@ -107,7 +107,7 @@ ge.GraphEditor.prototype.typeDefaults = [
 	},
 	{
 		link: {
-			id: function(link) {
+			id: function linkId(link) {
 				return ''.concat(link.source.id, '-', link.target.id);
 			},
 			text: {
@@ -125,7 +125,7 @@ ge.GraphEditor.prototype.typeDefaults = [
  * @param   {D3Selection}     svg
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.initOptions = function(options, svg) {
+ge.GraphEditor.prototype.initOptions = function initOptions(options, svg) {
 	var directed;
 	if(options && options.hasOwnProperty('directed')) {
 		directed = options.directed;

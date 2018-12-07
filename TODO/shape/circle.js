@@ -17,7 +17,7 @@ ge.shape.circle = (function() {
 	 * @param   {SinCos}  angle  Angle.
 	 * @returns {Point}
 	 */
-	circle.getPoint = function(node, angle) {
+	circle.getPoint = function getPoint(node, angle) {
 		return [
 			node.x + node.width * angle[1] * 0.5,
 			node.y + node.height * angle[0] * 0.5
@@ -32,7 +32,7 @@ ge.shape.circle = (function() {
 	 * @returns {?Point}         Intersection point.
 	 * @see ge.defaultLinkPath
 	 */
-	circle.intersect = function(node, a, b) {
+	circle.intersect = function intersect(node, a, b) {
 		// ...
 	};
 
@@ -41,7 +41,7 @@ ge.shape.circle = (function() {
 	 * @param {ge.Node} node   Node data.
 	 * @see ge.GraphEditor.getNodeSize
 	 */
-	circle.fitTextInside = function(node) {
+	circle.fitTextInside = function fitTextInside(node) {
 		// ...
 	};
 

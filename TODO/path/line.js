@@ -50,7 +50,7 @@ ge.path.line = (function() {
 	 * @param {number} angle  Angle in radians.
 	 * @returns {Path}
 	 */
-	line.loopStart = function(angle) {
+	line.loopStart = function loopStart(angle) {
 		if(angle === undefined) {
 			return loopStart;
 		}
@@ -66,7 +66,7 @@ ge.path.line = (function() {
 	 * @param {number} angle  Angle in radians.
 	 * @returns {Path}
 	 */
-	line.loopEnd = function(angle) {
+	line.loopEnd = function loopEnd(angle) {
 		if(angle === undefined) {
 			return loopEnd;
 		}

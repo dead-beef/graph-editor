@@ -6,7 +6,7 @@
  * @param {ImportNodeData}  data
  * @see ge.GraphEditor.initNode
  */
-ge.Node = function(graph, data) {
+ge.Node = function Node(graph, data) {
 	/**
 	 * ID.
 	 * @readonly
@@ -122,7 +122,7 @@ ge.Node = function(graph, data) {
  * @see ge.GraphEditor.update
  * @see ge.GraphEditor.nodeEvents
  */
-ge.Node.prototype.initSelection = ge.Node.initSelection = function(nodes) {
+ge.Node.prototype.initSelection = ge.Node.initSelection = function initSelection(nodes) {
 	// ...
 };
 
@@ -132,7 +132,7 @@ ge.Node.prototype.initSelection = ge.Node.initSelection = function(nodes) {
  * @param {D3Selection} nodes  SVG element selection.
  * @see ge.GraphEditor.updateNode
  */
-ge.Node.prototype.updateSelection = ge.Node.updateSelection = function(nodes) {
+ge.Node.prototype.updateSelection = ge.Node.updateSelection = function updateSelection(nodes) {
 	// ...
 };
 
@@ -140,7 +140,7 @@ ge.Node.prototype.updateSelection = ge.Node.updateSelection = function(nodes) {
  * Update node data.
  * @returns {boolean}  True if node position changed.
  */
-ge.Node.prototype.update = function() {
+ge.Node.prototype.update = function update() {
 	var moved = false;
 
 	if(this.textInside && this.title !== this.prevTitle) {
@@ -163,7 +163,7 @@ ge.Node.prototype.update = function() {
  * @param {number} [oy=0]
  * @returns {ExportNodeData}  JSON data.
  */
-ge.Node.prototype.toJson = function(ox, oy) {
+ge.Node.prototype.toJson = function toJson(ox, oy) {
 	return {
 		id: this.id,
 		x: this.x - ox,

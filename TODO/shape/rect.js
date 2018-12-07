@@ -19,7 +19,7 @@ ge.shape.rect = (function() {
 	 * @param   {SinCos}  angle  Angle.
 	 * @returns {Point}
 	 */
-	rect.getPoint = function(node, angle) {
+	rect.getPoint = function getPoint(node, angle) {
 		// ...
 	};
 
@@ -31,7 +31,7 @@ ge.shape.rect = (function() {
 	 * @returns {?Point}         Intersection point.
 	 * @see ge.defaultLinkPath
 	 */
-	rect.intersect = function(node, a, b) {
+	rect.intersect = function intersect(node, a, b) {
 		// ...
 	};
 
@@ -40,7 +40,7 @@ ge.shape.rect = (function() {
 	 * @param {ge.Node} node   Node data.
 	 * @see ge.GraphEditor.getNodeSize
 	 */
-	rect.fitTextInside = function(node) {
+	rect.fitTextInside = function fitTextInside(node) {
 		// ...
 	};
 

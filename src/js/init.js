@@ -6,7 +6,7 @@
  * @param   {D3Selection}    svg
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.initMarkers = function(svg) {
+ge.GraphEditor.prototype.initMarkers = function initMarkers(svg) {
 	/*var defs = d3.select('#' + this.options.css.markers).node();
 	if(defs !== null) {
 		return this;
@@ -63,7 +63,7 @@ ge.GraphEditor.prototype.initMarkers = function(svg) {
  * @this    ge.GraphEditor
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.initSvg = function(svg) {
+ge.GraphEditor.prototype.initSvg = function initSvg(svg) {
 	svg
 		.attr('id', this.options.id)
 		.classed(this.options.css.graph, true)
@@ -131,7 +131,7 @@ ge.GraphEditor.prototype.initSvg = function(svg) {
  * @this    ge.GraphEditor
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.initData = function(data) {
+ge.GraphEditor.prototype.initData = function initData(data) {
 	/**
 	 * Node data dictionary.
 	 * @readonly
@@ -164,7 +164,7 @@ ge.GraphEditor.prototype.initData = function(data) {
  * @this    ge.GraphEditor
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.initState = function() {
+ge.GraphEditor.prototype.initState = function initState() {
 	/**
 	 * Graph editor state.
      * @readonly
@@ -202,7 +202,7 @@ ge.GraphEditor.prototype.initState = function() {
  * @param   {ImportNodeData} node  Node data.
  * @returns {boolean}              False if node exists.
  */
-ge.GraphEditor.prototype.initNode = function(node) {
+ge.GraphEditor.prototype.initNode = function initNode(node) {
 	if(node.id === undefined) {
 		node.id = 1 + d3.max(this.data.nodes, function(d) { return d.id; });
 		if(isNaN(node.id)) {
@@ -238,7 +238,7 @@ ge.GraphEditor.prototype.initNode = function(node) {
  * @param   {ImportLinkData} link  Link data.
  * @returns {boolean}              False if data is invalid or link exists.
  */
-ge.GraphEditor.prototype.initLink = function(link) {
+ge.GraphEditor.prototype.initLink = function initLink(link) {
 	var source = link.source, target = link.target;
 
 	if(typeof source !== 'object') {
