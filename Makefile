@@ -24,7 +24,7 @@ DIST_FILES := $(DIST_DIR)/js/$(NAME).js \
               $(DIST_DIR)/css/$(NAME).css \
               $(DIST_DIR)/css/$(NAME).min.css
 
-.PHONY: all clean install rebuild lint docs watch
+.PHONY: all clean install rebuild lint docs watch test test-watch
 
 all: $(BUILD_DIR)/install.touch $(DIST_FILES)
 
@@ -40,6 +40,12 @@ clean:
 rebuild:
 	make clean
 	make
+
+test: all
+	karma start karma.conf.js --single-run
+
+test-watch:
+	karma start karma.conf.js
 
 lint:
 	eslint src
