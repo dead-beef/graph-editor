@@ -12,7 +12,7 @@ NAME := graph-editor
 
 JS_FILES := src/umd/umd-start.js \
             src/main.js \
-            src/js/common.js \
+            $(sort $(wildcard src/js/util/*.js)) \
             $(sort $(wildcard src/js/path/*.js)) \
             $(sort $(wildcard src/js/shape/*.js)) \
             $(sort $(filter-out %/common.js,$(wildcard src/js/*.js))) \
