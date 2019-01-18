@@ -1,0 +1,120 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+		<link rel="stylesheet" href="../dist/css/graph-editor.css">
+		<link rel="stylesheet" href="index.css">
+	</head>
+	<body>
+		<div id="graph-container">
+			<svg id="graph"></svg>
+		</div>
+		<div id="sidebar">
+			<h4>Graph editor</h4>
+			<div>
+				click - select node/link<br>
+				shift+click - add a node<br>
+				shift+drag - add a link<br>
+				del - delete selected node/link<br>
+				s - toggle simulation<br>
+			</div>
+			<div id="selected-node" style="display: none">
+				<h5>Node</h5>
+				<div>
+					<label for="node-title">Title</label>
+					<input id="node-title" type="text">
+				</div>
+				<div>
+					<label for="node-shape">
+						Shape
+					</label>
+					<select id="node-shape">
+						<option value="Circle">●</option>
+						<option value="Rect">■</option>
+					</select>
+				</div>
+			</div>
+			<div id="selected-link" style="display: none">
+				<h5>Link</h5>
+				<div>
+					<label for="link-title">Title</label>
+					<input id="link-title" type="text">
+				</div>
+			</div>
+		</div>
+		<script src="../node_modules/d3/dist/d3.js"></script>
+		<script src="../dist/js/graph-editor.js"></script>
+		<script type="text/javascript">
+			var data = {
+				nodes: [
+					{ id: 0, x: 0, y: 0, title: '1', data: {} },
+					{ id: 1, x: 200, y: 0, title: '2',
+						shape: {'class': 'Rect', aspect: 2}, data: {} },
+					{ id: 2, x: 100, y: 200, title: '3', data: {} }
+				],
+				links: [
+					{ source: 0, target: 1, size: 2, title: '0-1', data: {} },
+					{ source: 1, target: 2, size: 4, title: '1-2', data: {} },
+					{ source: 0, target: 0, size: 2, title: '0-0', data: {} },
+					{ source: 2, target: 0, size: 2, title: '2-0', data: {} }
+				]
+			};
+
+			var options = {
+				directed: true
+			};
+
+			var graph = new ge.GraphEditor('#graph', data, options);
+			var shift = false;
+
+			graph
+				.on('click', function(pos) {
+					if(shift) {
+						graph.add({x: pos[0], y: pos[1]});
+					}
+					else {
+						graph.select(null);
+					}
+				})
+				.on('node-click', function(node) {
+					graph.select(node);
+				})
+				.on('link-click', function(link) {
+					graph.select(link);
+				})
+				.on('new-link-end', function(source, target) {
+					graph.add({source: source, target: target});
+				});
+
+			document.body.addEventListener('keydown', function(ev) {
+				switch(ev.key) {
+					case 'Shift':
+						shift = true;
+						graph.dragToLink(true);
+						break;
+					case 'Delete':
+						var selection = graph.select();
+						if(selection.node) {
+							graph.remove(selection.node);
+						}
+						if(selection.link) {
+							graph.remove(selection.link);
+						}
+						break;
+					case 's':
+					case 'S':
+						graph.simulation('toggle');
+						break;
+				}
+			});
+			document.body.addEventListener('keyup', function(ev) {
+				switch(ev.key) {
+					case 'Shift':
+						shift = false;
+						graph.dragToLink(false);
+						break;
+				}
+			});
+		</script>
+	</body>
+</html>

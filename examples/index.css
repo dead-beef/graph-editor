@@ -1,0 +1,55 @@
+body {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: row;
+	color: #ffffff;
+	background-color: #444444;
+}
+
+h4 {
+   text-align: center;
+   margin: 0;
+   width: 100%;
+}
+
+#graph-container {
+	margin: 1em;
+	padding: 0;
+	border: 1px solid #ffffff;
+	display: flex;
+	flex-grow: 1;
+}
+
+#sidebar {
+	margin: 1em;
+	padding: 1em;
+	border: 1px solid #ffffff;
+	display: flex;
+	flex-direction: column;
+	width: 300px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+#graph {
+	width: 100%;
+	height: 100%;
+}
+
+@media(max-width: 600px) {
+	body {
+		flex-direction: column;
+	}
+	#graph-container {
+		order: 2;
+		height: 100%;
+	}
+	#sidebar {
+		order: 1;
+		width: auto;
+		height: auto;
+	}
+}
