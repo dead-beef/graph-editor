@@ -26,21 +26,21 @@
   stroke-width: 2px;
   /* * { vector-effect: non-scaling-stroke } */ }
   .ge-graph .ge-link path {
-    stroke: #aaa;
+    stroke: #888;
     fill: none; }
-  .ge-graph .ge-link textPath {
-    fill: #aaa; }
+  .ge-graph .ge-link text {
+    fill: #888; }
   .ge-graph .ge-link:hover path {
-    stroke: #066; }
+    stroke: #fff; }
   .ge-graph .ge-link:hover text {
-    fill: #066; }
+    fill: #fff; }
 
 .ge-graph .ge-node {
   cursor: pointer;
   /* * { vector-effect: non-scaling-stroke } */ }
   .ge-graph .ge-node path {
     stroke-width: 2px;
-    stroke: #ccc;
+    stroke: #888;
     fill: #111; }
   .ge-graph .ge-node div {
     display: -webkit-box;
@@ -70,26 +70,26 @@
           -ms-flex-align: center;
               align-items: center;
       text-align: center;
-      color: #ccc;
+      color: #888;
       font-size: 16px;
       word-wrap: break-word; }
   .ge-graph .ge-node:hover path {
     stroke: #fff;
-    fill: #666; }
+    fill: #333; }
   .ge-graph .ge-node:hover div span {
     color: #fff; }
 
 .ge-graph.ge-selection .ge-link path {
-  stroke: #666; }
+  stroke: #888; }
 
 .ge-graph.ge-selection .ge-link text {
-  fill: #666; }
+  fill: #888; }
 
 .ge-graph.ge-selection .ge-link:hover path {
-  stroke: #336666; }
+  stroke: #c4c4c4; }
 
 .ge-graph.ge-selection .ge-link:hover text {
-  fill: #336666; }
+  fill: #c4c4c4; }
 
 .ge-graph.ge-selection .ge-link.ge-selection path {
   stroke: #aae; }
@@ -98,21 +98,21 @@
   fill: #aae; }
 
 .ge-graph.ge-selection .ge-link.ge-selection:hover path {
-  stroke: #5588aa; }
+  stroke: #d5d5f7; }
 
 .ge-graph.ge-selection .ge-link.ge-selection:hover text {
-  fill: #5588aa; }
+  fill: #d5d5f7; }
 
 .ge-graph.ge-selection .ge-node path {
-  stroke: #666;
-  fill: #000; }
+  stroke: #888;
+  fill: #111; }
 
 .ge-graph.ge-selection .ge-node span {
-  color: #666; }
+  color: #888; }
 
 .ge-graph.ge-selection .ge-node:hover path {
   stroke: #d5d5f7;
-  fill: #3c3c3c; }
+  fill: #222222; }
 
 .ge-graph.ge-selection .ge-node:hover span {
   color: #d5d5f7; }
@@ -126,7 +126,7 @@
 
 .ge-graph.ge-selection .ge-node.ge-selection:hover path {
   stroke: #d5d5f7;
-  fill: #3c3c3c; }
+  fill: #222222; }
 
 .ge-graph.ge-selection .ge-node.ge-selection:hover span {
   color: #d5d5f7; }
@@ -138,7 +138,7 @@
   fill: #ada; }
 
 .ge-graph.ge-selection .ge-link.ge-link-selection:hover path, .ge-graph.ge-selection .ge-link.ge-selection.ge-link-selection:hover path, .ge-graph.ge-link-selection .ge-link.ge-link-selection:hover path, .ge-graph.ge-link-selection .ge-link.ge-selection.ge-link-selection:hover path {
-  stroke: #5588aa; }
+  stroke: #d5d5f7; }
 
 .ge-graph.ge-selection .ge-link.ge-link-selection:hover text, .ge-graph.ge-selection .ge-link.ge-selection.ge-link-selection:hover text, .ge-graph.ge-link-selection .ge-link.ge-link-selection:hover text, .ge-graph.ge-link-selection .ge-link.ge-selection.ge-link-selection:hover text {
-  fill: #5588aa; }
+  fill: #d5d5f7; }

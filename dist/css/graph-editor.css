@@ -28,7 +28,7 @@
   .ge-graph .ge-link path {
     stroke: #000;
     fill: none; }
-  .ge-graph .ge-link textPath {
+  .ge-graph .ge-link text {
     fill: #000; }
   .ge-graph .ge-link:hover path {
     stroke: #4aa; }

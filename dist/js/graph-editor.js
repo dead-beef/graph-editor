@@ -92,60 +92,6 @@ ge.GraphEditor = function GraphEditor(svg, data, options) {
 };
 
 /* eslint-enable no-unused-vars */
-'use strict';
-
-/**
- * Point constructor.
- * @class
- * @classdesc Point class.
- * @param {?number}  x  X coordinate.
- * @param {?number}  y  Y coordinate.
- */
-ge.Point = function Point(x, y) {
-	/**
-	 * X coordinate.
-	 * @member {number}
-	 */
-	this.x = +x || 0;
-	/**
-	 * Y coordinate.
-	 * @member {number}
-	 */
-	this.y = +y || 0;
-};
-
-/**
- * Bounding box constructor.
- * @class
- * @classdesc Bounding box class.
- * @param {?number}  left   Left X coordinate.
- * @param {?number}  top    Top Y coordinate.
- * @param {?number}  right  Right X coordinate.
- * @param {?number}  bottom Bottom Y coordinate.
- */
-ge.BBox = function BBox(left, top, right, bottom) {
-	/**
-	 * Left X coordinate.
-	 * @member {number}
-	 */
-	this.left = +left || 0;
-	/**
-	 * Top Y coordinate.
-	 * @member {number}
-	 */
-	this.top = +top || 0;
-	/**
-	 * Right X coordinate.
-	 * @member {number}
-	 */
-	this.right = +right || 0;
-	/**
-	 * Bottom Y coordinate.
-	 * @member {number}
-	 */
-	this.bottom = +bottom || 0;
-};
-
 /**
  * Angle constructor.
  * @class
@@ -185,102 +131,37 @@ ge.Angle = function Angle(value, rad) {
 	 */
 	this.cos = Math.cos(this.rad);
 };
-
 /**
- * Container size constructor.
+ * Bounding box constructor.
  * @class
- * @classdesc Point class.
- * @param {?number}  [minWidth=1]                   Minimum width.
- * @param {?number}  [minHeight=1]                  Minimum height.
- * @param {?number}  [minArea=minWidth*minHeight]   Minimum area.
+ * @classdesc Bounding box class.
+ * @param {?number}  left   Left X coordinate.
+ * @param {?number}  top    Top Y coordinate.
+ * @param {?number}  right  Right X coordinate.
+ * @param {?number}  bottom Bottom Y coordinate.
  */
-ge.ContainerSize = function ContainerSize(minWidth, minHeight, minArea) {
+ge.BBox = function BBox(left, top, right, bottom) {
 	/**
-	 * Minimum width.
+	 * Left X coordinate.
 	 * @member {number}
 	 */
-	this.minWidth = +minWidth || 1;
+	this.left = +left || 0;
 	/**
-	 * Minimum height.
+	 * Top Y coordinate.
 	 * @member {number}
 	 */
-	this.minHeight = +minHeight || 1;
+	this.top = +top || 0;
 	/**
-	 * Minimum area.
+	 * Right X coordinate.
 	 * @member {number}
 	 */
-	this.minArea = +minArea || this.minWidth * this.minHeight;
-};
-
-
-/**
- * Class for saving/loading JSON.
- * @class
- * @param {?number}  x  X coordinate.
- * @param {?number}  y  Y coordinate.
- */
-ge.SaveLoad = function SaveLoad() {
+	this.right = +right || 0;
 	/**
-	 * Class constructors by name.
-	 * @member {object}
+	 * Bottom Y coordinate.
+	 * @member {number}
 	 */
-	this.classes = {};
+	this.bottom = +bottom || 0;
 };
-
-/**
- * Add a class.
- * @param {function} constructor              Class constructor.
- * @param {string}   [name=constructor.name]  Class name.
- * @param {boolean}  [overwrite=false]        Overwrite if class exists.
- */
-ge.SaveLoad.prototype.addClass = function addClass(
-	constructor,
-	name,
-	overwrite
-) {
-	name = name || constructor.name;
-	if(this.classes[name] && !overwrite) {
-		throw new Error('class "' + name +'" exists');
-	}
-	this.classes[name] = constructor;
-};
-
-/**
- * Get class by name.
- * @param   {string}   name  Class name.
- * @returns {function}       Class constructor.
- */
-ge.SaveLoad.prototype.getClass = function getClass(name) {
-	var ret = this.classes[name];
-	if(!ret) {
-		throw new Error('class "' + name +'" not found');
-	}
-	return ret;
-};
-
-/**
- * Load from JSON.
- * @param   {object}  data     JSON data.
- * @returns {object}
- */
-ge.SaveLoad.prototype.fromJson = function fromJson(data) {
-	var cls = this.getClass(data['class']);
-	return new cls(data);
-};
-
-/**
- * Save to JSON.
- * @param   {object}  obj                          Object to save.
- * @param   {string}  [name=obj.constructor.name]  Class name.
- * @returns {object}
- */
-ge.SaveLoad.prototype.toJson = function toJson(obj, name) {
-	var ret = obj.toJson();
-	ret['class'] = name || obj.constructor.name;
-	return ret;
-};
-
-
 /**
  * Get object ID.
  * @param {?(Object|undefined)} obj
@@ -459,6 +340,248 @@ ge.extend = function extend(dst, src) { // eslint-disable-line no-unused-vars
 	};
 };*/
 /**
+ * Container size constructor.
+ * @class
+ * @classdesc Point class.
+ * @param {?number}  [minWidth=1]                   Minimum width.
+ * @param {?number}  [minHeight=1]                  Minimum height.
+ * @param {?number}  [minArea=minWidth*minHeight]   Minimum area.
+ */
+ge.ContainerSize = function ContainerSize(minWidth, minHeight, minArea) {
+	/**
+	 * Minimum width.
+	 * @member {number}
+	 */
+	this.minWidth = +minWidth || 1;
+	/**
+	 * Minimum height.
+	 * @member {number}
+	 */
+	this.minHeight = +minHeight || 1;
+	/**
+	 * Minimum area.
+	 * @member {number}
+	 */
+	this.minArea = +minArea || this.minWidth * this.minHeight;
+};
+/**
+ * Point constructor.
+ * @class
+ * @classdesc Point class.
+ * @param {?number}  x  X coordinate.
+ * @param {?number}  y  Y coordinate.
+ */
+ge.Point = function Point(x, y) {
+	/**
+	 * X coordinate.
+	 * @member {number}
+	 */
+	this.x = +x || 0;
+	/**
+	 * Y coordinate.
+	 * @member {number}
+	 */
+	this.y = +y || 0;
+};
+
+/**
+ * Add.
+ * @param {ge.Point} p
+ * @returns {ge.Point}
+ */
+ge.Point.prototype.add = function add(p) {
+	this.x += p.x;
+	this.y += p.y;
+	return this;
+};
+
+/**
+ * Subtract.
+ * @param {ge.Point} p
+ * @returns {ge.Point}
+ */
+ge.Point.prototype.sub = function sub(p) {
+	this.x -= p.x;
+	this.y -= p.y;
+	return this;
+};
+
+/**
+ * Multiply.
+ * @param {number} k
+ * @returns {ge.Point}
+ */
+ge.Point.prototype.mul = function mul(k) {
+	this.x *= k;
+	this.y *= k;
+	return this;
+};
+
+/**
+ * Return vector length.
+ * @returns {number}
+ */
+ge.Point.prototype.length = function length() {
+	return Math.sqrt(this.x * this.x + this.y * this.y);
+};
+
+/**
+ * Normalize.
+ * @returns {ge.Point}
+ */
+ge.Point.prototype.normalize = function normalize() {
+	var l = this.length();
+	if(l > 1e-8) {
+		this.x /= l;
+		this.y /= l;
+	}
+	return this;
+};
+
+/**
+ * Rotate.
+ * @param {ge.Angle} a
+ * @returns {ge.Point}
+ */
+ge.Point.prototype.rotate = function rotate(a) {
+	var x = this.x, y = this.y;
+	this.x = x * a.cos - y * a.sin;
+	this.y = x * a.sin + y * a.cos;
+	return this;
+};
+
+/**
+ * Clone.
+ * @returns {ge.Point}
+ */
+ge.Point.prototype.clone = function clone() {
+	return new ge.Point(this.x, this.y);
+};
+/**
+ * Class for saving/loading JSON.
+ * @class
+ * @param {?number}  x  X coordinate.
+ * @param {?number}  y  Y coordinate.
+ */
+ge.SaveLoad = function SaveLoad() {
+	/**
+	 * Class constructors by name.
+	 * @member {object}
+	 */
+	this.classes = {};
+};
+
+/**
+ * Add a class.
+ * @param {function} constructor              Class constructor.
+ * @param {string}   [name=constructor.name]  Class name.
+ * @param {boolean}  [overwrite=false]        Overwrite if class exists.
+ */
+ge.SaveLoad.prototype.addClass = function addClass(
+	constructor,
+	name,
+	overwrite
+) {
+	name = name || constructor.name;
+	if(this.classes[name] && !overwrite) {
+		throw new Error('class "' + name +'" exists');
+	}
+	this.classes[name] = constructor;
+};
+
+/**
+ * Get class by name.
+ * @param   {string}   name  Class name.
+ * @returns {function}       Class constructor.
+ */
+ge.SaveLoad.prototype.getClass = function getClass(name) {
+	var ret = this.classes[name];
+	if(!ret) {
+		throw new Error('class "' + name +'" not found');
+	}
+	return ret;
+};
+
+/**
+ * Load from JSON.
+ * @param   {object}  data     JSON data.
+ * @returns {object}
+ */
+ge.SaveLoad.prototype.fromJson = function fromJson(data) {
+	var cls = this.getClass(data['class']);
+	return new cls(data);
+};
+
+/**
+ * Save to JSON.
+ * @param   {object}  obj                          Object to save.
+ * @param   {string}  [name=obj.constructor.name]  Class name.
+ * @returns {object}
+ */
+ge.SaveLoad.prototype.toJson = function toJson(obj, name) {
+	var ret = obj.toJson();
+	ret['class'] = name || obj.constructor.name;
+	return ret;
+};
+/**
+ * Text size calculator constructor.
+ * @class
+ * @classdesc Text size calculator class.
+ * @param {SVGElement} el  SVG <text> element.
+ */
+ge.TextSize = function TextSize(el) {
+	el.setAttribute('style', 'stroke:none;fill:none');
+	this.el = el;
+	return this;
+};
+
+/**
+ * Compute text width.
+ * @param {string} text
+ * @returns {number}
+ */
+ge.TextSize.prototype.width = function length(text) {
+	this.el.textContent = text;
+	return this.el.getComputedTextLength();
+};
+
+/**
+ * Compute text width and height.
+ * @param {string} text
+ * @returns {ge.Point}
+ */
+ge.TextSize.prototype.size = function size(text) {
+	this.el.textContent = text;
+	var bbox = this.el.getBBox();
+	return new ge.Point(bbox.width, bbox.height);
+};
+
+/**
+ * Compute text container size.
+ * @param {string} text
+ * @returns {ge.ContainerSize}
+ */
+ge.TextSize.prototype.containerSize = function containerSize(text) {
+	var size = this.size(text);
+	var words = text.split(/\s+/);
+	var width;
+	if(words.length == 1) {
+		width = size.x;
+	}
+	else {
+		width = 0;
+		var self = this;
+		words.forEach(function(word) {
+			width = Math.max(width, self.width(word));
+		});
+	}
+	return new ge.ContainerSize(
+		width,
+		size.y,
+		size.x * size.y
+	);
+};
+/**
  * Link shapes.
  * @namespace
  */
@@ -508,12 +631,19 @@ ge.path.Path.prototype.toJson = function toJson() {
 /**
  * Line.
  * @class
- * @param {?object} [data]                JSON data.
- * @param {?number} [data.loopStart=180]  Loop start angle in degrees.
- * @param {?number} [data.loopEnd=270]    Loop end angle in degrees.
+ * @param {?object}  [data]                JSON data.
+ * @param {?number}  [data.loopStart=180]  Loop start angle in degrees.
+ * @param {?number}  [data.loopEnd=270]    Loop end angle in degrees.
+ * @param {?boolean} [data.arrow=false]
+ * @param {?number}  [data.arrowLength=10]
+ * @param {?number}  [data.arrowAngle=15]
  */
 ge.path.Line = function Line(data) {
 	ge.path.Path.call(this, data);
+	this.arrow = !!data.arrow;
+	this.arrowLength = +data.arrowLength || 10;
+	this.arrowAngle = new ge.Angle(+data.arrowAngle || 15);
+	this.arrowAngle2 = new ge.Angle(-data.arrowAngle || -15);
 };
 
 ge.path.Line.prototype = Object.create(ge.path.Line);
@@ -527,6 +657,24 @@ Object.defineProperty(
 	}
 );
 ge.path.addClass(ge.path.Line);
+
+/**
+ * Return arrow path.
+ * @param   {ge.Point}   src   Link source.
+ * @param   {ge.Point}   dst   Link target.
+ * @returns {string}           SVG path.
+ */
+ge.path.Line.prototype.arrowPath = function arrow(src, dst) {
+	var b = src.clone().sub(dst).normalize();
+	var c = b.clone().rotate(this.arrowAngle2).mul(this.arrowLength).add(dst);
+	b.rotate(this.arrowAngle).mul(this.arrowLength).add(dst);
+	return 'M'.concat(
+		dst.x, ',', dst.y,
+		'L', b.x, ',', b.y,
+		'L', c.x, ',', c.y,
+		'Z'
+	);
+};
 
 /**
  * Return text path and set link path.
@@ -548,6 +696,9 @@ ge.path.Line.prototype.path = function path(link) {
 			'A', rx, ',', ry, ',0,1,0,', dst.x, ',', dst.y
 		);
 
+		/*if(this.arrow) {
+		}*/
+
 		return link.path;
 	}
 
@@ -558,7 +709,20 @@ ge.path.Line.prototype.path = function path(link) {
 	src = src2 || src;
 	dst = dst2 || dst;
 
-	link.path = 'M'.concat(src.x, ',', src.y, 'L', dst.x, ',', dst.y);
+	var dst3 = dst;
+
+	if(this.arrow) {
+		dst3 = dst.clone().sub(src);
+		var l = dst3.length();
+		var l2 = this.arrowLength * this.arrowAngle.cos;
+		dst3.mul(1 - l2 / l).add(src);
+	}
+	
+	link.path = 'M'.concat(src.x, ',', src.y, 'L', dst3.x, ',', dst3.y);
+
+	if(this.arrow) {
+		link.path += this.arrowPath(src, dst);
+	}
 
 	if((link.reversed = src.x > dst.x)) {
 		src2 = src;
@@ -2401,10 +2565,6 @@ ge.GraphEditor.prototype.defaults = {
 	},
 
 	link: {
-		shape: new ge.path.Line({
-			loopStart: 0,
-			loopEnd: 90
-		}),
 		size: {
 			def: 2
 		},
@@ -2466,13 +2626,10 @@ ge.GraphEditor.prototype.defaults = {
 ge.GraphEditor.prototype.typeDefaults = [
 	{
 		link: {
-			id: function linkId(link) {
-				return ''.concat(
-					Math.min(link.source.id, link.target.id),
-					'-',
-					Math.max(link.source.id, link.target.id)
-				);
-			},
+			shape: new ge.path.Line({
+				loopStart: 0,
+				loopEnd: 90
+			}),
 			text: {
 				offset: '50%',
 				anchor: 'middle'
@@ -2481,9 +2638,11 @@ ge.GraphEditor.prototype.typeDefaults = [
 	},
 	{
 		link: {
-			id: function linkId(link) {
-				return ''.concat(link.source.id, '-', link.target.id);
-			},
+			shape: new ge.path.Line({
+				arrow: true,
+				loopStart: 0,
+				loopEnd: 90
+			}),
 			text: {
 				offset: '20%',
 				anchor: 'start'
@@ -2533,64 +2692,6 @@ ge.GraphEditor.prototype.initOptions = function initOptions(options, svg) {
 
 	this.options = opt;
 	return this;
-};
-/**
- * Text size calculator constructor.
- * @class
- * @classdesc Text size calculator class.
- * @param {SVGElement} el  SVG <text> element.
- */
-ge.TextSize = function TextSize(el) {
-	el.setAttribute('style', 'stroke:none;fill:none');
-	this.el = el;
-	return this;
-};
-
-/**
- * Compute text width.
- * @param {string} text
- * @returns {number}
- */
-ge.TextSize.prototype.width = function length(text) {
-	this.el.textContent = text;
-	return this.el.getComputedTextLength();
-};
-
-/**
- * Compute text width and height.
- * @param {string} text
- * @returns {ge.Point}
- */
-ge.TextSize.prototype.size = function size(text) {
-	this.el.textContent = text;
-	var bbox = this.el.getBBox();
-	return new ge.Point(bbox.width, bbox.height);
-};
-
-/**
- * Compute text container size.
- * @param {string} text
- * @returns {ge.ContainerSize}
- */
-ge.TextSize.prototype.containerSize = function containerSize(text) {
-	var size = this.size(text);
-	var words = text.split(/\s+/);
-	var width;
-	if(words.length == 1) {
-		width = size.x;
-	}
-	else {
-		width = 0;
-		var self = this;
-		words.forEach(function(word) {
-			width = Math.max(width, self.width(word));
-		});
-	}
-	return new ge.ContainerSize(
-		width,
-		size.y,
-		size.x * size.y
-	);
 };
 'use strict';
 

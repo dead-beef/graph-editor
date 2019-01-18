@@ -23,10 +23,6 @@ ge.GraphEditor.prototype.defaults = {
 	},
 
 	link: {
-		shape: new ge.path.Line({
-			loopStart: 0,
-			loopEnd: 90
-		}),
 		size: {
 			def: 2
 		},
@@ -88,13 +84,10 @@ ge.GraphEditor.prototype.defaults = {
 ge.GraphEditor.prototype.typeDefaults = [
 	{
 		link: {
-			id: function linkId(link) {
-				return ''.concat(
-					Math.min(link.source.id, link.target.id),
-					'-',
-					Math.max(link.source.id, link.target.id)
-				);
-			},
+			shape: new ge.path.Line({
+				loopStart: 0,
+				loopEnd: 90
+			}),
 			text: {
 				offset: '50%',
 				anchor: 'middle'
@@ -103,9 +96,11 @@ ge.GraphEditor.prototype.typeDefaults = [
 	},
 	{
 		link: {
-			id: function linkId(link) {
-				return ''.concat(link.source.id, '-', link.target.id);
-			},
+			shape: new ge.path.Line({
+				arrow: true,
+				loopStart: 0,
+				loopEnd: 90
+			}),
 			text: {
 				offset: '20%',
 				anchor: 'start'
