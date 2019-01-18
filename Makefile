@@ -57,6 +57,7 @@ docs:
 	rm -rf $(DOC_DIR)/$(NAME)
 
 $(DIST_DIR)/js/$(NAME).js: $(JS_FILES) | $(DIST_DIR)/js
+	eslint $?
 	cat $(JS_FILES) >$@
 
 $(DIST_DIR)/css/$(NAME).css: $(CSS_MAIN) | $(BUILD_DIR) $(DIST_DIR)/css
