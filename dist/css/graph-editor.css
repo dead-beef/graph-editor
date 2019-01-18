@@ -8,38 +8,6 @@
   -webkit-transition-duration: 0.3s;
           transition-duration: 0.3s; }
 
-.ge-graph marker#ge-arrow-default > path {
-  stroke: #000;
-  fill: #000; }
-
-.ge-graph marker#ge-arrow-hover > path {
-  stroke: #4aa;
-  fill: #4aa; }
-
-.ge-graph marker#ge-arrow-selected-node > path {
-  stroke: #44a;
-  fill: #44a; }
-
-.ge-graph marker#ge-arrow-selected-node-hover > path {
-  stroke: #4477aa;
-  fill: #4477aa; }
-
-.ge-graph marker#ge-arrow-selected > path {
-  stroke: #488;
-  fill: #488; }
-
-.ge-graph marker#ge-arrow-selected-hover > path {
-  stroke: #4477aa;
-  fill: #4477aa; }
-
-.ge-graph marker#ge-arrow-unselected > path {
-  stroke: #666;
-  fill: #666; }
-
-.ge-graph marker#ge-arrow-unselected-hover > path {
-  stroke: #558888;
-  fill: #558888; }
-
 .ge-graph marker#ge-dragline-end path, .ge-graph marker#ge-dragline-end circle, .ge-graph marker#ge-dragline-start path, .ge-graph marker#ge-dragline-start circle {
   stroke: #a44;
   fill: #a44; }
@@ -50,9 +18,7 @@
 .ge-graph .ge-dragline {
   pointer-events: none;
   stroke-width: 2px;
-  stroke: #a44;
-  marker-start: url("../#ge-dragline-start");
-  marker-end: url("../#ge-dragline-end"); }
+  stroke: #a44; }
 
 .ge-graph .ge-link {
   cursor: pointer;
@@ -176,33 +142,3 @@
 
 .ge-graph.ge-selection .ge-link.ge-link-selection:hover text, .ge-graph.ge-selection .ge-link.ge-selection.ge-link-selection:hover text, .ge-graph.ge-link-selection .ge-link.ge-link-selection:hover text, .ge-graph.ge-link-selection .ge-link.ge-selection.ge-link-selection:hover text {
   fill: #4477aa; }
-
-.ge-digraph .ge-link > path {
-  marker-end: url("../#ge-arrow-default"); }
-
-.ge-digraph .ge-link:hover > path {
-  marker-end: url("../#ge-arrow-hover"); }
-
-.ge-digraph.ge-selection .ge-link {
-  /*&.ge-link-selection, &.ge-selection.ge-link-selection {
-				& > path {
-					marker-end: url("../#ge-arrow-selected");
-				}
-				&:hover > path {
-					marker-end: url("../#ge-arrow-selected-hover");
-				}
-			}*/ }
-  .ge-digraph.ge-selection .ge-link > path {
-    marker-end: url("../#ge-arrow-unselected"); }
-  .ge-digraph.ge-selection .ge-link:hover > path {
-    marker-end: url("../#ge-arrow-unselected-hover"); }
-  .ge-digraph.ge-selection .ge-link.ge-selection > path {
-    marker-end: url("../#ge-arrow-selected-node"); }
-  .ge-digraph.ge-selection .ge-link.ge-selection:hover > path {
-    marker-end: url("../#ge-arrow-selected-node-hover"); }
-
-.ge-digraph.ge-selection .ge-link.ge-link-selection > path, .ge-digraph.ge-selection .ge-link.ge-selection.ge-link-selection > path, .ge-digraph.ge-link-selection .ge-link.ge-link-selection > path, .ge-digraph.ge-link-selection .ge-link.ge-selection.ge-link-selection > path {
-  marker-end: url("../#ge-arrow-selected"); }
-
-.ge-digraph.ge-selection .ge-link.ge-link-selection:hover > path, .ge-digraph.ge-selection .ge-link.ge-selection.ge-link-selection:hover > path, .ge-digraph.ge-link-selection .ge-link.ge-link-selection:hover > path, .ge-digraph.ge-link-selection .ge-link.ge-selection.ge-link-selection:hover > path {
-  marker-end: url("../#ge-arrow-selected-hover"); }

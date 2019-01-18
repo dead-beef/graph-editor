@@ -19,19 +19,8 @@ ge.GraphEditor.prototype.initMarkers = function initMarkers(svg) {
 
 	var defs = svg.append('svg:defs');
 
-	var arrows = [
-		'ge-arrow-default', 'ge-arrow-hover',
-		'ge-arrow-selected', 'ge-arrow-selected-hover',
-		'ge-arrow-unselected', 'ge-arrow-unselected-hover',
-		'ge-arrow-selected-node', 'ge-arrow-selected-node-hover',
-		'ge-dragline-end'
-	];
-
-	defs.selectAll('marker')
-		.data(arrows)
-		.enter()
-		.append('marker')
-		.attr('id', function(d) { return d; })
+	defs.append('marker')
+		.attr('id', 'ge-dragline-end')
 		.attr('viewBox', '0 -7 12 14')
 		.attr('refX', '7')
 		.attr('refY', '0')
@@ -107,6 +96,8 @@ ge.GraphEditor.prototype.initSvg = function initSvg(svg) {
 	this.dragLine = g.append('path')
 		.classed(this.options.css.dragline, true)
 		.classed(this.options.css.hide, true)
+		.attr('marker-start', 'url(#ge-dragline-start)')
+		.attr('marker-end', 'url(#ge-dragline-end)')
 		.attr('d', 'M0,0L0,0');
 	/**
 	 * Text size calculator.
