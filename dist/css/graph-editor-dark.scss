@@ -1,0 +1,18 @@
+$ge-node-fg:          #ccc !default;
+$ge-node-bg:          #111 !default;
+$ge-node-hover-fg:    #fff !default;
+$ge-node-hover-bg:    #666 !default;
+
+$ge-link-fg:          #aaa !default;
+$ge-link-hover-fg:    #066 !default;
+
+$ge-dragline-fg:      #a44 !default;
+
+$ge-selection-fg:     #aae !default;
+$ge-selected-link-fg: #ada !default;
+$ge-selected-node-bg: #111 !default;
+
+$ge-unselected-fg:    #666 !default;
+$ge-unselected-bg:    #000 !default;
+
+@import "graph-editor";

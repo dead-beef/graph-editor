@@ -111,6 +111,10 @@ $ge-selected-node-hover-bg:   mix($ge-selected-node-bg, $ge-node-hover-bg) !defa
 			fill: none;
 		}
 
+		textPath {
+			fill: $ge-link-fg;
+		}
+
 		&:hover {
 			path {
 				stroke: $ge-link-hover-fg;

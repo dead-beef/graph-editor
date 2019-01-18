@@ -9,36 +9,36 @@
           transition-duration: 0.3s; }
 
 .ge-graph marker#ge-arrow-default > path {
-  stroke: #000;
-  fill: #000; }
+  stroke: #aaa;
+  fill: #aaa; }
 
 .ge-graph marker#ge-arrow-hover > path {
-  stroke: #4aa;
-  fill: #4aa; }
+  stroke: #066;
+  fill: #066; }
 
 .ge-graph marker#ge-arrow-selected-node > path {
-  stroke: #44a;
-  fill: #44a; }
+  stroke: #aae;
+  fill: #aae; }
 
 .ge-graph marker#ge-arrow-selected-node-hover > path {
-  stroke: #4477aa;
-  fill: #4477aa; }
+  stroke: #5588aa;
+  fill: #5588aa; }
 
 .ge-graph marker#ge-arrow-selected > path {
-  stroke: #488;
-  fill: #488; }
+  stroke: #ada;
+  fill: #ada; }
 
 .ge-graph marker#ge-arrow-selected-hover > path {
-  stroke: #4477aa;
-  fill: #4477aa; }
+  stroke: #5588aa;
+  fill: #5588aa; }
 
 .ge-graph marker#ge-arrow-unselected > path {
   stroke: #666;
   fill: #666; }
 
 .ge-graph marker#ge-arrow-unselected-hover > path {
-  stroke: #558888;
-  fill: #558888; }
+  stroke: #336666;
+  fill: #336666; }
 
 .ge-graph marker#ge-dragline-end path, .ge-graph marker#ge-dragline-end circle, .ge-graph marker#ge-dragline-start path, .ge-graph marker#ge-dragline-start circle {
   stroke: #a44;
@@ -60,22 +60,22 @@
   stroke-width: 2px;
   /* * { vector-effect: non-scaling-stroke } */ }
   .ge-graph .ge-link path {
-    stroke: #000;
+    stroke: #aaa;
     fill: none; }
   .ge-graph .ge-link textPath {
-    fill: #000; }
+    fill: #aaa; }
   .ge-graph .ge-link:hover path {
-    stroke: #4aa; }
+    stroke: #066; }
   .ge-graph .ge-link:hover text {
-    fill: #4aa; }
+    fill: #066; }
 
 .ge-graph .ge-node {
   cursor: pointer;
   /* * { vector-effect: non-scaling-stroke } */ }
   .ge-graph .ge-node path {
     stroke-width: 2px;
-    stroke: #000;
-    fill: #ddd; }
+    stroke: #ccc;
+    fill: #111; }
   .ge-graph .ge-node div {
     display: -webkit-box;
     display: -ms-flexbox;
@@ -104,14 +104,14 @@
           -ms-flex-align: center;
               align-items: center;
       text-align: center;
-      color: #000;
+      color: #ccc;
       font-size: 16px;
       word-wrap: break-word; }
   .ge-graph .ge-node:hover path {
-    stroke: #000;
-    fill: #aee; }
+    stroke: #fff;
+    fill: #666; }
   .ge-graph .ge-node:hover div span {
-    color: #000; }
+    color: #fff; }
 
 .ge-graph.ge-selection .ge-link path {
   stroke: #666; }
@@ -120,62 +120,62 @@
   fill: #666; }
 
 .ge-graph.ge-selection .ge-link:hover path {
-  stroke: #558888; }
+  stroke: #336666; }
 
 .ge-graph.ge-selection .ge-link:hover text {
-  fill: #558888; }
+  fill: #336666; }
 
 .ge-graph.ge-selection .ge-link.ge-selection path {
-  stroke: #44a; }
+  stroke: #aae; }
 
 .ge-graph.ge-selection .ge-link.ge-selection text {
-  fill: #44a; }
+  fill: #aae; }
 
 .ge-graph.ge-selection .ge-link.ge-selection:hover path {
-  stroke: #4477aa; }
+  stroke: #5588aa; }
 
 .ge-graph.ge-selection .ge-link.ge-selection:hover text {
-  fill: #4477aa; }
+  fill: #5588aa; }
 
 .ge-graph.ge-selection .ge-node path {
   stroke: #666;
-  fill: #eee; }
+  fill: #000; }
 
 .ge-graph.ge-selection .ge-node span {
   color: #666; }
 
 .ge-graph.ge-selection .ge-node:hover path {
-  stroke: #222255;
-  fill: #aaccee; }
+  stroke: #d5d5f7;
+  fill: #3c3c3c; }
 
 .ge-graph.ge-selection .ge-node:hover span {
-  color: #222255; }
+  color: #d5d5f7; }
 
 .ge-graph.ge-selection .ge-node.ge-selection path {
-  stroke: #44a;
-  fill: #aae; }
+  stroke: #aae;
+  fill: #111; }
 
 .ge-graph.ge-selection .ge-node.ge-selection span {
-  color: #44a; }
+  color: #aae; }
 
 .ge-graph.ge-selection .ge-node.ge-selection:hover path {
-  stroke: #222255;
-  fill: #aaccee; }
+  stroke: #d5d5f7;
+  fill: #3c3c3c; }
 
 .ge-graph.ge-selection .ge-node.ge-selection:hover span {
-  color: #222255; }
+  color: #d5d5f7; }
 
 .ge-graph.ge-selection .ge-link.ge-link-selection path, .ge-graph.ge-selection .ge-link.ge-selection.ge-link-selection path, .ge-graph.ge-link-selection .ge-link.ge-link-selection path, .ge-graph.ge-link-selection .ge-link.ge-selection.ge-link-selection path {
-  stroke: #488; }
+  stroke: #ada; }
 
 .ge-graph.ge-selection .ge-link.ge-link-selection text, .ge-graph.ge-selection .ge-link.ge-selection.ge-link-selection text, .ge-graph.ge-link-selection .ge-link.ge-link-selection text, .ge-graph.ge-link-selection .ge-link.ge-selection.ge-link-selection text {
-  fill: #488; }
+  fill: #ada; }
 
 .ge-graph.ge-selection .ge-link.ge-link-selection:hover path, .ge-graph.ge-selection .ge-link.ge-selection.ge-link-selection:hover path, .ge-graph.ge-link-selection .ge-link.ge-link-selection:hover path, .ge-graph.ge-link-selection .ge-link.ge-selection.ge-link-selection:hover path {
-  stroke: #4477aa; }
+  stroke: #5588aa; }
 
 .ge-graph.ge-selection .ge-link.ge-link-selection:hover text, .ge-graph.ge-selection .ge-link.ge-selection.ge-link-selection:hover text, .ge-graph.ge-link-selection .ge-link.ge-link-selection:hover text, .ge-graph.ge-link-selection .ge-link.ge-selection.ge-link-selection:hover text {
-  fill: #4477aa; }
+  fill: #5588aa; }
 
 .ge-digraph .ge-link > path {
   marker-end: url("../#ge-arrow-default"); }

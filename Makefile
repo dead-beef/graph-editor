@@ -19,13 +19,17 @@ JS_FILES := src/umd/umd-start.js \
             src/umd/umd-end.js
 
 CSS_MAIN := src/css/$(NAME).scss
+CSS_DARK_MAIN := src/css/$(NAME)-dark.scss
 CSS_DEPS := $(BUILD_DIR)/deps.mk
 
 DIST_FILES := $(DIST_DIR)/js/$(NAME).js \
               $(DIST_DIR)/js/$(NAME).min.js \
               $(DIST_DIR)/css/$(NAME).scss \
               $(DIST_DIR)/css/$(NAME).css \
-              $(DIST_DIR)/css/$(NAME).min.css
+              $(DIST_DIR)/css/$(NAME).min.css \
+              $(DIST_DIR)/css/$(NAME)-dark.scss \
+              $(DIST_DIR)/css/$(NAME)-dark.css \
+              $(DIST_DIR)/css/$(NAME)-dark.min.css
 
 .PHONY: all clean install rebuild lint docs watch test test-watch
 
@@ -70,6 +74,13 @@ $(DIST_DIR)/css/$(NAME).css: $(CSS_MAIN) | $(BUILD_DIR) $(DIST_DIR)/css
 $(DIST_DIR)/css/$(NAME).scss: $(CSS_MAIN) | $(DIST_DIR)/css
 	cp -f $< $@
 
+$(DIST_DIR)/css/$(NAME)-dark.css: $(CSS_DARK_MAIN) | $(BUILD_DIR) $(DIST_DIR)/css
+	node-sass $< >$(BUILD_DIR)/tmp.css
+	postcss $(BUILD_DIR)/tmp.css --use autoprefixer --no-map -o $@
+
+$(DIST_DIR)/css/$(NAME)-dark.scss: $(CSS_DARK_MAIN) | $(DIST_DIR)/css
+	cp -f $< $@
+
 %.min.js: %.js
 	uglifyjs $< -c -m -o $@
 
@@ -79,8 +90,8 @@ $(DIST_DIR)/css/$(NAME).scss: $(CSS_MAIN) | $(DIST_DIR)/css
 $(DIRS):
 	mkdir -p $@
 
-$(CSS_DEPS): $(CSS_MAIN) | $(BUILD_DIR)
-	sass-makedepend -m -r -p $(DIST_DIR)/css/ $< >$(BUILD_DIR)/tmp.mk
+$(CSS_DEPS): $(CSS_MAIN) $(CSS_DARK_MAIN) | $(BUILD_DIR)
+	sass-makedepend -m -r -p $(DIST_DIR)/css/ $^ >$(BUILD_DIR)/tmp.mk
 	mv -f $(BUILD_DIR)/tmp.mk $@
 
 $(BUILD_DIR)/install.touch: package.json | $(BUILD_DIR)
