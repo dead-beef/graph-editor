@@ -56,15 +56,49 @@ ge.GraphEditor.prototype.getData = function getData(el) {
 };
 
 /**
+ * Get unused node ID.
+ * @private
+ * @returns {ID}
+ */
+ge.GraphEditor.prototype.nodeId = function nodeId() {
+	var id = 1 + d3.max(this.data.nodes, function(d) { return d.id; });
+	if(isNaN(id)) {
+		id = 0;
+	}
+	return id;
+};
+
+/**
+ * Get link ID.
+ * @private
+ * @param {ge.Node} source  Link source.
+ * @param {ge.Node} target  Link target.
+ * @returns {ID}
+ */
+ge.GraphEditor.prototype.linkId = function linkId(source, target) {
+	var s = source.id;
+	var t = target.id;
+	if(!this.options.directed && s > t) {
+		var tmp = s;
+		s = t;
+		t = tmp;
+	}
+	var id = s + '-' + t;
+	return id;
+};
+
+/**
  * Add a node if it does not exist.
  * @param   {ImportNodeData} node                Node data.
  * @param   {boolean}        [skipUpdate=false]  Skip DOM update.
- * @returns {?Node}                              Added node.
+ * @returns {?ge.Node}                           Added node.
  */
 ge.GraphEditor.prototype.addNode = function addNode(node, skipUpdate) {
-	if(!this.initNode(node)) {
+	node = new ge.Node(this, node);
+	if(this.nodeById[node.id]) {
 		return null;
 	}
+	this.nodeById[node.id] = node;
 	this.data.nodes.push(node);
 	if(!skipUpdate) {
 		this.update();
@@ -76,12 +110,14 @@ ge.GraphEditor.prototype.addNode = function addNode(node, skipUpdate) {
  * Add a link if it does not exist.
  * @param   {ImportLinkData} link                Link data.
  * @param   {boolean}        [skipUpdate=false]  Skip DOM update.
- * @returns {?Link}                              Added link.
+ * @returns {?ge.Link}                           Added link.
  */
 ge.GraphEditor.prototype.addLink = function addLink(link, skipUpdate) {
-	if(!this.initLink(link)) {
+	link = new ge.Link(this, link);
+	if(this.linkById[link.id]) {
 		return null;
 	}
+	this.linkById[link.id] = link;
 	this.data.links.push(link);
 	if(!skipUpdate) {
 		this.update();
@@ -93,15 +129,14 @@ ge.GraphEditor.prototype.addLink = function addLink(link, skipUpdate) {
  * Add multiple nodes.
  * @param   {Array<ImportNodeData>} nodes               Node data.
  * @param   {boolean}               [skipUpdate=false]  Skip DOM update.
- * @returns {Array<Node>}                               Added nodes.
  */
 ge.GraphEditor.prototype.addNodes = function addNodes(nodes, skipUpdate) {
-	var newNodes = nodes.filter(ge.bind(this, this.initNode));
-	this.data.nodes.push.apply(this.data.nodes, newNodes);
+	for(var i = 0; i < nodes.length; ++i) {
+		this.addNode(nodes[i], true);
+	}
 	if(!skipUpdate) {
 		this.update();
 	}
-	return newNodes;
 };
 
 /**
@@ -111,51 +146,43 @@ ge.GraphEditor.prototype.addNodes = function addNodes(nodes, skipUpdate) {
  * @returns {Array<Link>}                               Added links.
  */
 ge.GraphEditor.prototype.addLinks = function addLinks(links, skipUpdate) {
-	var newLinks = links.filter(ge.bind(this, this.initLink));
-	this.data.links.push.apply(this.data.links, newLinks);
+	for(var i = 0; i < links.length; ++i) {
+		this.addLink(links[i], true);
+	}
 	if(!skipUpdate) {
 		this.update();
 	}
-	return newLinks;
 };
 
 /**
  * Add one or multiple nodes/links.
  * @param   {ImportNodeData|ImportLinkData|Array<(ImportNodeData|ImportLinkData)>} data  Data.
  * @param   {boolean} [skipUpdate=false]  Skip DOM update.
- * @returns {?(Node|Link|AddedObjects)}   Added objects.
  */
 ge.GraphEditor.prototype.add = function add(data, skipUpdate) {
 	var self = this;
-
 	if(Array.isArray(data)) {
-		var newNodes = [], newLinks = [];
 		data.forEach(function(d) {
 			if(self.isLinkData(d)) {
-				if(self.initLink(d)) {
-					newLinks.push(d);
-				}
+				self.addLink(d, true);
 			}
-			else if(self.initNode(d)) {
-				newNodes.push(d);
+			else {
+				self.addNode(d, true);
 			}
 		});
-
-		self.data.nodes.push.apply(self.data.nodes, newNodes);
-		self.data.links.push.apply(self.data.links, newLinks);
-
 		if(!skipUpdate) {
 			self.update();
 		}
-
-		return [ newNodes, newLinks ];
 	}
-
-	data = self.getData(data);
-	if(self.isLinkData(data)) {
-		return self.addLink(data, skipUpdate);
+	else {
+		data = self.getData(data);
+		if(self.isLinkData(data)) {
+			self.addLink(data, skipUpdate);
+		}
+		else {
+			self.addNode(data, skipUpdate);
+		}
 	}
-	return this.addNode(data, skipUpdate);
 };
 
 /**
@@ -275,10 +302,13 @@ ge.GraphEditor.prototype.remove = function remove(data, skipUpdate) {
 };
 
 /**
- * Set or return selected node.
- * @param   {?Reference}   [node]          Node.
+ * Return selected node.
+ * @returns {?Node}
+ *//**
+ * Select a node.
+ * @param   {?Reference}   [node]          Node to select.
  * @param   {boolean}      [update=false]  Update DOM if the node is already selected.
- * @returns {(Node|ge.GraphEditor)}
+ * @returns {ge.GraphEditor}
  */
 ge.GraphEditor.prototype.selectNode = function selectNode(node, update) {
 	if(node === undefined) {
@@ -325,10 +355,13 @@ ge.GraphEditor.prototype.selectNode = function selectNode(node, update) {
 };
 
 /**
- * Set or return selected link.
- * @param   {?Reference}   [link]          Link.
+ * Return selected link.
+ * @returns {?Link}
+ *//**
+ * Selected a link.
+ * @param   {?Reference}   [link]          Link to select.
  * @param   {boolean}      [update=false]  Update DOM if the link is already selected.
- * @returns {(Link|ge.GraphEditor)}
+ * @returns {ge.GraphEditor}
  */
 ge.GraphEditor.prototype.selectLink = function selectLink(link, update) {
 	if(link === undefined) {
@@ -361,10 +394,13 @@ ge.GraphEditor.prototype.selectLink = function selectLink(link, update) {
 };
 
 /**
- * Set or return selected node/link.
- * @param   {?Reference}   [data]          Node or link.
+ * Return selected node/link.
+ * @returns {Selection}
+ *//**
+ * Select a node or a link.
+ * @param   {?Reference}   [data]          Node or link to select.
  * @param   {boolean}      [update=false]  Update DOM if the node/link is already selected.
- * @returns {(Node|Link|Selection|ge.GraphEditor)}
+ * @returns {ge.GraphEditor}
  */
 ge.GraphEditor.prototype.select = function select(data, update) {
 	if(data === undefined) {
@@ -495,9 +531,12 @@ ge.GraphEditor.prototype.simulation = function simulation(on) {
 };
 
 /**
- * Set or return 'drag to link nodes' state.
+ * Return true if 'drag to link nodes' is enabled.
+ * @returns {boolean}
+ *//**
+ * Set 'drag to link nodes' state.
  * @param   {boolean|string}           [on]  state | 'toggle'
- * @returns {(boolean|ge.GraphEditor)}
+ * @returns {ge.GraphEditor}
  */
 ge.GraphEditor.prototype.dragToLink = function dragToLink(on) {
 	if(on === undefined) {
@@ -572,17 +611,23 @@ ge.GraphEditor.prototype.destroy = function destroy() {
 		.on('.zoom', null)
 		.html('');
 
+	window.removeEventListener('resize', this.onresize);
+
 	return this;
 };
 
 /**
- * Export graph data.
+ * Convert to JSON.
  * @returns {ExportGraphData}
  */
-ge.GraphEditor.prototype.exportData = function exportData() {
-	var exp = this.options['export'];
+ge.GraphEditor.prototype.toJson = function toJson() {
+	var self = this;
 	return {
-		nodes: this.data.nodes.map(ge.bind(this, exp.node)),
-		links: this.data.links.map(ge.bind(this, exp.link))
+		nodes: this.data.nodes.map(function(node) {
+			return node.toJson(self, self.bbox[0][0], self.bbox[0][1]);
+		}),
+		links: this.data.links.map(function(link) {
+			return link.toJson(self);
+		})
 	};
 };

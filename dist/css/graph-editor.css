@@ -3,8 +3,10 @@
                       color $ge-graph-transition-duration !default;*/
 .ge-graph * {
   /*transition: $ge-graph-transition;*/
+  -webkit-transition-property: stroke, fill, color;
   transition-property: stroke, fill, color;
-  transition-duration: 0.3s; }
+  -webkit-transition-duration: 0.3s;
+          transition-duration: 0.3s; }
 
 .ge-graph marker#ge-arrow-default > path {
   stroke: #000;
@@ -68,26 +70,42 @@
 .ge-graph .ge-node {
   cursor: pointer;
   /* * { vector-effect: non-scaling-stroke } */ }
-  .ge-graph .ge-node circle {
+  .ge-graph .ge-node path {
     stroke-width: 2px;
     stroke: #000;
     fill: #ddd; }
   .ge-graph .ge-node div {
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
-    flex-direction: row;
-    align-items: center;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: row;
+            flex-direction: row;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
     width: 100%;
     height: 100%; }
     .ge-graph .ge-node div span {
+      display: -webkit-box;
+      display: -ms-flexbox;
       display: flex;
-      flex-direction: column;
-      flex-grow: 1;
-      align-items: center;
+      -webkit-box-orient: vertical;
+      -webkit-box-direction: normal;
+          -ms-flex-direction: column;
+              flex-direction: column;
+      -webkit-box-flex: 1;
+          -ms-flex-positive: 1;
+              flex-grow: 1;
+      -webkit-box-align: center;
+          -ms-flex-align: center;
+              align-items: center;
       text-align: center;
       color: #000;
       font-size: 16px;
       word-wrap: break-word; }
-  .ge-graph .ge-node:hover circle {
+  .ge-graph .ge-node:hover path {
     stroke: #000;
     fill: #aee; }
   .ge-graph .ge-node:hover div span {
@@ -117,28 +135,28 @@
 .ge-graph.ge-selection .ge-link.ge-selection:hover text {
   fill: #4477aa; }
 
-.ge-graph.ge-selection .ge-node circle {
+.ge-graph.ge-selection .ge-node path {
   stroke: #666;
   fill: #eee; }
 
 .ge-graph.ge-selection .ge-node span {
   color: #666; }
 
-.ge-graph.ge-selection .ge-node:hover circle {
+.ge-graph.ge-selection .ge-node:hover path {
   stroke: #222255;
   fill: #aaccee; }
 
 .ge-graph.ge-selection .ge-node:hover span {
   color: #222255; }
 
-.ge-graph.ge-selection .ge-node.ge-selection circle {
+.ge-graph.ge-selection .ge-node.ge-selection path {
   stroke: #44a;
   fill: #aae; }
 
 .ge-graph.ge-selection .ge-node.ge-selection span {
   color: #44a; }
 
-.ge-graph.ge-selection .ge-node.ge-selection:hover circle {
+.ge-graph.ge-selection .ge-node.ge-selection:hover path {
   stroke: #222255;
   fill: #aaccee; }
 

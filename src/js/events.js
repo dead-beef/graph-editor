@@ -247,12 +247,12 @@ ge.GraphEditor.prototype.nodeEvents = function nodeEvents(nodes) {
 	var self = this;
 
 	return nodes
-		.attr(
+		/*.attr(
 			'transform',
 			function(d) {
 				return 'translate('.concat(d.x, ',', d.y, ')');
 			}
-		)
+		)*/
 		.on('mouseover', function mouseOver(d) {
 			if(self.state.dragToLink) {
 				self.state.newLinkTarget = d;

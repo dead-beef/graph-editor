@@ -57,22 +57,23 @@ ge.GraphEditor.prototype.initMarkers = function initMarkers(svg) {
 };
 
 /**
- * Initialize SVG.
+ * Initialize SVG element.
  * @private
  * @param   {D3Selection}    svg
  * @this    ge.GraphEditor
  * @returns {ge.GraphEditor}
  */
 ge.GraphEditor.prototype.initSvg = function initSvg(svg) {
-	svg
-		.attr('id', this.options.id)
+	svg.attr('id', this.options.id)
 		.classed(this.options.css.graph, true)
 		.classed(this.options.css.digraph, this.options.directed);
 
+	this.initMarkers(svg);
+
 	var g = svg.append('g');
 	var defsContainer = svg.select('defs'); //g.append('defs');
-	var linksContainer = g.append('g');
-	var nodesContainer = g.append('g');
+	var linkContainer = g.append('g');
+	var nodeContainer = g.append('g');
 
 	/**
 	 * Graph container element.
@@ -85,19 +86,19 @@ ge.GraphEditor.prototype.initSvg = function initSvg(svg) {
 	 * @readonly
 	 * @member {D3Selection}
 	 */
-	this.defs = defsContainer.selectAll('.ge-text-path');
+	this.defs = defsContainer.selectAll('.' + this.options.css.textpath);
 	/**
 	 * Link elements.
 	 * @readonly
 	 * @member {D3Selection}
 	 */
-	this.links = linksContainer.selectAll('g');
+	this.links = linkContainer.selectAll('g');
 	/**
 	 * Node elements.
 	 * @readonly
 	 * @member {D3Selection}
 	 */
-	this.nodes = nodesContainer.selectAll('g');
+	this.nodes = nodeContainer.selectAll('g');
 	/**
 	 * 'Drag to link nodes' line.
 	 * @readonly
@@ -108,21 +109,26 @@ ge.GraphEditor.prototype.initSvg = function initSvg(svg) {
 		.classed(this.options.css.hide, true)
 		.attr('d', 'M0,0L0,0');
 	/**
-	 * Hidden element for text size calculation.
-	 * @private
-	 * @member {D3Selection}
+	 * Text size calculator.
+	 * @readonly
+	 * @member {ge.TextSize}
 	 */
-	this.tmpText = svg.append('text')
-		.style('stroke', 'none')
-		.style('fill', 'none');
+	this.textSize = new ge.TextSize(
+		svg.append('text')
+			.classed(this.options.css.node, true)
+			.node()
+	);
+
 	/**
 	 * Graph SVG element.
 	 * @readonly
 	 * @member {D3Selection}
 	 */
 	this.svg = svg;
+
 	return this;
 };
+
 
 /**
  * Initialize graph data.
@@ -133,13 +139,13 @@ ge.GraphEditor.prototype.initSvg = function initSvg(svg) {
  */
 ge.GraphEditor.prototype.initData = function initData(data) {
 	/**
-	 * Node data dictionary.
+	 * Nodes by ID.
 	 * @readonly
 	 * @member {Object<ID,Node>}
 	 */
 	this.nodeById = {};
 	/**
-	 * Link data dictionary.
+	 * Links by ID.
 	 * @readonly
 	 * @member {Object<ID,Link>}
 	 */
@@ -194,84 +200,4 @@ ge.GraphEditor.prototype.initState = function initState() {
 		//sizeScale: 1
 	};
 	return this;
-};
-
-/**
- * Initialize node data.
- * @private
- * @param   {ImportNodeData} node  Node data.
- * @returns {boolean}              False if node exists.
- */
-ge.GraphEditor.prototype.initNode = function initNode(node) {
-	if(node.id === undefined) {
-		node.id = 1 + d3.max(this.data.nodes, function(d) { return d.id; });
-		if(isNaN(node.id)) {
-			node.id = 0;
-		}
-	}
-
-	if(this.nodeById[node.id]) {
-		return false;
-	}
-
-	node.elementId = this.options.id.concat('n', node.id);
-	node.selector = '#' + node.elementId;
-	node.size = node.size || this.options.node.size.def;
-
-	if(node.x === undefined) {
-		node.x = node.size + Math.random() * 512;
-	}
-	if(node.y === undefined) {
-		node.y = node.size + Math.random() * 512;
-	}
-	if(node.title === undefined) {
-		node.title = node.id.toString();
-	}
-
-	this.nodeById[node.id] = node;
-	return true;
-};
-
-/**
- * Initialize link data.
- * @private
- * @param   {ImportLinkData} link  Link data.
- * @returns {boolean}              False if data is invalid or link exists.
- */
-ge.GraphEditor.prototype.initLink = function initLink(link) {
-	var source = link.source, target = link.target;
-
-	if(typeof source !== 'object') {
-		source = this.nodeById[source];
-	}
-	if(typeof target !== 'object') {
-		target = this.nodeById[target];
-	}
-
-	if(source === undefined || target === undefined) {
-		console.error(link, source, target);
-		return false;
-	}
-
-	link.source = source;
-	link.target = target;
-
-	var id = this.options.link.id(link);
-
-	if(this.linkById[id]) {
-		return false;
-	}
-
-	link.id = id;
-	link.size = link.size || this.options.link.size.def;
-	link.defId = this.options.id.concat('d', link.id);
-	link.pathId = this.options.id.concat('p', link.id);
-	link.selector = '#' + link.pathId;
-
-	if(link.title === undefined) {
-		link.title = link.id;
-	}
-
-	this.linkById[link.id] = link;
-	return true;
 };

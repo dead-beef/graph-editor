@@ -126,7 +126,7 @@ $ge-selected-node-hover-bg:   mix($ge-selected-node-bg, $ge-node-hover-bg) !defa
 
 		/* * { vector-effect: non-scaling-stroke } */
 
-		circle {
+		path {
 			stroke-width: $ge-node-border;
 			stroke: $ge-node-fg;
 			fill: $ge-node-bg;
@@ -154,7 +154,7 @@ $ge-selected-node-hover-bg:   mix($ge-selected-node-bg, $ge-node-hover-bg) !defa
 		}
 
 		&:hover {
-			circle {
+			path {
 				stroke: $ge-node-hover-fg;
 				fill: $ge-node-hover-bg;
 			}
@@ -188,14 +188,14 @@ $ge-selected-node-hover-bg:   mix($ge-selected-node-bg, $ge-node-hover-bg) !defa
 		}
 
 		.ge-node {
-			circle {
+			path {
 				stroke: $ge-unselected-fg;
 				fill: $ge-unselected-bg;
 			}
 			span { color: $ge-unselected-fg; }
 
 			&:hover {
-				circle {
+				path {
 					stroke: $ge-unselected-node-hover-fg;
 					fill: $ge-unselected-node-hover-bg;
 				}
@@ -203,14 +203,14 @@ $ge-selected-node-hover-bg:   mix($ge-selected-node-bg, $ge-node-hover-bg) !defa
 			}
 
 			&.ge-selection {
-				circle {
+				path {
 					stroke: $ge-selected-node-fg;
 					fill: $ge-selected-node-bg;
 				}
 				span { color: $ge-selected-node-fg; }
 
 				&:hover {
-					circle {
+					path {
 						stroke: $ge-selected-node-hover-fg;
 						fill: $ge-selected-node-hover-bg;
 					}

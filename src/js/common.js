@@ -1,6 +1,193 @@
 'use strict';
 
 /**
+ * Point constructor.
+ * @class
+ * @classdesc Point class.
+ * @param {?number}  x  X coordinate.
+ * @param {?number}  y  Y coordinate.
+ */
+ge.Point = function Point(x, y) {
+	/**
+	 * X coordinate.
+	 * @member {number}
+	 */
+	this.x = +x || 0;
+	/**
+	 * Y coordinate.
+	 * @member {number}
+	 */
+	this.y = +y || 0;
+};
+
+/**
+ * Bounding box constructor.
+ * @class
+ * @classdesc Bounding box class.
+ * @param {?number}  left   Left X coordinate.
+ * @param {?number}  top    Top Y coordinate.
+ * @param {?number}  right  Right X coordinate.
+ * @param {?number}  bottom Bottom Y coordinate.
+ */
+ge.BBox = function BBox(left, top, right, bottom) {
+	/**
+	 * Left X coordinate.
+	 * @member {number}
+	 */
+	this.left = +left || 0;
+	/**
+	 * Top Y coordinate.
+	 * @member {number}
+	 */
+	this.top = +top || 0;
+	/**
+	 * Right X coordinate.
+	 * @member {number}
+	 */
+	this.right = +right || 0;
+	/**
+	 * Bottom Y coordinate.
+	 * @member {number}
+	 */
+	this.bottom = +bottom || 0;
+};
+
+/**
+ * Angle constructor.
+ * @class
+ * @classdesc Angle class.
+ * @param {?number}   value   Angle value.
+ * @param {?boolean}  rad     true if value is in radians, false if in degrees.
+ */
+ge.Angle = function Angle(value, rad) {
+	/**
+	 * Angle in degrees.
+	 * @member {number}
+	 */
+	this.deg = 0;
+	/**
+	 * Angle in radians.
+	 * @member {number}
+	 */
+	this.rad = 0;
+
+	if(rad) {
+		this.rad = +value || 0;
+		this.deg = this.rad * 180.0 / Math.PI;
+	}
+	else {
+		this.deg = +value || 0;
+		this.rad = this.deg * Math.PI / 180.0;
+	}
+
+	/**
+	 * Sine.
+	 * @member {number}
+	 */
+	this.sin = Math.sin(this.rad);
+	/**
+	 * Cosine.
+	 * @member {number}
+	 */
+	this.cos = Math.cos(this.rad);
+};
+
+/**
+ * Container size constructor.
+ * @class
+ * @classdesc Point class.
+ * @param {?number}  [minWidth=1]                   Minimum width.
+ * @param {?number}  [minHeight=1]                  Minimum height.
+ * @param {?number}  [minArea=minWidth*minHeight]   Minimum area.
+ */
+ge.ContainerSize = function ContainerSize(minWidth, minHeight, minArea) {
+	/**
+	 * Minimum width.
+	 * @member {number}
+	 */
+	this.minWidth = +minWidth || 1;
+	/**
+	 * Minimum height.
+	 * @member {number}
+	 */
+	this.minHeight = +minHeight || 1;
+	/**
+	 * Minimum area.
+	 * @member {number}
+	 */
+	this.minArea = +minArea || this.minWidth * this.minHeight;
+};
+
+
+/**
+ * Class for saving/loading JSON.
+ * @class
+ * @param {?number}  x  X coordinate.
+ * @param {?number}  y  Y coordinate.
+ */
+ge.SaveLoad = function SaveLoad() {
+	/**
+	 * Class constructors by name.
+	 * @member {object}
+	 */
+	this.classes = {};
+};
+
+/**
+ * Add a class.
+ * @param {function} constructor              Class constructor.
+ * @param {string}   [name=constructor.name]  Class name.
+ * @param {boolean}  [overwrite=false]        Overwrite if class exists.
+ */
+ge.SaveLoad.prototype.addClass = function addClass(
+	constructor,
+	name,
+	overwrite
+) {
+	name = name || constructor.name;
+	if(this.classes[name] && !overwrite) {
+		throw new Error('class "' + name +'" exists');
+	}
+	this.classes[name] = constructor;
+};
+
+/**
+ * Get class by name.
+ * @param   {string}   name  Class name.
+ * @returns {function}       Class constructor.
+ */
+ge.SaveLoad.prototype.getClass = function getClass(name) {
+	var ret = this.classes[name];
+	if(!ret) {
+		throw new Error('class "' + name +'" not found');
+	}
+	return ret;
+};
+
+/**
+ * Load from JSON.
+ * @param   {object}  data     JSON data.
+ * @returns {object}
+ */
+ge.SaveLoad.prototype.fromJson = function fromJson(data) {
+	var cls = this.getClass(data['class']);
+	return new cls(data);
+};
+
+/**
+ * Save to JSON.
+ * @param   {object}  obj                          Object to save.
+ * @param   {string}  [name=obj.constructor.name]  Class name.
+ * @returns {object}
+ */
+ge.SaveLoad.prototype.toJson = function toJson(obj, name) {
+	var ret = obj.toJson();
+	ret['class'] = name || obj.constructor.name;
+	return ret;
+};
+
+
+/**
  * Get object ID.
  * @param {?(Object|undefined)} obj
  * @returns {?ID}
@@ -18,16 +205,6 @@ ge.bind = function bind(_this, func) {
 	return function bound() {
 		return func.apply(_this, arguments);
 	};
-};
-
-/**
- * Get angle sine and cosine.
- * @param {number} angle Angle in degrees.
- * @returns {SinCos}
- */
-ge.sincos = function sincos(angle) {
-	angle *= Math.PI / 180;
-	return [ Math.sin(angle), Math.cos(angle) ];
 };
 
 /**
@@ -73,108 +250,10 @@ ge.equal = function equal(u, v, eps) {
 };
 
 /**
- * Default node export function.
- * @param   {Node}           node
- * @this    ge.GraphEditor
- * @returns {ExportNodeData}
- */
-ge.defaultExportNode = function defaultExportNode(node) {
-	return {
-		id: node.id,
-		x: node.x - this.bbox[0][0],
-		y: node.y - this.bbox[0][1],
-		size: node.size,
-		title: node.title,
-		data: node.data
-	};
-};
-
-/**
- * Default link export function.
- * @param   {Link}           link
- * @this    ge.GraphEditor
- * @returns {ExportLinkData}
- */
-ge.defaultExportLink = function defaultExportLink(link) {
-	return {
-		source: link.source.id,
-		target: link.target.id,
-		size: link.size,
-		title: link.title,
-		data: link.data
-	};
-};
-
-/**
- * Default link path function.
- * @param   {GraphOptions} options Graph options
- * @this    ge.GraphEditor
- * @returns {string}               SVG text path.
- */
-ge.defaultLinkPath = function defaultLinkPath(d) {
-	var x0, y0, x1, y1;
-
-	if(d.source === d.target) {
-		var arc = this.options.link.arc;
-		var r = d.source.size + d.size;
-
-		x0 = d.source.x + arc.start[1] * d.source.size;
-		y0 = d.source.y - arc.start[0] * d.source.size;
-		x1 = d.source.x + arc.end[1] * r;
-		y1 = d.source.y - arc.end[0] * r;
-
-		d.textPath = ''.concat(
-			'M', x0, ',', y0,
-			'A', d.source.size, ',', d.source.size,
-			',0,1,0,', x1, ',', y1
-		);
-		d.path = d.textPath;
-		d.flip = 0;
-
-		return d.textPath;
-	}
-
-	x0 = d.source.x;
-	y0 = d.source.y;
-	x1 = d.target.x - x0;
-	y1 = d.target.y - y0;
-
-	var length = Math.sqrt(x1 * x1 + y1 * y1);
-
-	x1 /= length;
-	y1 /= length;
-
-	length -= d.source.size + d.target.size + d.size;
-
-	x0 += x1 * d.source.size;
-	y0 += y1 * d.source.size;
-
-	x1 = x0 + x1 * length;
-	y1 = y0 + y1 * length;
-
-	d.path = ''.concat(
-		'M', x0, ',', y0,
-		'L', x1, ',', y1
-	);
-
-	if((d.flip = +(x0 > x1))) {
-		d.textPath = ''.concat(
-			'M', x1, ',', y1,
-			'L', x0, ',', y0
-		);
-	}
-	else {
-		d.textPath = d.path;
-	}
-
-	return d.textPath;
-};
-
-/**
  * Default simulation update function.
  * @param   {?D3Simulation} simulation  Old simulation object.
- * @param   {Array<Node>}   nodes       Graph nodes.
- * @param   {Array<Link>}   links       Graph links.
+ * @param   {Array<ge.Node>}   nodes    Graph nodes.
+ * @param   {Array<ge.Link>}   links    Graph links.
  * @this    ge.GraphEditor
  * @returns {D3Simulation}              New/updated simulation object.
  */
@@ -186,7 +265,9 @@ ge.defaultSimulation = function defaultSimulation(simulation, nodes, links) {
 			.force('center', d3.forceCenter());
 	}
 
-	var dist = 10 * d3.max(nodes, function(d) { return d.size; });
+	var dist = 10 * d3.max(nodes, function(d) {
+		return Math.max(d.width, d.height);
+	});
 
 	var cx = d3.mean(nodes, function(d) { return d.x; });
 	var cy = d3.mean(nodes, function(d) { return d.y; });
