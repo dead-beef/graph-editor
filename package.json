@@ -28,28 +28,31 @@
     "node" : ">=6.11.4"
   },
   "dependencies": {
-    "jquery": "^3.2.1",
-    "d3": "^4.10.0"
+    "d3": "^5.7.0"
   },
   "devDependencies": {
+    "autoprefixer": "^7.2.5",
     "chokidar-cli": "^1.2.0",
     "csso-cli": "^1.0.0",
-    "eslint": "^4.2.0",
-    "jasmine-core": "^2.6.4",
+    "eslint": "^4.15.0",
+    "eslint-plugin-jasmine": "^2.10.1",
+    "http-server": "^0.11.1",
+    "jasmine-core": "^2.9.0",
     "jasmine-jquery": "^2.1.1",
+    "jasmine-spec-reporter": "^4.1.1",
     "jsdoc": "^3.5.5",
-    "karma": "^1.7.0",
+    "karma": "^2.0.0",
     "karma-chrome-launcher": "^2.2.0",
-    "karma-firefox-launcher": "^1.0.1",
-    "karma-jasmine": "^1.1.0",
-    "karma-spec-reporter": "0.0.31",
-    "node-sass": "^4.5.3",
-    "packpath": "^0.1.0",
-    "root-require": "^0.3.1",
-    "uglify-js": "^3.0.25"
+    "karma-firefox-launcher": "^1.1.0",
+    "karma-jasmine": "^1.1.1",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-spec-reporter": "0.0.32",
+    "node-sass": "^4.7.2",
+    "postcss-cli": "^4.1.1",
+    "sass-makedepend": "^0.2.1",
+    "source-map-concat-cli": "^1.0.0",
+    "uglify-js": "^3.3.8"
   },
   "scripts": {
-    "lint": "eslint src",
-    "docs": "rm -rf docs/* && jsdoc -c config/jsdoc.conf.js && mv docs/graph-editor/*/* docs/ && rm -rf docs/graph-editor"
   }
 }

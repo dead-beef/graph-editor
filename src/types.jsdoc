@@ -39,27 +39,6 @@
  */
 
 /**
- * Point.
- * @typedef {Array<number>} Point
- * @property {number} 0  X coordinate.
- * @property {number} 1  Y coordinate.
- */
-
-/**
- * Bounding box.
- * @typedef {Array<Point>} BBox
- * @property {Point} 0  Top left corner.
- * @property {Point} 1  Bottom right corner.
- */
-
-/**
- * Angle sine and cosine.
- * @typedef {Array<number>} SinCos
- * @property {number} 0  Sine.
- * @property {number} 1  Cosine.
- */
-
-/**
  * Imported node data.
  * @typedef {Object} ImportNodeData
  * @property {ID}     [id]     Node ID.
@@ -113,38 +92,6 @@
  * @typedef {Object} ExportGraphData
  * @property {Array<ExportNodeData>} nodes  Node data.
  * @property {Array<ExportLinkData>} links  Link data.
- */
-
-/**
- * Node data.
- * @typedef {Object} Node
- * @property {ID}       id         Node ID.
- * @property {number}   x          Center X coordinate.
- * @property {number}   y          Center Y coordinate.
- * @property {number}   size       Size.
- * @property {string}   title      Title.
- * @property {*}        data       User data.
- * @property {string}   elementId  SVG element ID.
- * @property {Selector} selector   SVG element selector.
- * @property {string}   prevTitle  Title during last DOM update.
- * @property {string}   textSize   Text element size.
- * @property {string}   textOffset Text element offset.
- */
-
-/**
- * Link data.
- * @typedef {Object} Link
- * @property {Node}     source    Source node.
- * @property {Node}     target    Target node.
- * @property {number}   size      Size.
- * @property {string}   title     Title.
- * @property {*}        data      User data.
- * @property {string}   defId     SVG <def> ID.
- * @property {string}   pathId    SVG <path> ID.
- * @property {Selector} selector  SVG <path> selector.
- * @property {string}   path      SVG path.
- * @property {string}   textPath  SVG text path.
- * @property {number}   flip      0 if path == textPath, 1 if text path is reversed.
  */
 
 /**
@@ -255,12 +202,6 @@
  * @property {number}
  *           [bbox.padding=80]
  *           Graph bounding box padding.
- * @property {function}
- *           [export.node={@link ge.defaultExportNode}]
- *           Node export function.
- * @property {function}
- *           [export.link={@link ge.defaultExportLink}]
- *           Link export function.
  * @property {string}
  *           [css.graph='ge-graph']
  *           Graph CSS classes.

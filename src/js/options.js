@@ -9,6 +9,7 @@ ge.GraphEditor.prototype.defaults = {
 	directed: false,
 
 	node: {
+		shape: new ge.shape.Circle(),
 		border: 2,
 		size: {
 			def: 10,
@@ -22,7 +23,10 @@ ge.GraphEditor.prototype.defaults = {
 	},
 
 	link: {
-		path: ge.defaultLinkPath,
+		shape: new ge.path.Line({
+			loopStart: 0,
+			loopEnd: 90
+		}),
 		size: {
 			def: 2
 		},
@@ -31,10 +35,6 @@ ge.GraphEditor.prototype.defaults = {
 			dy: '1.1em',
 			offset: null,
 			anchor: null
-		},
-		arc: {
-			start: 180,
-			end: 270
 		}
 	},
 
@@ -47,7 +47,7 @@ ge.GraphEditor.prototype.defaults = {
 
 	transition: {
 		zoom: 250,
-		drag: 50,
+		drag: 0,
 		simulation: 50
 	},
 
@@ -64,11 +64,6 @@ ge.GraphEditor.prototype.defaults = {
 		padding: 80
 	},
 
-	'export': {
-		node: ge.defaultExportNode,
-		link: ge.defaultExportLink
-	},
-
 	css: {
 		//markers: 'ge-markers',
 		node: 'ge-node',
@@ -77,6 +72,7 @@ ge.GraphEditor.prototype.defaults = {
 		hide: 'ge-hidden',
 		dragline: 'ge-dragline',
 		link: 'ge-link',
+		textpath: 'ge-text-path',
 		//connect: 'ge-connect',
 		selection: {
 			node: 'ge-selection',
@@ -92,7 +88,7 @@ ge.GraphEditor.prototype.defaults = {
 ge.GraphEditor.prototype.typeDefaults = [
 	{
 		link: {
-			id: function(link) {
+			id: function linkId(link) {
 				return ''.concat(
 					Math.min(link.source.id, link.target.id),
 					'-',
@@ -107,7 +103,7 @@ ge.GraphEditor.prototype.typeDefaults = [
 	},
 	{
 		link: {
-			id: function(link) {
+			id: function linkId(link) {
 				return ''.concat(link.source.id, '-', link.target.id);
 			},
 			text: {
@@ -121,11 +117,11 @@ ge.GraphEditor.prototype.typeDefaults = [
 /**
  * Initialize graph options.
  * @private
- * @param   {GraphOptions}    options
- * @param   {D3Selection}     svg
+ * @param	{GraphOptions}	  options
+ * @param	{D3Selection}	  svg
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.initOptions = function(options, svg) {
+ge.GraphEditor.prototype.initOptions = function initOptions(options, svg) {
 	var directed;
 	if(options && options.hasOwnProperty('directed')) {
 		directed = options.directed;
@@ -136,32 +132,26 @@ ge.GraphEditor.prototype.initOptions = function(options, svg) {
 
 	var typeDefaults = this.typeDefaults[+directed];
 
-	var opt = $.extend(true, {}, this.defaults, typeDefaults, options || {});
+	var opt = ge.extend({}, this.defaults, typeDefaults, options);
 
 	opt.id = opt.id
 		|| svg.attr('id')
 		|| 'ge'.concat(Math.floor(Math.random() * 100));
 
-	opt.link.arc = {
-		start: ge.sincos(Math.min(opt.link.arc.start, opt.link.arc.end)),
-		end: ge.sincos(Math.max(opt.link.arc.start, opt.link.arc.end)),
-		center: ge.sincos((opt.link.arc.start + opt.link.arc.end) / 2)
-	};
-
-	var flip = (100 - parseInt(opt.link.text.offset)) + '%';
-	opt.link.text.offset = [ opt.link.text.offset, flip ];
+	var reversed = (100 - parseInt(opt.link.text.offset)) + '%';
+	opt.link.text.offset = [ opt.link.text.offset, reversed ];
 
 	switch(opt.link.text.anchor) {
 		case 'start':
-			flip = 'end';
+			reversed = 'end';
 			break;
 		case 'end':
-			flip = 'start';
+			reversed = 'start';
 			break;
 		default:
-			flip = 'middle';
+			reversed = 'middle';
 	}
-	opt.link.text.anchor = [ opt.link.text.anchor, flip ];
+	opt.link.text.anchor = [ opt.link.text.anchor, reversed ];
 
 	this.options = opt;
 	return this;

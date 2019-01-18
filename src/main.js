@@ -22,7 +22,6 @@ ge.GraphEditor = function GraphEditor(svg, data, options) {
 	}
 
 	this.initOptions(options, svg)
-		.initMarkers(svg)
 		.initSvg(svg)
 		.initData(data)
 		.initState();
@@ -65,7 +64,7 @@ ge.GraphEditor = function GraphEditor(svg, data, options) {
 	 * @member {function}
 	 */
 	this.onresize = ge.bind(this, this.resized);
-	$(window).on('resize', this.onresize);
+	window.addEventListener('resize', this.onresize);
 
 	this.updateBBox();
 

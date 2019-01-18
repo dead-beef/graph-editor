@@ -2,15 +2,15 @@
 
 (function(root, factory) {
 	if(typeof define === 'function' && define.amd) {
-		define(['jquery', 'd3'], factory);
+		define(['d3'], factory);
 	}
 	else if(typeof module === 'object' && module.exports) {
-		module.exports = factory(require('jquery'), require('d3'));
+		module.exports = factory(require('d3'));
 	}
 	else {
-		root.ge = factory(root.jQuery, root.d3);
+		root.ge = factory(root.d3);
 	}
-})(this, function($, d3) {
+})(this, function(d3) {
 	var exports = {};
 'use strict';
 
@@ -36,7 +36,6 @@ ge.GraphEditor = function GraphEditor(svg, data, options) {
 	}
 
 	this.initOptions(options, svg)
-		.initMarkers(svg)
 		.initSvg(svg)
 		.initData(data)
 		.initState();
@@ -79,7 +78,7 @@ ge.GraphEditor = function GraphEditor(svg, data, options) {
 	 * @member {function}
 	 */
 	this.onresize = ge.bind(this, this.resized);
-	$(window).on('resize', this.onresize);
+	window.addEventListener('resize', this.onresize);
 
 	this.updateBBox();
 
@@ -96,11 +95,198 @@ ge.GraphEditor = function GraphEditor(svg, data, options) {
 'use strict';
 
 /**
+ * Point constructor.
+ * @class
+ * @classdesc Point class.
+ * @param {?number}  x  X coordinate.
+ * @param {?number}  y  Y coordinate.
+ */
+ge.Point = function Point(x, y) {
+	/**
+	 * X coordinate.
+	 * @member {number}
+	 */
+	this.x = +x || 0;
+	/**
+	 * Y coordinate.
+	 * @member {number}
+	 */
+	this.y = +y || 0;
+};
+
+/**
+ * Bounding box constructor.
+ * @class
+ * @classdesc Bounding box class.
+ * @param {?number}  left   Left X coordinate.
+ * @param {?number}  top    Top Y coordinate.
+ * @param {?number}  right  Right X coordinate.
+ * @param {?number}  bottom Bottom Y coordinate.
+ */
+ge.BBox = function BBox(left, top, right, bottom) {
+	/**
+	 * Left X coordinate.
+	 * @member {number}
+	 */
+	this.left = +left || 0;
+	/**
+	 * Top Y coordinate.
+	 * @member {number}
+	 */
+	this.top = +top || 0;
+	/**
+	 * Right X coordinate.
+	 * @member {number}
+	 */
+	this.right = +right || 0;
+	/**
+	 * Bottom Y coordinate.
+	 * @member {number}
+	 */
+	this.bottom = +bottom || 0;
+};
+
+/**
+ * Angle constructor.
+ * @class
+ * @classdesc Angle class.
+ * @param {?number}   value   Angle value.
+ * @param {?boolean}  rad     true if value is in radians, false if in degrees.
+ */
+ge.Angle = function Angle(value, rad) {
+	/**
+	 * Angle in degrees.
+	 * @member {number}
+	 */
+	this.deg = 0;
+	/**
+	 * Angle in radians.
+	 * @member {number}
+	 */
+	this.rad = 0;
+
+	if(rad) {
+		this.rad = +value || 0;
+		this.deg = this.rad * 180.0 / Math.PI;
+	}
+	else {
+		this.deg = +value || 0;
+		this.rad = this.deg * Math.PI / 180.0;
+	}
+
+	/**
+	 * Sine.
+	 * @member {number}
+	 */
+	this.sin = Math.sin(this.rad);
+	/**
+	 * Cosine.
+	 * @member {number}
+	 */
+	this.cos = Math.cos(this.rad);
+};
+
+/**
+ * Container size constructor.
+ * @class
+ * @classdesc Point class.
+ * @param {?number}  [minWidth=1]                   Minimum width.
+ * @param {?number}  [minHeight=1]                  Minimum height.
+ * @param {?number}  [minArea=minWidth*minHeight]   Minimum area.
+ */
+ge.ContainerSize = function ContainerSize(minWidth, minHeight, minArea) {
+	/**
+	 * Minimum width.
+	 * @member {number}
+	 */
+	this.minWidth = +minWidth || 1;
+	/**
+	 * Minimum height.
+	 * @member {number}
+	 */
+	this.minHeight = +minHeight || 1;
+	/**
+	 * Minimum area.
+	 * @member {number}
+	 */
+	this.minArea = +minArea || this.minWidth * this.minHeight;
+};
+
+
+/**
+ * Class for saving/loading JSON.
+ * @class
+ * @param {?number}  x  X coordinate.
+ * @param {?number}  y  Y coordinate.
+ */
+ge.SaveLoad = function SaveLoad() {
+	/**
+	 * Class constructors by name.
+	 * @member {object}
+	 */
+	this.classes = {};
+};
+
+/**
+ * Add a class.
+ * @param {function} constructor              Class constructor.
+ * @param {string}   [name=constructor.name]  Class name.
+ * @param {boolean}  [overwrite=false]        Overwrite if class exists.
+ */
+ge.SaveLoad.prototype.addClass = function addClass(
+	constructor,
+	name,
+	overwrite
+) {
+	name = name || constructor.name;
+	if(this.classes[name] && !overwrite) {
+		throw new Error('class "' + name +'" exists');
+	}
+	this.classes[name] = constructor;
+};
+
+/**
+ * Get class by name.
+ * @param   {string}   name  Class name.
+ * @returns {function}       Class constructor.
+ */
+ge.SaveLoad.prototype.getClass = function getClass(name) {
+	var ret = this.classes[name];
+	if(!ret) {
+		throw new Error('class "' + name +'" not found');
+	}
+	return ret;
+};
+
+/**
+ * Load from JSON.
+ * @param   {object}  data     JSON data.
+ * @returns {object}
+ */
+ge.SaveLoad.prototype.fromJson = function fromJson(data) {
+	var cls = this.getClass(data['class']);
+	return new cls(data);
+};
+
+/**
+ * Save to JSON.
+ * @param   {object}  obj                          Object to save.
+ * @param   {string}  [name=obj.constructor.name]  Class name.
+ * @returns {object}
+ */
+ge.SaveLoad.prototype.toJson = function toJson(obj, name) {
+	var ret = obj.toJson();
+	ret['class'] = name || obj.constructor.name;
+	return ret;
+};
+
+
+/**
  * Get object ID.
  * @param {?(Object|undefined)} obj
  * @returns {?ID}
  */
-ge.id = function(obj) {
+ge.id = function id(obj) {
 	return obj && obj.id || null;
 };
 
@@ -109,20 +295,10 @@ ge.id = function(obj) {
  * @param {function} func
  * @returns {function}
  */
-ge.bind = function(_this, func) {
-	return function() {
+ge.bind = function bind(_this, func) {
+	return function bound() {
 		return func.apply(_this, arguments);
 	};
-};
-
-/**
- * Get angle sine and cosine.
- * @param {number} angle Angle in degrees.
- * @returns {SinCos}
- */
-ge.sincos = function(angle) {
-	angle *= Math.PI / 180;
-	return [ Math.sin(angle), Math.cos(angle) ];
 };
 
 /**
@@ -132,7 +308,7 @@ ge.sincos = function(angle) {
  * @param {number}                 [eps=1e-5] Precision.
  * @returns {boolean}
  */
-ge.equal = function(u, v, eps) {
+ge.equal = function equal(u, v, eps) {
 	eps = eps || 1e-5;
 	var eq = function(x, y) { return Math.abs(x - y) < eps; };
 
@@ -168,112 +344,14 @@ ge.equal = function(u, v, eps) {
 };
 
 /**
- * Default node export function.
- * @param   {Node}           node
- * @this    ge.GraphEditor
- * @returns {ExportNodeData}
- */
-ge.defaultExportNode = function(node) {
-	return {
-		id: node.id,
-		x: node.x - this.bbox[0][0],
-		y: node.y - this.bbox[0][1],
-		size: node.size,
-		title: node.title,
-		data: node.data
-	};
-};
-
-/**
- * Default link export function.
- * @param   {Link}           link
- * @this    ge.GraphEditor
- * @returns {ExportLinkData}
- */
-ge.defaultExportLink = function(link) {
-	return {
-		source: link.source.id,
-		target: link.target.id,
-		size: link.size,
-		title: link.title,
-		data: link.data
-	};
-};
-
-/**
- * Default link path function.
- * @param   {GraphOptions} options Graph options
- * @this    ge.GraphEditor
- * @returns {string}               SVG text path.
- */
-ge.defaultLinkPath = function(d) {
-	var x0, y0, x1, y1;
-
-	if(d.source === d.target) {
-		var arc = this.options.link.arc;
-		var r = d.source.size + d.size;
-
-		x0 = d.source.x + arc.start[1] * d.source.size;
-		y0 = d.source.y - arc.start[0] * d.source.size;
-		x1 = d.source.x + arc.end[1] * r;
-		y1 = d.source.y - arc.end[0] * r;
-
-		d.textPath = ''.concat(
-			'M', x0, ',', y0,
-			'A', d.source.size, ',', d.source.size,
-			',0,1,0,', x1, ',', y1
-		);
-		d.path = d.textPath;
-		d.flip = 0;
-
-		return d.textPath;
-	}
-
-	x0 = d.source.x;
-	y0 = d.source.y;
-	x1 = d.target.x - x0;
-	y1 = d.target.y - y0;
-
-	var length = Math.sqrt(x1 * x1 + y1 * y1);
-
-	x1 /= length;
-	y1 /= length;
-
-	length -= d.source.size + d.target.size + d.size;
-
-	x0 += x1 * d.source.size;
-	y0 += y1 * d.source.size;
-
-	x1 = x0 + x1 * length;
-	y1 = y0 + y1 * length;
-
-	d.path = ''.concat(
-		'M', x0, ',', y0,
-		'L', x1, ',', y1
-	);
-
-	if((d.flip = +(x0 > x1))) {
-		d.textPath = ''.concat(
-			'M', x1, ',', y1,
-			'L', x0, ',', y0
-		);
-	}
-	else {
-		d.textPath = d.path;
-	}
-
-	return d.textPath;
-};
-
-/**
  * Default simulation update function.
  * @param   {?D3Simulation} simulation  Old simulation object.
- * @param   {Array<Node>}   nodes       Graph nodes.
- * @param   {Array<Link>}   links       Graph links.
+ * @param   {Array<ge.Node>}   nodes    Graph nodes.
+ * @param   {Array<ge.Link>}   links    Graph links.
  * @this    ge.GraphEditor
  * @returns {D3Simulation}              New/updated simulation object.
  */
-ge.defaultSimulation = function(simulation, nodes, links) {
+ge.defaultSimulation = function defaultSimulation(simulation, nodes, links) {
 	if(!simulation) {
 		simulation = d3.forceSimulation()
 			.force('charge', d3.forceManyBody())
@@ -281,7 +359,9 @@ ge.defaultSimulation = function(simulation, nodes, links) {
 			.force('center', d3.forceCenter());
 	}
 
-	var dist = 10 * d3.max(nodes, function(d) { return d.size; });
+	var dist = 10 * d3.max(nodes, function(d) {
+		return Math.max(d.width, d.height);
+	});
 
 	var cx = d3.mean(nodes, function(d) { return d.x; });
 	var cy = d3.mean(nodes, function(d) { return d.y; });
@@ -293,7 +373,64 @@ ge.defaultSimulation = function(simulation, nodes, links) {
 	return simulation;
 };
 
-/*ge.debounceD3 = function(func, delay) {
+/**
+ * Extend an object.
+ * @param   {object}  dst  Object to extend.
+ * @param   {object}  src  Source object.
+ * @returns {object}       Extended object.
+ */
+ge._extend = function _extend(dst, src) {
+	if(!src) {
+		return dst;
+	}
+	if(typeof src !== 'object') {
+		throw new Error('src is not an object: ' + src.toString());
+	}
+
+	if(!dst) {
+		dst = {};
+	}
+	else if(typeof dst !== 'object') {
+		throw new Error('dst is not an object: ' + dst.toString());
+	}
+
+	for(var key in src) {
+		var value = src[key];
+		if(typeof value === 'object' && value !== null) {
+			if(Array.isArray(value)) {
+				dst[key] = value.slice();
+			}
+			else {
+				var dstValue = dst[key];
+				if(!dstValue
+				   || typeof dstValue !== 'object'
+				   || Array.isArray(dstValue)) {
+					dst[key] = dstValue = {};
+				}
+				ge._extend(dstValue, value);
+			}
+		}
+		else {
+			dst[key] = value;
+		}
+	}
+	return dst;
+};
+
+/**
+ * Extend an object.
+ * @param   {object}     dst  Object to extend.
+ * @param   {...object}  src  Source objects.
+ * @returns {object}          Extended object.
+ */
+ge.extend = function extend(dst, src) { // eslint-disable-line no-unused-vars
+	for(var i = 1; i < arguments.length; ++i) {
+		dst = ge._extend(dst, arguments[i]);
+	}
+	return dst;
+};
+
+/*ge.debounceD3 = function debounceD3(func, delay) {
 	var timeout = null;
 
 	return function() {
@@ -321,6 +458,400 @@ ge.defaultSimulation = function(simulation, nodes, links) {
 		);
 	};
 };*/
+/**
+ * Link shapes.
+ * @namespace
+ */
+ge.path = new ge.SaveLoad();
+
+/**
+ * Abstract base path class.
+ * @class
+ * @abstract
+ * @param {?object} [data]                JSON data.
+ * @param {?number} [data.loopStart=180]  Loop start angle in degrees.
+ * @param {?number} [data.loopEnd=270]    Loop end angle in degrees.
+ */
+ge.path.Path = function Path(data) { // eslint-disable-line no-unused-vars
+	if(this.constructor === Path) {
+		throw new Error('abstract class');
+	}
+	data = data || {};
+	this.loopStart = new ge.Angle(+data.loopStart || 180);
+	this.loopEnd = new ge.Angle(+data.loopEnd || 270);
+};
+
+/* eslint-disable no-unused-vars */
+
+/**
+ * Return text path and set link path.
+ * @abstract
+ * @param   {ge.Link}   link   Link data.
+ * @returns {string}           SVG path.
+ */
+ge.path.Path.prototype.path = function path(link) {
+	throw new Error('abstract method');
+};
+
+/* eslint-enable no-unused-vars */
+
+/**
+ * Convert to JSON.
+ * @returns {object}  JSON data.
+ */
+ge.path.Path.prototype.toJson = function toJson() {
+	return {
+		loopStart: this.loopStart.deg,
+		loopEnd: this.loopEnd.deg
+	};
+};
+/**
+ * Line.
+ * @class
+ * @param {?object} [data]                JSON data.
+ * @param {?number} [data.loopStart=180]  Loop start angle in degrees.
+ * @param {?number} [data.loopEnd=270]    Loop end angle in degrees.
+ */
+ge.path.Line = function Line(data) {
+	ge.path.Path.call(this, data);
+};
+
+ge.path.Line.prototype = Object.create(ge.path.Line);
+Object.defineProperty(
+	ge.path.Line.prototype,
+	'constructor',
+	{ 
+		value: ge.path.Line,
+		enumerable: false,
+		writable: true
+	}
+);
+ge.path.addClass(ge.path.Line);
+
+/**
+ * Return text path and set link path.
+ * @param   {ge.Link}   link   Link data.
+ * @returns {string}           SVG path.
+ */
+ge.path.Line.prototype.path = function path(link) {
+	var src, dst;
+
+	if(link.source === link.target) {
+		src = link.source.shape.getPoint(link.source, this.loopStart);
+		dst = link.source.shape.getPoint(link.source, this.loopEnd);
+		var rx = link.source.width / 2;
+		var ry = link.source.height / 2;
+
+		link.reversed = false;
+		link.path = 'M'.concat(
+			src.x, ',', src.y,
+			'A', rx, ',', ry, ',0,1,0,', dst.x, ',', dst.y
+		);
+
+		return link.path;
+	}
+
+	src = new ge.Point(link.source.x, link.source.y);
+	dst = new ge.Point(link.target.x, link.target.y);
+	var src2 = link.source.shape.intersect(link.source, link.target);
+	var dst2 = link.target.shape.intersect(link.target, link.source);
+	src = src2 || src;
+	dst = dst2 || dst;
+
+	link.path = 'M'.concat(src.x, ',', src.y, 'L', dst.x, ',', dst.y);
+
+	if((link.reversed = src.x > dst.x)) {
+		src2 = src;
+		src = dst;
+		dst = src2;
+	}
+
+	return 'M'.concat(src.x, ',', src.y, 'L', dst.x, ',', dst.y);
+};
+/**
+ * Node shapes.
+ * @namespace
+ */
+
+ge.shape = new ge.SaveLoad();
+
+/**
+ * Abstract base shape class.
+ * @class
+ * @abstract
+ * @param {?object} [data]           JSON data.
+ */
+ge.shape.Shape = function Shape(data) { // eslint-disable-line no-unused-vars
+	if(this.constructor === Shape) {
+		throw new Error('abstract class');
+	}
+};
+
+/* eslint-disable no-unused-vars */
+
+/**
+ * Return SVG path.
+ * @abstract
+ * @param   {ge.Node}   node   Node data.
+ * @returns {string}           SVG path.
+ */
+ge.shape.Shape.prototype.path = function path(node) {
+	throw new Error('abstract method');
+};
+
+/**
+ * Return point at angle.
+ * @abstract
+ * @param   {ge.Node}   node   Node data.
+ * @param   {ge.Angle}  angle  Angle.
+ * @returns {ge.Point}
+ */
+ge.shape.Shape.prototype.getPoint = function getPoint(node, angle) {
+	throw new Error('abstract method');
+};
+
+/**
+ * Resize a node to fit its title inside.
+ * @abstract
+ * @param {ge.Node}            node       Node data.
+ * @param {ge.ContainerSize}   size       Text container size.
+ * @param {ge.TextSize}        textSize   Text size calculator.
+ */
+ge.shape.Shape.prototype.doFitTitleInside = function doFitTitleInside(
+	node,
+	size,
+	textSize
+) {
+	throw new Error('abstract method');
+};
+
+
+/* eslint-enable no-unused-vars */
+
+/**
+ * Convert to JSON.
+ * @returns {object}  JSON data.
+ */
+ge.shape.Shape.prototype.toJson = function toJson() {
+	return {};
+};
+
+/**
+ * Intersect with a link.
+ * @param   {ge.Node}   node   Node data.
+ * @param   {ge.Node}   node2  Node data.
+ * @returns {?ge.Point}        Intersection point.
+ */
+ge.shape.Shape.prototype.intersect = function intersect(node, node2) {
+	var a = Math.atan2(node2.y - node.y, node2.x - node.x);
+	return this.getPoint(node, new ge.Angle(a, true));
+};
+
+/**
+ * Resize a node to fit its title inside if necessary.
+ * @param {ge.Node}     node       Node data.
+ * @param {ge.TextSize} textSize   Text size calculator.
+ */
+ge.shape.Shape.prototype.fitTitleInside = function fitTitleInside(
+	node,
+	textSize
+) {
+	if(node.title === node.prevTitle) {
+		return;
+	}
+	var size = textSize.containerSize(node.title);
+	this.doFitTitleInside(node, size, textSize);
+	node.prevTitle = node.title;
+};
+/**
+ * Circle.
+ * @class
+ * @param {?object} [data]           JSON data.
+ */
+ge.shape.Circle = function Circle(data) {
+	ge.shape.Shape.call(this, data);
+};
+
+ge.shape.Circle.prototype = Object.create(ge.shape.Shape.prototype);
+Object.defineProperty(
+	ge.shape.Circle.prototype,
+	'constructor',
+	{ 
+		value: ge.shape.Circle,
+		enumerable: false,
+		writable: true
+	}
+);
+ge.shape.addClass(ge.shape.Circle);
+
+/**
+ * Return SVG path.
+ * @param   {ge.Node}   node   Node data.
+ * @returns {string}           SVG path.
+ */
+ge.shape.Circle.prototype.path = function path(node) {
+	var dx = node.width, rx = dx / 2, ry = node.height / 2;
+	var arc = 'a'.concat(rx, ',', ry, ',0,1,0,');
+	return 'M'.concat(-rx, ',0', arc, dx, ',0', arc, -dx, ',0');
+};
+
+/**
+ * Return point at angle.
+ * @abstract
+ * @param   {ge.Node}   node   Node data.
+ * @param   {ge.Angle}  angle  Angle.
+ * @returns {ge.Point}
+ */
+ge.shape.Circle.prototype.getPoint = function getPoint(node, angle) {
+	return new ge.Point(
+		node.x + node.width * angle.cos * 0.5,
+		node.y + node.height * angle.sin * 0.5
+	);
+};
+
+/**
+ * Resize a node to fit its title inside.
+ * @abstract
+ * @param {ge.Node}            node       Node data.
+ * @param {ge.ContainerSize}   size       Text container size.
+ * @param {ge.TextSize}        textSize   Text size calculator.
+ */
+ge.shape.Circle.prototype.doFitTitleInside = function doFitTitleInside(
+	node,
+	size/*,
+	textSize*/
+) {
+	node.width = node.height = Math.max(
+		Math.ceil(Math.sqrt(size.minArea * 2)),
+		size.minWidth,
+		size.minHeight
+	);
+	node.textWidth = node.textHeight = Math.ceil(node.width / 1.414213);
+};
+/**
+ * Rectangle.
+ * @class
+ * @param {?object} [data]           JSON data.
+ * @param {?number} [data.aspect=1]  Aspect ratio.
+ */
+ge.shape.Rect = function Rect(data) {
+	data = data || {};
+	ge.shape.Shape.call(this, data);
+	/**
+	 * Aspect ratio.
+	 * @member {number}
+	 */
+	this.aspect = data.aspect || 1;
+};
+
+ge.shape.Rect.prototype = Object.create(ge.shape.Shape.prototype);
+Object.defineProperty(
+	ge.shape.Rect.prototype,
+	'constructor',
+	{ 
+		value: ge.shape.Rect,
+		enumerable: false,
+		writable: true
+	}
+);
+ge.shape.addClass(ge.shape.Rect);
+
+/**
+ * Convert to JSON.
+ * @abstract
+ * @returns {object}  JSON data.
+ */
+ge.shape.Rect.prototype.toJson = function toJson() {
+	return {
+		aspect: this.aspect
+	};
+};
+
+/**
+ * Return SVG path.
+ * @param   {ge.Node}   node   Node data.
+ * @returns {string}           SVG path.
+ */
+ge.shape.Rect.prototype.path = function path(node) {
+	var w = node.width, h = node.height;
+	return 'M'.concat(
+		(-w / 2), ',', (-h / 2),
+		'l', w, ',0l0,', h, 'l', -w, ',0z'
+	);
+};
+
+/**
+ * Return point at angle.
+ * @abstract
+ * @param   {ge.Node}   node   Node data.
+ * @param   {ge.Angle}  angle  Angle.
+ * @returns {ge.Point}
+ */
+ge.shape.Rect.prototype.getPoint = function getPoint(node, angle) {
+	var w = node.width / 2;
+	var h = node.height / 2;
+
+	var x, y, t;
+	var ret = new ge.Point(node.x, node.y);
+
+	x = null;
+	if(angle.cos > 1e-8) {
+		x = w;
+	}
+	else if(angle.cos < -1e-8) {
+		x = -w;
+	}
+	if(x !== null) {
+		t = x / angle.cos;
+		y = t * angle.sin;
+		if(y < h + 1e-8 && y > -h - 1e-8) {
+			ret.x += x;
+			ret.y += y;
+			return ret;
+		}
+	}
+
+	y = null;
+	if(angle.sin > 1e-8) {
+		y = h;
+	}
+	else if(angle.sin < -1e-8) {
+		y = -h;
+	}
+	if(y !== null) {
+		t = y / angle.sin;
+		x = t * angle.cos;
+		if(x < w + 1e-8 && x > -w - 1e-8) {
+			ret.x += x;
+			ret.y += y;
+			return ret;
+		}
+	}
+
+	// throw new Error()
+	return ret;
+};
+
+/**
+ * Resize a node to fit its title inside.
+ * @abstract
+ * @param {ge.Node}            node       Node data.
+ * @param {ge.ContainerSize}   size       Text container size.
+ * @param {ge.TextSize}        textSize   Text size calculator.
+ */
+ge.shape.Rect.prototype.doFitTitleInside = function doFitTitleInside(
+	node,
+	size/*,
+	textSize*/
+) {
+	node.width = Math.max(
+		Math.ceil(this.aspect * Math.sqrt(size.minArea)),
+		size.minWidth
+	);
+	node.height = Math.max(size.minHeight, node.width / this.aspect);
+	node.textWidth = node.width;
+	node.textHeight = node.height;
+};
 'use strict';
 
 /**
@@ -329,7 +860,7 @@ ge.defaultSimulation = function(simulation, nodes, links) {
  * @param   {Object} data
  * @returns {boolean}
  */
-ge.GraphEditor.prototype.isLinkData = function(obj) {
+ge.GraphEditor.prototype.isLinkData = function isLinkData(obj) {
 	return obj.source !== undefined;
 };
 
@@ -338,7 +869,7 @@ ge.GraphEditor.prototype.isLinkData = function(obj) {
  * @param   {?Reference}   el
  * @returns {?D3Selection}
  */
-ge.GraphEditor.prototype.getElement = function(el) {
+ge.GraphEditor.prototype.getElement = function getElement(el) {
 	if(el === null) {
 		return null;
 	}
@@ -362,7 +893,7 @@ ge.GraphEditor.prototype.getElement = function(el) {
  * @param   {?Reference}   el
  * @returns {?(Node|Link)}
  */
-ge.GraphEditor.prototype.getData = function(el) {
+ge.GraphEditor.prototype.getData = function getData(el) {
 	if(el === null) {
 		return null;
 	}
@@ -379,15 +910,49 @@ ge.GraphEditor.prototype.getData = function(el) {
 };
 
 /**
+ * Get unused node ID.
+ * @private
+ * @returns {ID}
+ */
+ge.GraphEditor.prototype.nodeId = function nodeId() {
+	var id = 1 + d3.max(this.data.nodes, function(d) { return d.id; });
+	if(isNaN(id)) {
+		id = 0;
+	}
+	return id;
+};
+
+/**
+ * Get link ID.
+ * @private
+ * @param {ge.Node} source  Link source.
+ * @param {ge.Node} target  Link target.
+ * @returns {ID}
+ */
+ge.GraphEditor.prototype.linkId = function linkId(source, target) {
+	var s = source.id;
+	var t = target.id;
+	if(!this.options.directed && s > t) {
+		var tmp = s;
+		s = t;
+		t = tmp;
+	}
+	var id = s + '-' + t;
+	return id;
+};
+
+/**
  * Add a node if it does not exist.
  * @param   {ImportNodeData} node                Node data.
  * @param   {boolean}        [skipUpdate=false]  Skip DOM update.
- * @returns {?Node}                              Added node.
+ * @returns {?ge.Node}                           Added node.
  */
-ge.GraphEditor.prototype.addNode = function(node, skipUpdate) {
-	if(!this.initNode(node)) {
+ge.GraphEditor.prototype.addNode = function addNode(node, skipUpdate) {
+	node = new ge.Node(this, node);
+	if(this.nodeById[node.id]) {
 		return null;
 	}
+	this.nodeById[node.id] = node;
 	this.data.nodes.push(node);
 	if(!skipUpdate) {
 		this.update();
@@ -399,12 +964,14 @@ ge.GraphEditor.prototype.addNode = function(node, skipUpdate) {
  * Add a link if it does not exist.
  * @param   {ImportLinkData} link                Link data.
  * @param   {boolean}        [skipUpdate=false]  Skip DOM update.
- * @returns {?Link}                              Added link.
+ * @returns {?ge.Link}                           Added link.
  */
-ge.GraphEditor.prototype.addLink = function(link, skipUpdate) {
-	if(!this.initLink(link)) {
+ge.GraphEditor.prototype.addLink = function addLink(link, skipUpdate) {
+	link = new ge.Link(this, link);
+	if(this.linkById[link.id]) {
 		return null;
 	}
+	this.linkById[link.id] = link;
 	this.data.links.push(link);
 	if(!skipUpdate) {
 		this.update();
@@ -416,15 +983,14 @@ ge.GraphEditor.prototype.addLink = function(link, skipUpdate) {
  * Add multiple nodes.
  * @param   {Array<ImportNodeData>} nodes               Node data.
  * @param   {boolean}               [skipUpdate=false]  Skip DOM update.
- * @returns {Array<Node>}                               Added nodes.
  */
-ge.GraphEditor.prototype.addNodes = function(nodes, skipUpdate) {
-	var newNodes = nodes.filter(ge.bind(this, this.initNode));
-	this.data.nodes.push.apply(this.data.nodes, newNodes);
+ge.GraphEditor.prototype.addNodes = function addNodes(nodes, skipUpdate) {
+	for(var i = 0; i < nodes.length; ++i) {
+		this.addNode(nodes[i], true);
+	}
 	if(!skipUpdate) {
 		this.update();
 	}
-	return newNodes;
 };
 
 /**
@@ -433,52 +999,44 @@ ge.GraphEditor.prototype.addNodes = function(nodes, skipUpdate) {
  * @param   {boolean}               [skipUpdate=false]  Skip DOM update.
  * @returns {Array<Link>}                               Added links.
  */
-ge.GraphEditor.prototype.addLinks = function(links, skipUpdate) {
-	var newLinks = links.filter(ge.bind(this, this.initLink));
-	this.data.links.push.apply(this.data.links, newLinks);
+ge.GraphEditor.prototype.addLinks = function addLinks(links, skipUpdate) {
+	for(var i = 0; i < links.length; ++i) {
+		this.addLink(links[i], true);
+	}
 	if(!skipUpdate) {
 		this.update();
 	}
-	return newLinks;
 };
 
 /**
  * Add one or multiple nodes/links.
  * @param   {ImportNodeData|ImportLinkData|Array<(ImportNodeData|ImportLinkData)>} data  Data.
  * @param   {boolean} [skipUpdate=false]  Skip DOM update.
- * @returns {?(Node|Link|AddedObjects)}   Added objects.
  */
-ge.GraphEditor.prototype.add = function(data, skipUpdate) {
+ge.GraphEditor.prototype.add = function add(data, skipUpdate) {
 	var self = this;
-
 	if(Array.isArray(data)) {
-		var newNodes = [], newLinks = [];
 		data.forEach(function(d) {
 			if(self.isLinkData(d)) {
-				if(self.initLink(d)) {
-					newLinks.push(d);
-				}
+				self.addLink(d, true);
 			}
-			else if(self.initNode(d)) {
-				newNodes.push(d);
+			else {
+				self.addNode(d, true);
 			}
 		});
-
-		self.data.nodes.push.apply(self.data.nodes, newNodes);
-		self.data.links.push.apply(self.data.links, newLinks);
-
 		if(!skipUpdate) {
 			self.update();
 		}
-
-		return [ newNodes, newLinks ];
 	}
-
-	data = self.getData(data);
-	if(self.isLinkData(data)) {
-		return self.addLink(data, skipUpdate);
+	else {
+		data = self.getData(data);
+		if(self.isLinkData(data)) {
+			self.addLink(data, skipUpdate);
+		}
+		else {
+			self.addNode(data, skipUpdate);
+		}
 	}
-	return this.addNode(data, skipUpdate);
 };
 
 /**
@@ -486,7 +1044,7 @@ ge.GraphEditor.prototype.add = function(data, skipUpdate) {
  * @private
  * @param {number} idx  Link index.
  */
-ge.GraphEditor.prototype._removeLink = function(idx) {
+ge.GraphEditor.prototype._removeLink = function _removeLink(idx) {
 	if(this.state.selectedLink === this.data.links[idx]) {
 		this.selectLink(null);
 	}
@@ -500,7 +1058,7 @@ ge.GraphEditor.prototype._removeLink = function(idx) {
  * @param   {boolean}   [skipUpdate=false]  Skip DOM update.
  * @returns {boolean}                       False if link does not exist.
  */
-ge.GraphEditor.prototype.removeLink = function(data, skipUpdate) {
+ge.GraphEditor.prototype.removeLink = function removeLink(data, skipUpdate) {
 	if(!(data = this.getData(data))) {
 		return false;
 	}
@@ -525,7 +1083,7 @@ ge.GraphEditor.prototype.removeLink = function(data, skipUpdate) {
  * @param   {boolean}   [skipUpdate=false]  Skip DOM update.
  * @returns {boolean}                       False if node does not exist.
  */
-ge.GraphEditor.prototype.removeNode = function(data, skipUpdate) {
+ge.GraphEditor.prototype.removeNode = function removeNode(data, skipUpdate) {
 	if(!(data = this.getData(data))) {
 		return false;
 	}
@@ -567,7 +1125,7 @@ ge.GraphEditor.prototype.removeNode = function(data, skipUpdate) {
  * @param   {boolean}   [skipUpdate=false]  Skip DOM update.
  * @returns {boolean}                       False if object does not exist.
  */
-ge.GraphEditor.prototype._remove = function(data, skipUpdate) {
+ge.GraphEditor.prototype._remove = function _remove(data, skipUpdate) {
 	data = this.getData(data);
 	if(this.isLinkData(data)) {
 		return this.removeLink(data, skipUpdate);
@@ -580,7 +1138,7 @@ ge.GraphEditor.prototype._remove = function(data, skipUpdate) {
  * @param   {(Reference|Array<Reference>)} data                References.
  * @param   {boolean}                      [skipUpdate=false]  Skip DOM update.
  */
-ge.GraphEditor.prototype.remove = function(data, skipUpdate) {
+ge.GraphEditor.prototype.remove = function remove(data, skipUpdate) {
 	var self = this;
 
 	if(Array.isArray(data)) {
@@ -598,12 +1156,15 @@ ge.GraphEditor.prototype.remove = function(data, skipUpdate) {
 };
 
 /**
- * Set or return selected node.
- * @param   {?Reference}   [node]          Node.
+ * Return selected node.
+ * @returns {?Node}
+ *//**
+ * Select a node.
+ * @param   {?Reference}   [node]          Node to select.
  * @param   {boolean}      [update=false]  Update DOM if the node is already selected.
- * @returns {(Node|ge.GraphEditor)}
+ * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.selectNode = function(node, update) {
+ge.GraphEditor.prototype.selectNode = function selectNode(node, update) {
 	if(node === undefined) {
 		return this.state.selectedNode;
 	}
@@ -648,12 +1209,15 @@ ge.GraphEditor.prototype.selectNode = function(node, update) {
 };
 
 /**
- * Set or return selected link.
- * @param   {?Reference}   [link]          Link.
+ * Return selected link.
+ * @returns {?Link}
+ *//**
+ * Selected a link.
+ * @param   {?Reference}   [link]          Link to select.
  * @param   {boolean}      [update=false]  Update DOM if the link is already selected.
- * @returns {(Link|ge.GraphEditor)}
+ * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.selectLink = function(link, update) {
+ge.GraphEditor.prototype.selectLink = function selectLink(link, update) {
 	if(link === undefined) {
 		return this.state.selectedLink;
 	}
@@ -684,12 +1248,15 @@ ge.GraphEditor.prototype.selectLink = function(link, update) {
 };
 
 /**
- * Set or return selected node/link.
- * @param   {?Reference}   [data]          Node or link.
+ * Return selected node/link.
+ * @returns {Selection}
+ *//**
+ * Select a node or a link.
+ * @param   {?Reference}   [data]          Node or link to select.
  * @param   {boolean}      [update=false]  Update DOM if the node/link is already selected.
- * @returns {(Node|Link|Selection|ge.GraphEditor)}
+ * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.select = function(data, update) {
+ge.GraphEditor.prototype.select = function select(data, update) {
 	if(data === undefined) {
 		return {
 			node: this.state.selectedNode,
@@ -715,7 +1282,7 @@ ge.GraphEditor.prototype.select = function(data, update) {
  * @fires   simulation-start
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.startSimulation = function(stopOnEnd) {
+ge.GraphEditor.prototype.startSimulation = function startSimulation(stopOnEnd) {
 	var self = this;
 
 	if(stopOnEnd === undefined) {
@@ -778,7 +1345,7 @@ ge.GraphEditor.prototype.startSimulation = function(stopOnEnd) {
  * @fires   simulation-stop
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.stopSimulation = function() {
+ge.GraphEditor.prototype.stopSimulation = function stopSimulation() {
 	if(!this.state.simulationStarted) {
 		return this;
 	}
@@ -797,7 +1364,7 @@ ge.GraphEditor.prototype.stopSimulation = function() {
  * @fires   simulation-stop
  * @returns {(boolean|ge.GraphEditor)}
  */
-ge.GraphEditor.prototype.simulation = function(on) {
+ge.GraphEditor.prototype.simulation = function simulation(on) {
 	if(on === undefined) {
 		return this.state.simulationStarted;
 	}
@@ -818,11 +1385,14 @@ ge.GraphEditor.prototype.simulation = function(on) {
 };
 
 /**
- * Set or return 'drag to link nodes' state.
+ * Return true if 'drag to link nodes' is enabled.
+ * @returns {boolean}
+ *//**
+ * Set 'drag to link nodes' state.
  * @param   {boolean|string}           [on]  state | 'toggle'
- * @returns {(boolean|ge.GraphEditor)}
+ * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.dragToLink = function(on) {
+ge.GraphEditor.prototype.dragToLink = function dragToLink(on) {
 	if(on === undefined) {
 		return this.state.dragToLink;
 	}
@@ -840,7 +1410,7 @@ ge.GraphEditor.prototype.dragToLink = function(on) {
  * @fires   simulation-stop
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.clear = function(clearData) {
+ge.GraphEditor.prototype.clear = function clear(clearData) {
 	clearData = clearData || (clearData === undefined);
 
 	this.simulation(false);
@@ -873,7 +1443,7 @@ ge.GraphEditor.prototype.clear = function(clearData) {
  * @fires   simulation-stop
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.redraw = function() {
+ge.GraphEditor.prototype.redraw = function redraw() {
 	return this.clear(false).update();
 };
 
@@ -882,10 +1452,8 @@ ge.GraphEditor.prototype.redraw = function() {
  * @fires   simulation-stop
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.destroy = function() {
+ge.GraphEditor.prototype.destroy = function destroy() {
 	var cls = this.options.css;
-
-	$(window).off('resize', this.onresize);
 
 	this.clear();
 
@@ -897,18 +1465,24 @@ ge.GraphEditor.prototype.destroy = function() {
 		.on('.zoom', null)
 		.html('');
 
+	window.removeEventListener('resize', this.onresize);
+
 	return this;
 };
 
 /**
- * Export graph data.
+ * Convert to JSON.
  * @returns {ExportGraphData}
  */
-ge.GraphEditor.prototype.exportData = function() {
-	var exp = this.options['export'];
+ge.GraphEditor.prototype.toJson = function toJson() {
+	var self = this;
 	return {
-		nodes: this.data.nodes.map(ge.bind(this, exp.node)),
-		links: this.data.links.map(ge.bind(this, exp.link))
+		nodes: this.data.nodes.map(function(node) {
+			return node.toJson(self, self.bbox[0][0], self.bbox[0][1]);
+		}),
+		links: this.data.links.map(function(link) {
+			return link.toJson(self);
+		})
 	};
 };
 'use strict';
@@ -920,7 +1494,7 @@ ge.GraphEditor.prototype.exportData = function() {
  * @returns {ge.GraphEditor}
  * @see [d3.dispatch.on]{@link https://github.com/d3/d3-dispatch#dispatch_on}
  */
-ge.GraphEditor.prototype.on = function(event, handler) {
+ge.GraphEditor.prototype.on = function on(event, handler) {
 	this.dispatch.on(event, handler);
 	return this;
 };
@@ -933,7 +1507,7 @@ ge.GraphEditor.prototype.on = function(event, handler) {
  * @see [d3.mouse]{@link https://github.com/d3/d3-selection/blob/master/README.md#mouse}
  * @see [d3.touch]{@link https://github.com/d3/d3-selection/blob/master/README.md#touch}
  */
-ge.GraphEditor.prototype.clickPosition = function(container) {
+ge.GraphEditor.prototype.clickPosition = function clickPosition(container) {
 	container = container || this.container.node();
 	return d3.touch(container) || d3.mouse(container);
 };
@@ -945,7 +1519,7 @@ ge.GraphEditor.prototype.clickPosition = function(container) {
  * @see [d3.event]{@link https://github.com/d3/d3-selection/blob/master/README.md#event}
  * @see [document.elementFromPoint]{@link https://developer.mozilla.org/en-US/docs/Web/API/Document/elementFromPoint}
  */
-ge.GraphEditor.prototype.touchedNode = function() {
+ge.GraphEditor.prototype.touchedNode = function touchedNode() {
 	var x = d3.event.touches[0].pageX;
 	var y = d3.event.touches[0].pageY;
 	var el = document.elementFromPoint(x, y);
@@ -977,11 +1551,11 @@ ge.GraphEditor.prototype.touchedNode = function() {
  * @fires new-link-cancel
  * @returns {D3Drag}
  */
-ge.GraphEditor.prototype.dragEvents = function(drag) {
+ge.GraphEditor.prototype.dragEvents = function dragEvents(drag) {
 	var self = this;
 
 	return drag
-		.on('start', function(d) {
+		.on('start', function dragStart(d) {
 			self.state.dragged = false;
 			self.state.dragPos = null;
 			d3.select(this).raise();
@@ -992,7 +1566,7 @@ ge.GraphEditor.prototype.dragEvents = function(drag) {
 				self.simulation('restart');
 			}
 		})
-		.on('drag', function(d) {
+		.on('drag', function drag(d) {
 			if(self.state.dragToLink) {
 				var mouse = self.clickPosition();
 				var path = ''.concat(
@@ -1024,7 +1598,7 @@ ge.GraphEditor.prototype.dragEvents = function(drag) {
 				self.updateNode(this);
 			}
 		})
-		.on('end', function(d) {
+		.on('end', function dragEnd(d) {
 			d.fx = null;
 			d.fy = null;
 			
@@ -1063,13 +1637,13 @@ ge.GraphEditor.prototype.dragEvents = function(drag) {
  * @fires click
  * @returns {D3Zoom}
  */
-ge.GraphEditor.prototype.zoomEvents = function(zoom) {
+ge.GraphEditor.prototype.zoomEvents = function zoomEvents(zoom) {
 	var self = this;
 	//var prevScale = 1;
 
 	return zoom
 		.duration(self.options.transition.zoom)
-		.on('end', function() {
+		.on('end', function zoomEnd() {
 			if(!self.state.zoomed) {
 				var pos = self.clickPosition();
 				if(!ge.equal(self.state.dragPos, pos)) {
@@ -1081,7 +1655,7 @@ ge.GraphEditor.prototype.zoomEvents = function(zoom) {
 			}
 			self.state.zoomed = false;
 		})
-		.on('zoom', function() {
+		.on('zoom', function zoom() {
 			self.state.zoomed = true;
 
 			/*var scale = d3.event.transform.k;
@@ -1131,7 +1705,7 @@ ge.GraphEditor.prototype.zoomEvents = function(zoom) {
  * @fires link-click
  * @returns {D3Selection}
  */
-ge.GraphEditor.prototype.linkEvents = function(links) {
+ge.GraphEditor.prototype.linkEvents = function linkEvents(links) {
 	var self = this;
 
 	return links
@@ -1156,17 +1730,17 @@ ge.GraphEditor.prototype.linkEvents = function(links) {
  * @param {D3Selection} nodes
  * @returns {D3Selection}
  */
-ge.GraphEditor.prototype.nodeEvents = function(nodes) {
+ge.GraphEditor.prototype.nodeEvents = function nodeEvents(nodes) {
 	var self = this;
 
 	return nodes
-		.attr(
+		/*.attr(
 			'transform',
 			function(d) {
 				return 'translate('.concat(d.x, ',', d.y, ')');
 			}
-		)
-		.on('mouseover', function(d) {
+		)*/
+		.on('mouseover', function mouseOver(d) {
 			if(self.state.dragToLink) {
 				self.state.newLinkTarget = d;
 				/*d3.select(this).classed(
@@ -1175,7 +1749,7 @@ ge.GraphEditor.prototype.nodeEvents = function(nodes) {
 				);*/
 			}
 		})
-		.on('mouseout', function(/*d*/) {
+		.on('mouseout', function mouseOut(/*d*/) {
 			if(self.state.dragToLink) {
 				self.state.newLinkTarget = null;
 			}
@@ -1184,7 +1758,7 @@ ge.GraphEditor.prototype.nodeEvents = function(nodes) {
 				false
 			);*/
 		})
-		.on('touchmove', function() {
+		.on('touchmove', function touchMove() {
 			if(self.state.dragToLink) {
 				self.state.newLinkTarget = self.touchedNode();
 			}
@@ -1199,7 +1773,7 @@ ge.GraphEditor.prototype.nodeEvents = function(nodes) {
  * @param   {D3Selection}    svg
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.initMarkers = function(svg) {
+ge.GraphEditor.prototype.initMarkers = function initMarkers(svg) {
 	/*var defs = d3.select('#' + this.options.css.markers).node();
 	if(defs !== null) {
 		return this;
@@ -1250,22 +1824,23 @@ ge.GraphEditor.prototype.initMarkers = function(svg) {
 };
 
 /**
- * Initialize SVG.
+ * Initialize SVG element.
  * @private
  * @param   {D3Selection}    svg
  * @this    ge.GraphEditor
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.initSvg = function(svg) {
-	svg
-		.attr('id', this.options.id)
+ge.GraphEditor.prototype.initSvg = function initSvg(svg) {
+	svg.attr('id', this.options.id)
 		.classed(this.options.css.graph, true)
 		.classed(this.options.css.digraph, this.options.directed);
 
+	this.initMarkers(svg);
+
 	var g = svg.append('g');
 	var defsContainer = svg.select('defs'); //g.append('defs');
-	var linksContainer = g.append('g');
-	var nodesContainer = g.append('g');
+	var linkContainer = g.append('g');
+	var nodeContainer = g.append('g');
 
 	/**
 	 * Graph container element.
@@ -1278,19 +1853,19 @@ ge.GraphEditor.prototype.initSvg = function(svg) {
 	 * @readonly
 	 * @member {D3Selection}
 	 */
-	this.defs = defsContainer.selectAll('.ge-text-path');
+	this.defs = defsContainer.selectAll('.' + this.options.css.textpath);
 	/**
 	 * Link elements.
 	 * @readonly
 	 * @member {D3Selection}
 	 */
-	this.links = linksContainer.selectAll('g');
+	this.links = linkContainer.selectAll('g');
 	/**
 	 * Node elements.
 	 * @readonly
 	 * @member {D3Selection}
 	 */
-	this.nodes = nodesContainer.selectAll('g');
+	this.nodes = nodeContainer.selectAll('g');
 	/**
 	 * 'Drag to link nodes' line.
 	 * @readonly
@@ -1301,21 +1876,26 @@ ge.GraphEditor.prototype.initSvg = function(svg) {
 		.classed(this.options.css.hide, true)
 		.attr('d', 'M0,0L0,0');
 	/**
-	 * Hidden element for text size calculation.
-	 * @private
-	 * @member {D3Selection}
+	 * Text size calculator.
+	 * @readonly
+	 * @member {ge.TextSize}
 	 */
-	this.tmpText = svg.append('text')
-		.style('stroke', 'none')
-		.style('fill', 'none');
+	this.textSize = new ge.TextSize(
+		svg.append('text')
+			.classed(this.options.css.node, true)
+			.node()
+	);
+
 	/**
 	 * Graph SVG element.
 	 * @readonly
 	 * @member {D3Selection}
 	 */
 	this.svg = svg;
+
 	return this;
 };
+
 
 /**
  * Initialize graph data.
@@ -1324,15 +1904,15 @@ ge.GraphEditor.prototype.initSvg = function(svg) {
  * @this    ge.GraphEditor
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.initData = function(data) {
+ge.GraphEditor.prototype.initData = function initData(data) {
 	/**
-	 * Node data dictionary.
+	 * Nodes by ID.
 	 * @readonly
 	 * @member {Object<ID,Node>}
 	 */
 	this.nodeById = {};
 	/**
-	 * Link data dictionary.
+	 * Links by ID.
 	 * @readonly
 	 * @member {Object<ID,Link>}
 	 */
@@ -1357,7 +1937,7 @@ ge.GraphEditor.prototype.initData = function(data) {
  * @this    ge.GraphEditor
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.initState = function() {
+ge.GraphEditor.prototype.initState = function initState() {
 	/**
 	 * Graph editor state.
      * @readonly
@@ -1388,85 +1968,422 @@ ge.GraphEditor.prototype.initState = function() {
 	};
 	return this;
 };
-
 /**
- * Initialize node data.
- * @private
- * @param   {ImportNodeData} node  Node data.
- * @returns {boolean}              False if node exists.
+ * Graph link constructor.
+ * @class
+ * @classdesc Graph link class.
+ * @param {ge.GraphEditor}  graph  Link container.
+ * @param {ImportLinkData}  data   Link data.
  */
-ge.GraphEditor.prototype.initNode = function(node) {
-	if(node.id === undefined) {
-		node.id = 1 + d3.max(this.data.nodes, function(d) { return d.id; });
-		if(isNaN(node.id)) {
-			node.id = 0;
-		}
+ge.Link = function Link(graph, data) {
+	/**
+	 * Source node.
+	 * @member {ge.Node}
+	 */
+	this.source = graph.getData(data.source);
+	if(!this.source) {
+		throw new Error('invalid link source');
 	}
+	/**
+	 * Target node.
+	 * @member {ge.Node}
+	 */
+	this.target = graph.getData(data.target);
+	if(!this.target) {
+		throw new Error('invalid link target');
+	}
+	/**
+	 * ID.
+	 * @readonly
+	 * @member {ID}
+	 */
+	this.id = /*data.id || */graph.linkId(this.source, this.target);
+	/**
+	 * Path generator.
+	 * @member {ge.path.Path}
+	 */
+	this.shape = data.shape
+		? ge.path.fromJson(data.shape)
+		: graph.options.link.shape;
+	/**
+	 * Title.
+	 * @member {string}
+	 */
+	this.title = data.title === undefined ? this.id : data.title;
+	/**
+	 * User data.
+	 * @member {*}
+	 */
+	this.data = data.data;
+	/**
+	 * SVG path.
+	 * @readonly
+	 * @member {string}
+	 */
+	this.path = '';
+	/**
+	 * True if text path is reversed.
+	 * @readonly
+	 * @member {boolean}
+	 */
+	this.reversed = false;
+	/**
+	 * SVG element ID.
+	 * @readonly
+	 * @member {string}
+	 */
+	this.elementId = graph.options.id.concat('l', this.id);
+	/**
+	 * SVG element selector.
+	 * @readonly
+	 * @member {string}
+	 */
+	this.selector = '#' + this.elementId;
+	/**
+	 * SVG <path> element ID.
+	 * @readonly
+	 * @member {string}
+	 */
+	this.pathId = graph.options.id.concat('p', this.id);
+	/**
+	 * SVG <path> element selector.
+	 * @readonly
+	 * @member {Selector}
+	 */
+	this.pathSelector = '#' + this.pathId;
+	/**
+	 * SVG text path element ID.
+	 * @readonly
+	 * @member {string}
+	 */
+	this.defId = graph.options.id.concat('d', this.id);
+	/**
+	 * SVG text path element selector.
+	 * @readonly
+	 * @member {Selector}
+	 */
+	this.defSelector = '#' + this.defId;
 
-	if(this.nodeById[node.id]) {
-		return false;
-	}
-
-	node.elementId = this.options.id.concat('n', node.id);
-	node.selector = '#' + node.elementId;
-	node.size = node.size || this.options.node.size.def;
-
-	if(node.x === undefined) {
-		node.x = node.size + Math.random() * 512;
-	}
-	if(node.y === undefined) {
-		node.y = node.size + Math.random() * 512;
-	}
-	if(node.title === undefined) {
-		node.title = node.id.toString();
-	}
-
-	this.nodeById[node.id] = node;
-	return true;
+	return this;
 };
 
 /**
- * Initialize link data.
- * @private
- * @param   {ImportLinkData} link  Link data.
- * @returns {boolean}              False if data is invalid or link exists.
+ * Initialize SVG elements.
+ * @static
+ * @param {D3Selection} links          SVG element enter selection.
+ * @param {D3Selection} defs           SVG element enter selection.
+ * @param {object}      opts           Link options.
+ * @param {number}      opts.text.dx   Link title X offset.
+ * @param {number}      opts.text.dy   Link title Y offset.
+ * @param {string}      cls            CSS class.
  */
-ge.GraphEditor.prototype.initLink = function(link) {
-	var source = link.source, target = link.target;
+ge.Link.initSelection = function initSelection(links, defs, opts) {
+	defs.attr('id', function(d) { return d.defId; });
 
-	if(typeof source !== 'object') {
-		source = this.nodeById[source];
+	links.attr('id', function(d) { return d.pathId; });
+	links.append('path');
+	links.append('text')
+		.attr('dx', opts.text.dx)
+		.attr('dy', opts.text.dy)
+		.append('textPath')
+		.attr('xlink:href', function(d) { return d.defSelector; });
+};
+
+/**
+ * Update SVG elements.
+ * @static
+ * @param {D3Selection} links       SVG element selection.
+ * @param {D3Selection} defs        SVG element selection.
+ * @param {object}      opts        Link options.
+ * @param {function}    transition  Transition generator.
+ * @see ge.GraphEditor.updateLink
+ */
+ge.Link.updateSelection = function updateSelection(
+	links, defs,
+	opts, transition
+) {
+	transition(defs)
+		.attr('d', function(d) { return d.shape.path(d); });
+
+	transition(links.select('path'))
+		.style('stroke-width', function(d) { return d.size + 'px'; })
+		.attr('d', function(d) { return d.path; });
+
+	var offset = opts.text.offset;
+	var anchor = opts.text.anchor;
+
+	transition(links.select('textPath'))
+		.text(function(d) { return d.title; })
+		.attr('startOffset', function(d) { return offset[+d.reversed]; })
+		.attr('text-anchor', function(d) { return anchor[+d.reversed]; });
+};
+
+/**
+ * Initialize SVG elements.
+ * @param {D3Selection} links  SVG element enter selection.
+ * @see ge.GraphEditor.update
+ * @see ge.GraphEditor.linkEvents
+ */
+ge.Link.prototype.initSelection = ge.Link.initSelection;
+
+/**
+ * Update SVG elements.
+ * @param {D3Selection} links  SVG element selection.
+ * @see ge.GraphEditor.updateLink
+ */
+ge.Link.prototype.updateSelection = ge.Link.updateSelection;
+
+/**
+ * Update link data.
+ */
+ge.Link.prototype.update = function update() {
+	this.shape(this);
+};
+
+/**
+ * Convert to JSON.
+ * @param   {ge.GraphEditor} graph      Graph.
+ * @returns {ExportLinkData}            JSON data.
+ */
+ge.Link.prototype.toJson = function toJson(graph) {
+	return {
+		id: this.id,
+		source: this.source.id,
+		target: this.target.id,
+		size: this.size,
+		title: this.title,
+		data: this.data,
+		shape: this.shape === graph.options.link.shape
+			? null
+			: ge.path.toJson(this.shape)
+	};
+};
+/**
+ * Graph node constructor.
+ * @class
+ * @classdesc Graph node class.
+ * @param {ge.GraphEditor} graph  Graph
+ * @param {ImportNodeData} data   Node JSON data
+ * @see ge.GraphEditor.initNode
+ */
+ge.Node = function Node(graph, data) {
+	var opts = graph.options.node;
+	/**
+	 * ID.
+	 * @readonly
+	 * @member {ID}
+	 */
+	this.id = data.id || graph.nodeId();
+	/**
+	 * X coordinate.
+	 * @member {number}
+	 */
+	this.x = +data.x || 0;
+	/**
+	 * Y coordinate.
+	 * @member {number}
+	 */
+	this.y = +data.y || 0;
+	/**
+	 * Width.
+	 * @member {number}
+	 */
+	this.width = Math.max(+data.width || opts.size.def, opts.size.min);
+	/**
+	 * Height.
+	 * @member {number}
+	 */
+	this.height = Math.max(+data.height || opts.size.def, opts.size.min);
+	/**
+	 * Shape.
+	 * @member {Shape}
+	 */
+	this.shape = data.shape
+		? ge.shape.fromJson(data.shape)
+		: opts.shape;
+	/**
+	 * Title.
+	 * @member {string}
+	 */
+	this.title = data.title == null ? this.id.toString() : data.title;
+	/**
+	 * Text X offset.
+	 * @readonly
+	 * @member {?number}
+	 */
+	this.textX = null;
+	/**
+	 * Text Y offset.
+	 * @readonly
+	 * @member {?number}
+	 */
+	this.textY = null;
+	/**
+	 * Text container width.
+	 * @readonly
+	 * @member {?number}
+	 */
+	this.textWidth = null;
+	/**
+	 * Text container height.
+	 * @readonly
+	 * @member {?number}
+	 */
+	this.textHeight = null;
+	/**
+	 * True if node title is inside its shape.
+	 * @readonly
+	 * @member {ge.GraphEditor}
+	 */
+	this.textInside = opts.text.inside;
+	/**
+	 * Text size calculator.
+	 * @readonly
+	 * @member {ge.TextSize}
+	 */
+	this.textSize = graph.textSize;
+	/**
+	 * User data.
+	 * @member {*}
+	 */
+	this.data = data.data;
+	/**
+	 * SVG element ID.
+	 * @readonly
+	 * @member {string}
+	 */
+	this.elementId = graph.options.id.concat('n', this.id);
+	/**
+	 * SVG element selector.
+	 * @readonly
+	 * @member {Selector}
+	 */
+	this.selector = '#' + this.elementId;
+	/**
+	 * SVG group transform.
+	 * @readonly
+	 * @member {?string}
+	 */
+	this.transform = null;
+	/**
+	 * Previous title.
+	 * @private
+	 * @member {?string}
+	 */
+	this.prevTitle = null;
+
+	return this;
+};
+
+/**
+ * Initialize SVG elements.
+ * @static
+ * @param {D3Selection} nodes  SVG element enter selection.
+ * @param {string}      cls    CSS class.
+ */
+ge.Node.initSelection = function initSelection(nodes) {
+	nodes.attr('id', function(d) { return d.elementId; });
+	nodes.append('path');
+	nodes.append('foreignObject')
+		.append('xhtml:div')
+		.append('xhtml:span');
+};
+
+/**
+ * Update SVG elements.
+ * @static
+ * @param {D3Selection} nodes               SVG element selection.
+ * @param {function}    transition          Transition generator.
+ * @param {ge.TextSize} textSize            Text size calculator.
+ */
+ge.Node.updateSelection = function updateSelection(
+	nodes,
+	transition,
+	textSize
+) {
+	console.log(nodes);
+	transition(nodes)
+		.attr(
+			'transform',
+			function(d) {
+				return 'translate('.concat(d.x, ',', d.y, ')');
+			}
+		);
+
+	nodes.each(function(d) {
+		//if(d.textInside) {
+		d.shape.fitTitleInside(d, textSize);
+		//}
+		/*else {
+			d.shape.fitTitleOutside(d, textSize);
+		}*/
+	});
+
+	transition(nodes.select('foreignObject'))
+		.attr('x', function(d) { return -d.textWidth / 2; })
+		.attr('y', function(d) { return -d.textHeight / 2; })
+		.attr('width', function(d) { return d.textWidth; })
+		.attr('height', function(d) { return d.textHeight; })
+		.select('span')
+		.text(function(d) { return d.title; });
+
+	transition(nodes.select('path'))
+		.attr('d', function(d) { return d.shape.path(d); });
+};
+
+/**
+ * Initialize SVG elements.
+ * @param {D3Selection} nodes  SVG element enter selection.
+ */
+ge.Node.prototype.initSelection = ge.Node.initSelection;
+
+/**
+ * Update SVG elements.
+ * @param {D3Selection} nodes       SVG element selection.
+ * @param {function}    transition  Transition generator.
+ */
+ge.Node.prototype.updateSelection = ge.Node.updateSelection;
+
+/**
+ * Update node data.
+ * @returns {boolean}  True if node position changed.
+ */
+ge.Node.prototype.update = function update() {
+	var moved = false;
+
+	if(this.textInside) {
+		this.shape.fitTextInside(this);
 	}
-	if(typeof target !== 'object') {
-		target = this.nodeById[target];
+
+	var transform = 'translate('.concat(this.x, ',', this.y, ')');
+	if(transform !== this.transform) {
+		this.transform = transform;
+		moved = true;
 	}
 
-	if(source === undefined || target === undefined) {
-		console.error(link, source, target);
-		return false;
-	}
+	return moved;
+};
 
-	link.source = source;
-	link.target = target;
-
-	var id = this.options.link.id(link);
-
-	if(this.linkById[id]) {
-		return false;
-	}
-
-	link.id = id;
-	link.size = link.size || this.options.link.size.def;
-	link.defId = this.options.id.concat('d', link.id);
-	link.pathId = this.options.id.concat('p', link.id);
-	link.selector = '#' + link.pathId;
-
-	if(link.title === undefined) {
-		link.title = link.id;
-	}
-
-	this.linkById[link.id] = link;
-	return true;
+/**
+ * Convert to JSON.
+ * @param   {ge.GraphEditor} graph      Graph.
+ * @param   {number}         [ox=0]     Origin X coordinate.
+ * @param   {number}         [oy=0]     Origin Y coordinate.
+ * @returns {ExportNodeData}            JSON data.
+ */
+ge.Node.prototype.toJson = function toJson(graph, ox, oy) {
+	return {
+		id: this.id,
+		x: this.x - ox,
+		y: this.y - oy,
+		width: this.width,
+		height: this.height,
+		shape: this.shape === graph.options.node.shape
+			? null
+			: ge.shape.toJson(this.shape),
+		title: this.title,
+		data: this.data
+	};
 };
 'use strict';
 
@@ -1479,6 +2396,7 @@ ge.GraphEditor.prototype.defaults = {
 	directed: false,
 
 	node: {
+		shape: new ge.shape.Circle(),
 		border: 2,
 		size: {
 			def: 10,
@@ -1492,7 +2410,10 @@ ge.GraphEditor.prototype.defaults = {
 	},
 
 	link: {
-		path: ge.defaultLinkPath,
+		shape: new ge.path.Line({
+			loopStart: 0,
+			loopEnd: 90
+		}),
 		size: {
 			def: 2
 		},
@@ -1501,10 +2422,6 @@ ge.GraphEditor.prototype.defaults = {
 			dy: '1.1em',
 			offset: null,
 			anchor: null
-		},
-		arc: {
-			start: 180,
-			end: 270
 		}
 	},
 
@@ -1517,7 +2434,7 @@ ge.GraphEditor.prototype.defaults = {
 
 	transition: {
 		zoom: 250,
-		drag: 50,
+		drag: 0,
 		simulation: 50
 	},
 
@@ -1534,11 +2451,6 @@ ge.GraphEditor.prototype.defaults = {
 		padding: 80
 	},
 
-	'export': {
-		node: ge.defaultExportNode,
-		link: ge.defaultExportLink
-	},
-
 	css: {
 		//markers: 'ge-markers',
 		node: 'ge-node',
@@ -1547,6 +2459,7 @@ ge.GraphEditor.prototype.defaults = {
 		hide: 'ge-hidden',
 		dragline: 'ge-dragline',
 		link: 'ge-link',
+		textpath: 'ge-text-path',
 		//connect: 'ge-connect',
 		selection: {
 			node: 'ge-selection',
@@ -1562,7 +2475,7 @@ ge.GraphEditor.prototype.defaults = {
 ge.GraphEditor.prototype.typeDefaults = [
 	{
 		link: {
-			id: function(link) {
+			id: function linkId(link) {
 				return ''.concat(
 					Math.min(link.source.id, link.target.id),
 					'-',
@@ -1577,7 +2490,7 @@ ge.GraphEditor.prototype.typeDefaults = [
 	},
 	{
 		link: {
-			id: function(link) {
+			id: function linkId(link) {
 				return ''.concat(link.source.id, '-', link.target.id);
 			},
 			text: {
@@ -1591,11 +2504,11 @@ ge.GraphEditor.prototype.typeDefaults = [
 /**
  * Initialize graph options.
  * @private
- * @param   {GraphOptions}    options
- * @param   {D3Selection}     svg
+ * @param	{GraphOptions}	  options
+ * @param	{D3Selection}	  svg
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.initOptions = function(options, svg) {
+ge.GraphEditor.prototype.initOptions = function initOptions(options, svg) {
 	var directed;
 	if(options && options.hasOwnProperty('directed')) {
 		directed = options.directed;
@@ -1606,35 +2519,87 @@ ge.GraphEditor.prototype.initOptions = function(options, svg) {
 
 	var typeDefaults = this.typeDefaults[+directed];
 
-	var opt = $.extend(true, {}, this.defaults, typeDefaults, options || {});
+	var opt = ge.extend({}, this.defaults, typeDefaults, options);
 
 	opt.id = opt.id
 		|| svg.attr('id')
 		|| 'ge'.concat(Math.floor(Math.random() * 100));
 
-	opt.link.arc = {
-		start: ge.sincos(Math.min(opt.link.arc.start, opt.link.arc.end)),
-		end: ge.sincos(Math.max(opt.link.arc.start, opt.link.arc.end)),
-		center: ge.sincos((opt.link.arc.start + opt.link.arc.end) / 2)
-	};
-
-	var flip = (100 - parseInt(opt.link.text.offset)) + '%';
-	opt.link.text.offset = [ opt.link.text.offset, flip ];
+	var reversed = (100 - parseInt(opt.link.text.offset)) + '%';
+	opt.link.text.offset = [ opt.link.text.offset, reversed ];
 
 	switch(opt.link.text.anchor) {
 		case 'start':
-			flip = 'end';
+			reversed = 'end';
 			break;
 		case 'end':
-			flip = 'start';
+			reversed = 'start';
 			break;
 		default:
-			flip = 'middle';
+			reversed = 'middle';
 	}
-	opt.link.text.anchor = [ opt.link.text.anchor, flip ];
+	opt.link.text.anchor = [ opt.link.text.anchor, reversed ];
 
 	this.options = opt;
 	return this;
+};
+/**
+ * Text size calculator constructor.
+ * @class
+ * @classdesc Text size calculator class.
+ * @param {SVGElement} el  SVG <text> element.
+ */
+ge.TextSize = function TextSize(el) {
+	el.setAttribute('style', 'stroke:none;fill:none');
+	this.el = el;
+	return this;
+};
+
+/**
+ * Compute text width.
+ * @param {string} text
+ * @returns {number}
+ */
+ge.TextSize.prototype.width = function length(text) {
+	this.el.textContent = text;
+	return this.el.getComputedTextLength();
+};
+
+/**
+ * Compute text width and height.
+ * @param {string} text
+ * @returns {ge.Point}
+ */
+ge.TextSize.prototype.size = function size(text) {
+	this.el.textContent = text;
+	var bbox = this.el.getBBox();
+	return new ge.Point(bbox.width, bbox.height);
+};
+
+/**
+ * Compute text container size.
+ * @param {string} text
+ * @returns {ge.ContainerSize}
+ */
+ge.TextSize.prototype.containerSize = function containerSize(text) {
+	var size = this.size(text);
+	var words = text.split(/\s+/);
+	var width;
+	if(words.length == 1) {
+		width = size.x;
+	}
+	else {
+		width = 0;
+		var self = this;
+		words.forEach(function(word) {
+			width = Math.max(width, self.width(word));
+		});
+	}
+	return new ge.ContainerSize(
+		width,
+		size.y,
+		size.x * size.y
+	);
 };
 'use strict';
 
@@ -1647,7 +2612,7 @@ ge.GraphEditor.prototype.initOptions = function(options, svg) {
  * @returns {ge.GraphEditor}
  * @see [d3.transition]{@link https://github.com/d3/d3-transition/blob/master/README.md#api-reference}
  */
-ge.GraphEditor.prototype.transition = function(selection, type, name) {
+ge.GraphEditor.prototype.transition = function transition(selection, type, name) {
 	var duration = this.options.transition[type];
 	if(!duration) {
 		return selection;
@@ -1660,13 +2625,8 @@ ge.GraphEditor.prototype.transition = function(selection, type, name) {
 		.duration(duration);
 };
 
-/**
- * Resize node to fit text inside.
- * @private
- * @param   {Node}     node
- * @returns {boolean}        False if node text did not change.
- */
-ge.GraphEditor.prototype.getNodeSize = function(node) {
+
+/*ge.GraphEditor.prototype.getNodeSize = function getNodeSize(node) {
 	if(node.title === node.prevTitle) {
 		return false;
 	}
@@ -1728,13 +2688,13 @@ ge.GraphEditor.prototype.getNodeSize = function(node) {
 	node.size = node.textSize / 1.4142;
 
 	return true;
-};
+};*/
 
 /**
  * Handle graph SVG element resize.
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.resized = function() {
+ge.GraphEditor.prototype.resized = function resized() {
 	this.updateExtent();
 	this.zoom.translateTo(this.container, 0, 0);
 	return this;
@@ -1745,7 +2705,7 @@ ge.GraphEditor.prototype.resized = function() {
  * @private
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.updateSimulation = function() {
+ge.GraphEditor.prototype.updateSimulation = function updateSimulation() {
 	if(this.state.simulation) {
 		this.state.simulation = this.options.simulation
 			.create.call(
@@ -1765,32 +2725,33 @@ ge.GraphEditor.prototype.updateSimulation = function() {
  * @param   {Node}           [node]  Moved node.
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.updateBBox = function(node) {
+ge.GraphEditor.prototype.updateBBox = function updateBBox(node) {
 	var data = this.data.nodes;
 	var padding = this.options.bbox.padding;
 
 	if(node === undefined) {
-		var extent = d3.extent(data, function(d) { return d.x; });
-		if(extent[0] === undefined) {
-			extent[0] = extent[1] = 0;
-		}
+		var left = d3.min(data, function(d) { return d.x; });
+		var up = d3.min(data, function(d) { return d.y; });
+		var right = d3.max(data, function(d) { return d.x + d.width; });
+		var down = d3.max(data, function(d) { return d.y + d.height; });
 
-		this.bbox[0][0] = extent[0] - padding;
-		this.bbox[1][0] = extent[1] + padding;
-
-		extent = d3.extent(data, function(d) { return d.y; });
-		if(extent[0] === undefined) {
-			extent[0] = extent[1] = 0;
-		}
-
-		this.bbox[0][1] = extent[0] - padding;
-		this.bbox[1][1] = extent[1] + padding;
+		this.bbox[0][0] = (left || 0) - padding;
+		this.bbox[1][0] = (right || 0) + padding;
+		this.bbox[0][1] = (up || 0) - padding;
+		this.bbox[1][1] = (down || 0) + padding;
 	}
 	else {
-		this.bbox[0][0] = Math.min(this.bbox[0][0], data.x - padding);
-		this.bbox[1][0] = Math.max(this.bbox[1][0], data.x + padding);
-		this.bbox[0][1] = Math.min(this.bbox[0][1], data.y - padding);
-		this.bbox[1][1] = Math.max(this.bbox[1][1], data.y + padding);
+		console.log(node.x, node.y, node.width, node.height, padding);
+		this.bbox[0][0] = Math.min(this.bbox[0][0], node.x - padding);
+		this.bbox[0][1] = Math.min(this.bbox[0][1], node.y - padding);
+		this.bbox[1][0] = Math.max(
+			this.bbox[1][0],
+			node.x + node.width + padding
+		);
+		this.bbox[1][1] = Math.max(
+			this.bbox[1][1],
+			node.y + node.height + padding
+		);
 	}
 
 	this.updateExtent();
@@ -1803,7 +2764,7 @@ ge.GraphEditor.prototype.updateBBox = function(node) {
  * @private
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.updateExtent = function() {
+ge.GraphEditor.prototype.updateExtent = function updateExtent() {
 	var bbox = this.svg.node().getBoundingClientRect();
 	var extent = [
 		[ 0, 0 ],
@@ -1814,90 +2775,48 @@ ge.GraphEditor.prototype.updateExtent = function() {
 };
 
 /**
- * Update link element.
+ * Update a link.
  * @param   {Reference}       link  Changed link.
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.updateLink = function(link) {
+ge.GraphEditor.prototype.updateLink = function updateLink(link) {
 	var self = this;
 	var transition = function(selection) {
 		return self.transition(selection, 'drag', 'update-link');
 	};
-
 	link = self.getElement(link);
 	var def = d3.select('#' + link.datum().defId);
-
-	transition(def)
-		.attr('d', ge.bind(self, self.options.link.path));
-
-	transition(link.select('path'))
-		.attr('d', function(d) { return d.path; })
-		.style('stroke-width', function(d) { return d.size + 'px'; });
-
-	link.select('textPath')
-		.text(function(d) { return d.title; });
-
+	ge.Link.updateSelection(link, def, self.options.link, transition);
 	return this;
 };
 
 
 /**
- * Update node element. If it was moved or resized, update its links.
+ * Update a node. If it was moved or resized, update its links.
  * @param   {Reference}       node  Changed node.
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.updateNode = function(node) {
+ge.GraphEditor.prototype.updateNode = function updateNode(node) {
 	var self = this;
-	var opt = this.options;
 
 	node = this.getElement(node);
 
-	var circle = node.select('circle');
-
+	var d = node.datum();
 	var prevTransform = node.attr('transform');
-	var prevSize = circle.attr('r');
-	var transform;
-	var size;
+	var nextTransform = 'translate('.concat(d.x, ',', d.y, ')');
+	var prevWidth = d.width;
+	var prevHeight = d.height;
 
 	var transition = function(selection) {
 		return self.transition(selection, 'drag', 'update-node');
 	};
 
-	transition(node)
-		.attr(
-			'transform',
-			function(d) {
-				transform = 'translate('.concat(d.x, ',', d.y, ')');
-				return transform;
-			}
-		);
+	ge.Node.updateSelection(node, transition, this.textSize);
 
-	if(opt.node.text.inside) {
-		if(this.getNodeSize(node.datum())) {
-			node.select('foreignObject')
-				.attr('x', function(d) { return d.textOffset; })
-				.attr('y', function(d) { return d.textOffset; })
-				.attr('width', function(d) { return d.textSize; })
-				.attr('height', function(d) { return d.textSize; })
-				.select('span')
-				.text(function(d) { return d.title; });
-		}
-	}
-	else {
-		node.select('text')
-			.attr('dx', function(d) {
-				return d.size + opt.node.text.dx;
-			})
-			.text(function(d) {
-				return d.title;
-			});
-	}
-
-	transition(circle)
-		.attr('r', function(d) { size = d.size; return size; });
-
-	if(transform !== prevTransform || size !== prevSize) {
-		node = node.datum();
+	if(nextTransform !== prevTransform
+	   || d.width !== prevWidth
+	   || d.height !== prevHeight) {
+		node = d;
 
 		var updateLink = function(d) {
 			return d.source === node || d.target === node;
@@ -1906,8 +2825,10 @@ ge.GraphEditor.prototype.updateNode = function(node) {
 		var defs = this.defs.filter(updateLink);
 		var links = this.links.filter(updateLink);
 
-		transition(defs)
-			.attr('d', ge.bind(this, opt.link.path));
+		ge.Link.updateSelection(links, defs, self.options.link, transition);
+
+		/*transition(defs)
+			.attr('d', function() { return d.shape.path(d); });
 
 		transition(links.select('path'))
 			.attr('d', function(d) { return d.path; });
@@ -1917,15 +2838,15 @@ ge.GraphEditor.prototype.updateNode = function(node) {
 
 		transition(links.select('textPath'))
 			.attr('startOffset', function(d) { return offset[d.flip]; })
-			.attr('text-anchor', function(d) { return anchor[d.flip]; });
+			.attr('text-anchor', function(d) { return anchor[d.flip]; });*/
 
-		this.updateBBox();
+		this.updateBBox(node);
 	}
 
 	return this;
 };
 
-/*ge.GraphEditor.prototype.updateSize = function(nodes, links) {
+/*ge.GraphEditor.prototype.updateSize = function updateSize(nodes, links) {
 	nodes = nodes || this.nodes;
 	links = links || this.links;
 	var opt = this.options;
@@ -1970,7 +2891,7 @@ ge.GraphEditor.prototype.updateNode = function(node) {
  * @param   {boolean}        [simulation=false]  True if called from the simulation tick handler.
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.update = function(simulation) {
+ge.GraphEditor.prototype.update = function update(simulation) {
 	var self = this;
 	var opt = this.options;
 	var ttype = simulation ? 'simulation' : 'drag';
@@ -1979,102 +2900,30 @@ ge.GraphEditor.prototype.update = function(simulation) {
 		return self.transition(selection, ttype, 'update');
 	};
 
-	if(opt.node.text.inside) {
-		this.data.nodes.forEach(ge.bind(this, this.getNodeSize));
-	}
-
-	this.defs = this.defs.data(this.data.links, ge.id);
-	this.defs.exit().remove();
-	this.defs = this.defs.enter()
-		.append('path')
-		.attr('id', function(d) { return d.defId; })
-		.merge(this.defs);
-
-	transition(this.defs).attr('d', ge.bind(this, opt.link.path));
-
-	this.links = this.links.data(this.data.links, ge.id);
-	this.links.exit().remove();
-
-	var newLinks = this.links.enter()
-		.append('g')
-		.attr('id', function(d) { return d.pathId; })
-		.classed(opt.css.link, true);
-
-	newLinks.append('path');
-
-	newLinks.append('text')
-		.attr('dx', opt.link.text.dx)
-		.attr('dy', opt.link.text.dy)
-		.append('textPath')
-		.attr('xlink:href', function(d) { return '#' + d.defId; });
-
-	this.links = newLinks.merge(this.links);
-
-	transition(this.links.select('path'))
-		.style('stroke-width', function(d) { return d.size + 'px'; })
-		.attr('d', function(d) { return d.path; });
-
-	var offset = opt.link.text.offset;
-	var anchor = opt.link.text.anchor;
-
-	transition(this.links.select('textPath'))
-		.text(function(d) { return d.title; })
-		.attr('startOffset', function(d) { return offset[d.flip]; })
-		.attr('text-anchor', function(d) { return anchor[d.flip]; });
-
 	this.nodes = this.nodes.data(this.data.nodes, ge.id);
 	this.nodes.exit().remove();
 	var newNodes = this.nodes.enter()
 		.append('g')
-		.attr('id', function(d) { return d.elementId; })
 		.classed(opt.css.node, true);
-
-	newNodes.append('circle');
-
-	if(opt.node.text.inside) {
-		newNodes.append('foreignObject')
-			.append('xhtml:div')
-			.append('xhtml:span');
-	}
-	else {
-		newNodes.append('text');
-	}
-
+	ge.Node.initSelection(newNodes);
 	this.nodes = newNodes.merge(this.nodes);
-
-	transition(this.nodes)
-		.attr(
-			'transform',
-			function(d) {
-				return 'translate('.concat(d.x, ',', d.y, ')');
-			}
-		);
-
-	if(opt.node.text.inside) {
-		var obj = this.nodes.select('foreignObject');
-
-		transition(obj)
-			.attr('x', function(d) { return d.textOffset; })
-			.attr('y', function(d) { return d.textOffset; })
-			.attr('width', function(d) { return d.textSize; })
-			.attr('height', function(d) { return d.textSize; });
-
-		transition(obj.selectAll('span'))
-			.text(function(d) { return d.title; });
-	}
-	else {
-		transition(this.nodes.select('text'))
-			.text(function(d) { return d.title; })
-			.attr('dx', function(d) {
-				return d.size + opt.node.text.dx;
-			})
-			.attr('dy', opt.node.text.dy);
-	}
-
-	transition(this.nodes.select('circle'))
-		.attr('r', function(d) { return d.size; });
-
+	ge.Node.updateSelection(this.nodes, transition, this.textSize);
 	this.nodeEvents(newNodes);
+
+	this.defs = this.defs.data(this.data.links, ge.id);
+	this.defs.exit().remove();
+	var newDefs = this.defs.enter().append('path');
+
+	this.links = this.links.data(this.data.links, ge.id);
+	this.links.exit().remove();
+	var newLinks = this.links.enter()
+		.append('g')
+		.classed(opt.css.link, true);
+
+	ge.Link.initSelection(newLinks, newDefs, opt.link);
+	this.links = this.links.merge(newLinks);
+	this.defs = this.defs.merge(newDefs);
+	ge.Link.updateSelection(this.links, this.defs, opt.link, transition);
 	this.linkEvents(newLinks);
 
 	//this.updateSize(newNodes, newLinks);

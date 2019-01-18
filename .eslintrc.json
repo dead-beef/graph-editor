@@ -3,9 +3,13 @@
 	"env": {
 		"browser": true,
 		"es6": true,
-		"node": true
+		"node": true,
+		"jasmine": true
 	},
 	"extends": "eslint:recommended",
+	"plugins": [
+		"jasmine"
+	],
 	"parserOptions": {
 		"ecmaVersion": 6,
 		"ecmaFeatures": {
