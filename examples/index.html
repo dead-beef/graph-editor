@@ -12,13 +12,16 @@
 		<div id="sidebar">
 			<h4>Graph editor</h4>
 			<div>
+				double click - zoom in<br/>
+				mouse wheel - zoom in/out<br/>
+				drag - scroll<br/>
 				click - select node/link<br>
 				shift+click - add a node<br>
 				shift+drag - add a link<br>
 				del - delete selected node/link<br>
 				s - toggle simulation<br>
 			</div>
-			<div id="selected-node" style="display: none">
+			<div id="selected-node" class="hide form">
 				<h5>Node</h5>
 				<div>
 					<label for="node-title">Title</label>
@@ -34,7 +37,7 @@
 					</select>
 				</div>
 			</div>
-			<div id="selected-link" style="display: none">
+			<div id="selected-link" class="hide form">
 				<h5>Link</h5>
 				<div>
 					<label for="link-title">Title</label>
@@ -74,13 +77,16 @@
 					}
 					else {
 						graph.select(null);
+						updateSelection();
 					}
 				})
 				.on('node-click', function(node) {
 					graph.select(node);
+					updateSelection();
 				})
 				.on('link-click', function(link) {
 					graph.select(link);
+					updateSelection();
 				})
 				.on('new-link-end', function(source, target) {
 					graph.add({source: source, target: target});
@@ -100,6 +106,7 @@
 						if(selection.link) {
 							graph.remove(selection.link);
 						}
+						updateSelection();
 						break;
 					case 's':
 					case 'S':
@@ -114,6 +121,49 @@
 						graph.dragToLink(false);
 						break;
 				}
+			});
+			d3.select('#node-title').on('keydown', function(ev) {
+				d3.event.stopPropagation();
+			});
+			d3.select('#link-title').on('keydown', function(ev) {
+				d3.event.stopPropagation();
+			});
+
+			function updateSelection() {
+				var selection = graph.select();
+				var node = d3.select('#selected-node').classed('hide', !selection.node);
+				var link = d3.select('#selected-link').classed('hide', !selection.link);
+				if(selection.node) {
+					d3.select('#node-title').property(
+						'value',
+						selection.node.title
+					);
+					d3.select('#node-shape').property(
+						'value',
+						selection.node.shape.constructor.name
+					);
+				}
+				if(selection.link) {
+					d3.select('#link-title').property('value', selection.link.title);
+				}
+			}
+
+			d3.select('#node-title').on('input', function() {
+				var node = graph.selectNode();
+				node.title = this.value;
+				graph.updateNode(node);
+			});
+			d3.select('#node-shape').on('change', function() {
+				var shape = new ge.shape[this.value]({aspect: 2});
+				var node = graph.selectNode();
+				node.shape = shape;
+				node.prevTitle = null;
+				graph.updateNode(node);
+			});
+			d3.select('#link-title').on('input', function() {
+				var link = graph.selectLink();
+				link.title = this.value;
+				graph.updateLink(link);
 			});
 		</script>
 	</body>

@@ -9,10 +9,14 @@ body {
 	background-color: #222222;
 }
 
-h4 {
-   text-align: center;
-   margin: 0;
-   width: 100%;
+h4, h5 {
+	text-align: center;
+	margin: 0;
+	width: 100%;
+}
+
+h5 {
+	margin-top: 10px;
 }
 
 #graph-container {
@@ -52,4 +56,41 @@ h4 {
 		width: auto;
 		height: auto;
 	}
+}
+
+.hide {
+	display: none !important;
+}
+
+.form {
+	display: flex;
+	flex-direction: column;
+	min-height: 100px;
+}
+
+.form > div {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.form > div > * {
+	display: flex;
+	margin: 4px;
+}
+
+.form > div > label {
+	min-width: 50px;
+}
+
+.form > div > input, .form > div > select {
+	flex-grow: 1;
+	flex-shrink: 1;
+}
+
+input, select {
+	background: #000000;
+	border: 1px solid #ffffff;
+	color: #ffffff;
+	padding: 4px;
 }
