@@ -76,7 +76,7 @@ ge.defaultSimulation = function defaultSimulation(simulation, nodes, links) {
 			.force('center', d3.forceCenter());
 	}
 
-	var dist = 10 * d3.max(nodes, function(d) {
+	var dist = 2 * d3.max(nodes, function(d) {
 		return Math.max(d.width, d.height);
 	});
 
@@ -116,6 +116,9 @@ ge._extend = function _extend(dst, src) {
 		if(typeof value === 'object' && value !== null) {
 			if(Array.isArray(value)) {
 				dst[key] = value.slice();
+			}
+			else if(value.constructor.name !== 'Object') {
+				dst[key] = value;
 			}
 			else {
 				var dstValue = dst[key];
