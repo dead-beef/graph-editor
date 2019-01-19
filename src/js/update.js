@@ -138,7 +138,7 @@ ge.GraphEditor.prototype.updateBBox = function updateBBox(node) {
 		this.bbox[1][1] = (down || 0) + padding;
 	}
 	else {
-		console.log(node.x, node.y, node.width, node.height, padding);
+		//console.log(node.x, node.y, node.width, node.height, padding);
 		this.bbox[0][0] = Math.min(this.bbox[0][0], node.x - padding);
 		this.bbox[0][1] = Math.min(this.bbox[0][1], node.y - padding);
 		this.bbox[1][0] = Math.max(
@@ -182,7 +182,7 @@ ge.GraphEditor.prototype.updateLink = function updateLink(link) {
 		return self.transition(selection, 'drag', 'update-link');
 	};
 	link = self.getElement(link);
-	var def = d3.select('#' + link.datum().defId);
+	var def = d3.select(link.datum().defSelector);
 	ge.Link.updateSelection(link, def, self.options.link, transition);
 	return this;
 };
