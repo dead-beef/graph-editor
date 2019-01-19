@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: js/util/common.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: js/util/common.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Get object ID.
+ * @param {?(Object|undefined)} obj
+ * @returns {?ID}
+ */
+ge.id = function id(obj) {
+	return obj &amp;&amp; obj.id || null;
+};
+
+/**
+ * @param {Object} _this
+ * @param {function} func
+ * @returns {function}
+ */
+ge.bind = function bind(_this, func) {
+	return function bound() {
+		return func.apply(_this, arguments);
+	};
+};
+
+/**
+ * Compare numbers or arrays of numbers.
+ * @param {(number|Array&lt;number>)} u
+ * @param {(number|Array&lt;number>)} v
+ * @param {number}                 [eps=1e-5] Precision.
+ * @returns {boolean}
+ */
+ge.equal = function equal(u, v, eps) {
+	eps = eps || 1e-5;
+	var eq = function(x, y) { return Math.abs(x - y) &lt; eps; };
+
+	if(u === null || v === null
+	   || u === undefined || v === undefined
+	   || typeof u === 'number' &amp;&amp; Array.isArray(v)
+	   || typeof v === 'number' &amp;&amp; Array.isArray(u)) {
+		return false;
+	}
+
+	if(typeof u === 'number' &amp;&amp; typeof v === 'number') {
+		return eq(u, v);
+	}
+
+	if(!Array.isArray(u) || !Array.isArray(v)) {
+		throw new Error(
+			'ge.equal: invalid argument type: '
+				.concat(u.toString(), ' ', v.toString())
+		);
+	}
+
+	if(u.length !== v.length) {
+		return false;
+	}
+
+	for(var i = 0; i &lt; u.length; ++i) {
+		if(!eq(u[i], v[i])) {
+			return false;
+		}
+	}
+
+	return true;
+};
+
+/**
+ * Default simulation update function.
+ * @param   {?D3Simulation} simulation  Old simulation object.
+ * @param   {Array&lt;ge.Node>}   nodes    Graph nodes.
+ * @param   {Array&lt;ge.Link>}   links    Graph links.
+ * @this    ge.GraphEditor
+ * @returns {D3Simulation}              New/updated simulation object.
+ */
+ge.defaultSimulation = function defaultSimulation(simulation, nodes, links) {
+	if(!simulation) {
+		simulation = d3.forceSimulation()
+			.force('charge', d3.forceManyBody())
+			.force('link', d3.forceLink())
+			.force('center', d3.forceCenter());
+	}
+
+	var dist = 2 * d3.max(nodes, function(d) {
+		return Math.max(d.width, d.height);
+	});
+
+	var cx = d3.mean(nodes, function(d) { return d.x; });
+	var cy = d3.mean(nodes, function(d) { return d.y; });
+
+	simulation.nodes(nodes);
+	simulation.force('center').x(cx).y(cy);
+	simulation.force('link').links(links).distance(dist);
+
+	return simulation;
+};
+
+/**
+ * Extend an object.
+ * @param   {object}  dst  Object to extend.
+ * @param   {object}  src  Source object.
+ * @returns {object}       Extended object.
+ */
+ge._extend = function _extend(dst, src) {
+	if(!src) {
+		return dst;
+	}
+	if(typeof src !== 'object') {
+		throw new Error('src is not an object: ' + src.toString());
+	}
+
+	if(!dst) {
+		dst = {};
+	}
+	else if(typeof dst !== 'object') {
+		throw new Error('dst is not an object: ' + dst.toString());
+	}
+
+	for(var key in src) {
+		var value = src[key];
+		if(typeof value === 'object' &amp;&amp; value !== null) {
+			if(Array.isArray(value)) {
+				dst[key] = value.slice();
+			}
+			else if(value.constructor.name !== 'Object') {
+				dst[key] = value;
+			}
+			else {
+				var dstValue = dst[key];
+				if(!dstValue
+				   || typeof dstValue !== 'object'
+				   || Array.isArray(dstValue)) {
+					dst[key] = dstValue = {};
+				}
+				ge._extend(dstValue, value);
+			}
+		}
+		else {
+			dst[key] = value;
+		}
+	}
+	return dst;
+};
+
+/**
+ * Extend an object.
+ * @param   {object}     dst  Object to extend.
+ * @param   {...object}  src  Source objects.
+ * @returns {object}          Extended object.
+ */
+ge.extend = function extend(dst, src) { // eslint-disable-line no-unused-vars
+	for(var i = 1; i &lt; arguments.length; ++i) {
+		dst = ge._extend(dst, arguments[i]);
+	}
+	return dst;
+};
+
+/*ge.debounceD3 = function debounceD3(func, delay) {
+	var timeout = null;
+
+	return function() {
+		var context = this;
+		var args = arguments;
+		var d3ev = d3.event;
+
+		if(timeout !== null) {
+			clearTimeout(timeout);
+		}
+
+		timeout = setTimeout(
+			function() {
+				var tmp = d3.event;
+				timeout = null;
+				d3.event = d3ev;
+				try {
+					func.apply(context, args);
+				}
+				finally {
+					d3.event = tmp;
+				}
+			},
+			delay
+		);
+	};
+};*/
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ge.Angle.html">Angle</a></li><li><a href="ge.BBox.html">BBox</a></li><li><a href="ge.ContainerSize.html">ContainerSize</a></li><li><a href="ge.GraphEditor.html">GraphEditor</a></li><li><a href="ge.Link.html">Link</a></li><li><a href="ge.Node.html">Node</a></li><li><a href="ge.path.Line.html">Line</a></li><li><a href="ge.path.Path.html">Path</a></li><li><a href="ge.Point.html">Point</a></li><li><a href="ge.SaveLoad.html">SaveLoad</a></li><li><a href="ge.shape.Circle.html">Circle</a></li><li><a href="ge.shape.Rect.html">Rect</a></li><li><a href="ge.shape.Shape.html">Shape</a></li><li><a href="ge.TextSize.html">TextSize</a></li></ul><h3>Events</h3><ul><li><a href="global.html#event:click">click</a></li><li><a href="global.html#event:link-click">link-click</a></li><li><a href="global.html#event:new-link-cancel">new-link-cancel</a></li><li><a href="global.html#event:new-link-end">new-link-end</a></li><li><a href="global.html#event:new-link-start">new-link-start</a></li><li><a href="global.html#event:node-click">node-click</a></li><li><a href="global.html#event:simulation-start">simulation-start</a></li><li><a href="global.html#event:simulation-stop">simulation-stop</a></li></ul><h3>Namespaces</h3><ul><li><a href="ge.html">ge</a></li><li><a href="ge.path.html">path</a></li><li><a href="ge.shape.html">shape</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Jan 19 2019 08:17:38 GMT+0000 (UTC)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

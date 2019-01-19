@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: js/path/line.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: js/path/line.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Line.
+ * @class
+ * @param {?object}  [data]                JSON data.
+ * @param {?number}  [data.loopStart=180]  Loop start angle in degrees.
+ * @param {?number}  [data.loopEnd=270]    Loop end angle in degrees.
+ * @param {?boolean} [data.arrow=false]
+ * @param {?number}  [data.arrowLength=10]
+ * @param {?number}  [data.arrowAngle=15]
+ */
+ge.path.Line = function Line(data) {
+	ge.path.Path.call(this, data);
+	this.arrow = !!data.arrow;
+	this.arrowLength = +data.arrowLength || 10;
+	this.arrowAngle = new ge.Angle(+data.arrowAngle || 15);
+	this.arrowAngle2 = new ge.Angle(-data.arrowAngle || -15);
+};
+
+ge.path.Line.prototype = Object.create(ge.path.Line);
+Object.defineProperty(
+	ge.path.Line.prototype,
+	'constructor',
+	{ 
+		value: ge.path.Line,
+		enumerable: false,
+		writable: true
+	}
+);
+ge.path.addClass(ge.path.Line);
+
+/**
+ * Return arrow path.
+ * @param   {ge.Point}   src   Link source.
+ * @param   {ge.Point}   dst   Link target.
+ * @returns {string}           SVG path.
+ */
+ge.path.Line.prototype.arrowPath = function arrow(src, dst) {
+	var b = src.clone().sub(dst).normalize();
+	var c = b.clone().rotate(this.arrowAngle2).mul(this.arrowLength).add(dst);
+	b.rotate(this.arrowAngle).mul(this.arrowLength).add(dst);
+	return 'M'.concat(
+		dst.x, ',', dst.y,
+		'L', b.x, ',', b.y,
+		'L', c.x, ',', c.y,
+		'Z'
+	);
+};
+
+/**
+ * Return text path and set link path.
+ * @param   {ge.Link}   link   Link data.
+ * @returns {string}           SVG path.
+ */
+ge.path.Line.prototype.path = function path(link) {
+	var src, dst;
+
+	if(link.source === link.target) {
+		src = link.source.shape.getPoint(link.source, this.loopStart);
+		dst = link.source.shape.getPoint(link.source, this.loopEnd);
+		var rx = link.source.width / 2;
+		var ry = link.source.height / 2;
+
+		link.reversed = false;
+		link.path = 'M'.concat(
+			src.x, ',', src.y,
+			'A', rx, ',', ry, ',0,1,0,', dst.x, ',', dst.y
+		);
+
+		/*if(this.arrow) {
+		}*/
+
+		return link.path;
+	}
+
+	src = new ge.Point(link.source.x, link.source.y);
+	dst = new ge.Point(link.target.x, link.target.y);
+	var src2 = link.source.shape.intersect(link.source, link.target);
+	var dst2 = link.target.shape.intersect(link.target, link.source);
+	src = src2 || src;
+	dst = dst2 || dst;
+
+	var dst3 = dst;
+
+	if(this.arrow) {
+		dst3 = dst.clone().sub(src);
+		var l = dst3.length();
+		var l2 = this.arrowLength * this.arrowAngle.cos;
+		dst3.mul(1 - l2 / l).add(src);
+	}
+	
+	link.path = 'M'.concat(src.x, ',', src.y, 'L', dst3.x, ',', dst3.y);
+
+	if(this.arrow) {
+		link.path += this.arrowPath(src, dst);
+	}
+
+	if((link.reversed = src.x > dst.x)) {
+		src2 = src;
+		src = dst;
+		dst = src2;
+	}
+
+	return 'M'.concat(src.x, ',', src.y, 'L', dst.x, ',', dst.y);
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ge.Angle.html">Angle</a></li><li><a href="ge.BBox.html">BBox</a></li><li><a href="ge.ContainerSize.html">ContainerSize</a></li><li><a href="ge.GraphEditor.html">GraphEditor</a></li><li><a href="ge.Link.html">Link</a></li><li><a href="ge.Node.html">Node</a></li><li><a href="ge.path.Line.html">Line</a></li><li><a href="ge.path.Path.html">Path</a></li><li><a href="ge.Point.html">Point</a></li><li><a href="ge.SaveLoad.html">SaveLoad</a></li><li><a href="ge.shape.Circle.html">Circle</a></li><li><a href="ge.shape.Rect.html">Rect</a></li><li><a href="ge.shape.Shape.html">Shape</a></li><li><a href="ge.TextSize.html">TextSize</a></li></ul><h3>Events</h3><ul><li><a href="global.html#event:click">click</a></li><li><a href="global.html#event:link-click">link-click</a></li><li><a href="global.html#event:new-link-cancel">new-link-cancel</a></li><li><a href="global.html#event:new-link-end">new-link-end</a></li><li><a href="global.html#event:new-link-start">new-link-start</a></li><li><a href="global.html#event:node-click">node-click</a></li><li><a href="global.html#event:simulation-start">simulation-start</a></li><li><a href="global.html#event:simulation-stop">simulation-stop</a></li></ul><h3>Namespaces</h3><ul><li><a href="ge.html">ge</a></li><li><a href="ge.path.html">path</a></li><li><a href="ge.shape.html">shape</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Jan 19 2019 08:17:38 GMT+0000 (UTC)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

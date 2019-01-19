@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: main.js</title>
+    <title>JSDoc: Namespace: path</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,98 +17,110 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: main.js</h1>
+    <h1 class="page-title">Namespace: path</h1>
 
     
 
 
 
+
+<section>
+
+<header>
     
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>'use strict';
+        <h2>
+            <span class="ancestors"><a href="ge.html">ge</a>.</span>path</h2>
+        
+    
+</header>
 
-/* eslint-disable no-unused-vars */
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Link shapes.</div>
+        
 
-/**
- * Graph editor module.
- * @namespace
- */
-var ge = exports;
+        
 
-/**
- * Graph editor constructor.
- * @class
- * @classdesc Graph editor class.
- * @param {(SVGElement|Selector|D3Selection)} svg     SVG element.
- * @param {ImportGraphData}                   data    Graph data.
- * @param {GraphOptions}                      options Graph options.
- */
-ge.GraphEditor = function GraphEditor(svg, data, options) {
-	if(!svg.select) {
-		svg = d3.select(svg);
-	}
 
-	this.initOptions(options, svg)
-		.initSvg(svg)
-		.initData(data)
-		.initState();
+<dl class="details">
 
-	/**
-	 * @readonly
-	 * @member {D3Dispatch}
-	 */
-	this.dispatch = d3.dispatch(
-		'node-click', 'link-click',
-		'new-link-start', 'new-link-end', 'new-link-cancel',
-		'click',
-		'simulation-start', 'simulation-stop'
-	);
+    
 
-	/**
-	 * Graph bounding box.
-	 * @readonly
-	 * @member {BBox}
-	 */
-	this.bbox = [[0, 0], [0, 0]];
-	/**
-	 * Graph zoom behavior.
-	 * @readonly
-	 * @member {D3Zoom}
-	 */
-	this.zoom = this.zoomEvents(d3.zoom())
-		.scaleExtent([this.options.scale.min, this.options.scale.max]);
-	/**
-	 * Node drag behavior.
-	 * @readonly
-	 * @member {D3Drag}
-	 */
-	this.drag = this.dragEvents(d3.drag());
-	this.svg.call(this.zoom);
+    
 
-	/**
-	 * Window resize event handler.
-	 * @readonly
-	 * @member {function}
-	 */
-	this.onresize = ge.bind(this, this.resized);
-	window.addEventListener('resize', this.onresize);
+    
 
-	this.updateBBox();
+    
 
-	setTimeout(ge.bind(this, function() {
-		this.update()
-			.resized()
-			.simulation(this.options.simulation.start);
-	}), 10);
+    
 
-	return this;
-};
+    
 
-/* eslint-enable no-unused-vars */
-</code></pre>
-        </article>
-    </section>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="js_path_base.js.html">js/path/base.js</a>, <a href="js_path_base.js.html#line5">line 5</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="ge.path.Line.html">Line</a></dt>
+            <dd></dd>
+        
+            <dt><a href="ge.path.Path.html">Path</a></dt>
+            <dd></dd>
+        </dl>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 

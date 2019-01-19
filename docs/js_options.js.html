@@ -37,6 +37,7 @@ ge.GraphEditor.prototype.defaults = {
 	directed: false,
 
 	node: {
+		shape: new ge.shape.Circle(),
 		border: 2,
 		size: {
 			def: 10,
@@ -50,7 +51,6 @@ ge.GraphEditor.prototype.defaults = {
 	},
 
 	link: {
-		path: ge.defaultLinkPath,
 		size: {
 			def: 2
 		},
@@ -59,10 +59,6 @@ ge.GraphEditor.prototype.defaults = {
 			dy: '1.1em',
 			offset: null,
 			anchor: null
-		},
-		arc: {
-			start: 180,
-			end: 270
 		}
 	},
 
@@ -75,7 +71,7 @@ ge.GraphEditor.prototype.defaults = {
 
 	transition: {
 		zoom: 250,
-		drag: 50,
+		drag: 0,
 		simulation: 50
 	},
 
@@ -92,11 +88,6 @@ ge.GraphEditor.prototype.defaults = {
 		padding: 80
 	},
 
-	'export': {
-		node: ge.defaultExportNode,
-		link: ge.defaultExportLink
-	},
-
 	css: {
 		//markers: 'ge-markers',
 		node: 'ge-node',
@@ -105,6 +96,7 @@ ge.GraphEditor.prototype.defaults = {
 		hide: 'ge-hidden',
 		dragline: 'ge-dragline',
 		link: 'ge-link',
+		textpath: 'ge-text-path',
 		//connect: 'ge-connect',
 		selection: {
 			node: 'ge-selection',
@@ -120,13 +112,10 @@ ge.GraphEditor.prototype.defaults = {
 ge.GraphEditor.prototype.typeDefaults = [
 	{
 		link: {
-			id: function(link) {
-				return ''.concat(
-					Math.min(link.source.id, link.target.id),
-					'-',
-					Math.max(link.source.id, link.target.id)
-				);
-			},
+			shape: new ge.path.Line({
+				loopStart: 0,
+				loopEnd: 90
+			}),
 			text: {
 				offset: '50%',
 				anchor: 'middle'
@@ -135,9 +124,11 @@ ge.GraphEditor.prototype.typeDefaults = [
 	},
 	{
 		link: {
-			id: function(link) {
-				return ''.concat(link.source.id, '-', link.target.id);
-			},
+			shape: new ge.path.Line({
+				arrow: true,
+				loopStart: 0,
+				loopEnd: 90
+			}),
 			text: {
 				offset: '20%',
 				anchor: 'start'
@@ -149,11 +140,11 @@ ge.GraphEditor.prototype.typeDefaults = [
 /**
  * Initialize graph options.
  * @private
- * @param   {GraphOptions}    options
- * @param   {D3Selection}     svg
+ * @param	{GraphOptions}	  options
+ * @param	{D3Selection}	  svg
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.initOptions = function(options, svg) {
+ge.GraphEditor.prototype.initOptions = function initOptions(options, svg) {
 	var directed;
 	if(options &amp;&amp; options.hasOwnProperty('directed')) {
 		directed = options.directed;
@@ -164,32 +155,26 @@ ge.GraphEditor.prototype.initOptions = function(options, svg) {
 
 	var typeDefaults = this.typeDefaults[+directed];
 
-	var opt = $.extend(true, {}, this.defaults, typeDefaults, options || {});
+	var opt = ge.extend({}, this.defaults, typeDefaults, options);
 
 	opt.id = opt.id
 		|| svg.attr('id')
 		|| 'ge'.concat(Math.floor(Math.random() * 100));
 
-	opt.link.arc = {
-		start: ge.sincos(Math.min(opt.link.arc.start, opt.link.arc.end)),
-		end: ge.sincos(Math.max(opt.link.arc.start, opt.link.arc.end)),
-		center: ge.sincos((opt.link.arc.start + opt.link.arc.end) / 2)
-	};
-
-	var flip = (100 - parseInt(opt.link.text.offset)) + '%';
-	opt.link.text.offset = [ opt.link.text.offset, flip ];
+	var reversed = (100 - parseInt(opt.link.text.offset)) + '%';
+	opt.link.text.offset = [ opt.link.text.offset, reversed ];
 
 	switch(opt.link.text.anchor) {
 		case 'start':
-			flip = 'end';
+			reversed = 'end';
 			break;
 		case 'end':
-			flip = 'start';
+			reversed = 'start';
 			break;
 		default:
-			flip = 'middle';
+			reversed = 'middle';
 	}
-	opt.link.text.anchor = [ opt.link.text.anchor, flip ];
+	opt.link.text.anchor = [ opt.link.text.anchor, reversed ];
 
 	this.options = opt;
 	return this;
@@ -204,13 +189,13 @@ ge.GraphEditor.prototype.initOptions = function(options, svg) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ge.GraphEditor.html">GraphEditor</a></li></ul><h3>Events</h3><ul><li><a href="global.html#event:click">click</a></li><li><a href="global.html#event:link-click">link-click</a></li><li><a href="global.html#event:new-link-cancel">new-link-cancel</a></li><li><a href="global.html#event:new-link-end">new-link-end</a></li><li><a href="global.html#event:new-link-start">new-link-start</a></li><li><a href="global.html#event:node-click">node-click</a></li><li><a href="global.html#event:simulation-start">simulation-start</a></li><li><a href="global.html#event:simulation-stop">simulation-stop</a></li></ul><h3>Namespaces</h3><ul><li><a href="ge.html">ge</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ge.Angle.html">Angle</a></li><li><a href="ge.BBox.html">BBox</a></li><li><a href="ge.ContainerSize.html">ContainerSize</a></li><li><a href="ge.GraphEditor.html">GraphEditor</a></li><li><a href="ge.Link.html">Link</a></li><li><a href="ge.Node.html">Node</a></li><li><a href="ge.path.Line.html">Line</a></li><li><a href="ge.path.Path.html">Path</a></li><li><a href="ge.Point.html">Point</a></li><li><a href="ge.SaveLoad.html">SaveLoad</a></li><li><a href="ge.shape.Circle.html">Circle</a></li><li><a href="ge.shape.Rect.html">Rect</a></li><li><a href="ge.shape.Shape.html">Shape</a></li><li><a href="ge.TextSize.html">TextSize</a></li></ul><h3>Events</h3><ul><li><a href="global.html#event:click">click</a></li><li><a href="global.html#event:link-click">link-click</a></li><li><a href="global.html#event:new-link-cancel">new-link-cancel</a></li><li><a href="global.html#event:new-link-end">new-link-end</a></li><li><a href="global.html#event:new-link-start">new-link-start</a></li><li><a href="global.html#event:node-click">node-click</a></li><li><a href="global.html#event:simulation-start">simulation-start</a></li><li><a href="global.html#event:simulation-stop">simulation-stop</a></li></ul><h3>Namespaces</h3><ul><li><a href="ge.html">ge</a></li><li><a href="ge.path.html">path</a></li><li><a href="ge.shape.html">shape</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Nov 19 2017 05:09:48 GMT+0000 (UTC)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Jan 19 2019 08:17:38 GMT+0000 (UTC)
 </footer>
 
 <script> prettyPrint(); </script>

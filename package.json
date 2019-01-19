@@ -1,11 +1,11 @@
 {
   "name": "graph-editor",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "author": "dead-beef",
   "contributors": [],
   "license": "MIT",
   "private": false,
-  "description": "Graph editor library module",
+  "description": "Graph editor frontend component",
   "keywords": [
     "dom",
     "svg",

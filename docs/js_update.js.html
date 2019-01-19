@@ -37,7 +37,7 @@
  * @returns {ge.GraphEditor}
  * @see [d3.transition]{@link https://github.com/d3/d3-transition/blob/master/README.md#api-reference}
  */
-ge.GraphEditor.prototype.transition = function(selection, type, name) {
+ge.GraphEditor.prototype.transition = function transition(selection, type, name) {
 	var duration = this.options.transition[type];
 	if(!duration) {
 		return selection;
@@ -50,13 +50,8 @@ ge.GraphEditor.prototype.transition = function(selection, type, name) {
 		.duration(duration);
 };
 
-/**
- * Resize node to fit text inside.
- * @private
- * @param   {Node}     node
- * @returns {boolean}        False if node text did not change.
- */
-ge.GraphEditor.prototype.getNodeSize = function(node) {
+
+/*ge.GraphEditor.prototype.getNodeSize = function getNodeSize(node) {
 	if(node.title === node.prevTitle) {
 		return false;
 	}
@@ -118,13 +113,13 @@ ge.GraphEditor.prototype.getNodeSize = function(node) {
 	node.size = node.textSize / 1.4142;
 
 	return true;
-};
+};*/
 
 /**
  * Handle graph SVG element resize.
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.resized = function() {
+ge.GraphEditor.prototype.resized = function resized() {
 	this.updateExtent();
 	this.zoom.translateTo(this.container, 0, 0);
 	return this;
@@ -135,7 +130,7 @@ ge.GraphEditor.prototype.resized = function() {
  * @private
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.updateSimulation = function() {
+ge.GraphEditor.prototype.updateSimulation = function updateSimulation() {
 	if(this.state.simulation) {
 		this.state.simulation = this.options.simulation
 			.create.call(
@@ -155,32 +150,33 @@ ge.GraphEditor.prototype.updateSimulation = function() {
  * @param   {Node}           [node]  Moved node.
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.updateBBox = function(node) {
+ge.GraphEditor.prototype.updateBBox = function updateBBox(node) {
 	var data = this.data.nodes;
 	var padding = this.options.bbox.padding;
 
 	if(node === undefined) {
-		var extent = d3.extent(data, function(d) { return d.x; });
-		if(extent[0] === undefined) {
-			extent[0] = extent[1] = 0;
-		}
+		var left = d3.min(data, function(d) { return d.x; });
+		var up = d3.min(data, function(d) { return d.y; });
+		var right = d3.max(data, function(d) { return d.x + d.width; });
+		var down = d3.max(data, function(d) { return d.y + d.height; });
 
-		this.bbox[0][0] = extent[0] - padding;
-		this.bbox[1][0] = extent[1] + padding;
-
-		extent = d3.extent(data, function(d) { return d.y; });
-		if(extent[0] === undefined) {
-			extent[0] = extent[1] = 0;
-		}
-
-		this.bbox[0][1] = extent[0] - padding;
-		this.bbox[1][1] = extent[1] + padding;
+		this.bbox[0][0] = (left || 0) - padding;
+		this.bbox[1][0] = (right || 0) + padding;
+		this.bbox[0][1] = (up || 0) - padding;
+		this.bbox[1][1] = (down || 0) + padding;
 	}
 	else {
-		this.bbox[0][0] = Math.min(this.bbox[0][0], data.x - padding);
-		this.bbox[1][0] = Math.max(this.bbox[1][0], data.x + padding);
-		this.bbox[0][1] = Math.min(this.bbox[0][1], data.y - padding);
-		this.bbox[1][1] = Math.max(this.bbox[1][1], data.y + padding);
+		//console.log(node.x, node.y, node.width, node.height, padding);
+		this.bbox[0][0] = Math.min(this.bbox[0][0], node.x - padding);
+		this.bbox[0][1] = Math.min(this.bbox[0][1], node.y - padding);
+		this.bbox[1][0] = Math.max(
+			this.bbox[1][0],
+			node.x + node.width + padding
+		);
+		this.bbox[1][1] = Math.max(
+			this.bbox[1][1],
+			node.y + node.height + padding
+		);
 	}
 
 	this.updateExtent();
@@ -193,7 +189,7 @@ ge.GraphEditor.prototype.updateBBox = function(node) {
  * @private
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.updateExtent = function() {
+ge.GraphEditor.prototype.updateExtent = function updateExtent() {
 	var bbox = this.svg.node().getBoundingClientRect();
 	var extent = [
 		[ 0, 0 ],
@@ -204,90 +200,48 @@ ge.GraphEditor.prototype.updateExtent = function() {
 };
 
 /**
- * Update link element.
+ * Update a link.
  * @param   {Reference}       link  Changed link.
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.updateLink = function(link) {
+ge.GraphEditor.prototype.updateLink = function updateLink(link) {
 	var self = this;
 	var transition = function(selection) {
 		return self.transition(selection, 'drag', 'update-link');
 	};
-
 	link = self.getElement(link);
-	var def = d3.select('#' + link.datum().defId);
-
-	transition(def)
-		.attr('d', ge.bind(self, self.options.link.path));
-
-	transition(link.select('path'))
-		.attr('d', function(d) { return d.path; })
-		.style('stroke-width', function(d) { return d.size + 'px'; });
-
-	link.select('textPath')
-		.text(function(d) { return d.title; });
-
+	var def = d3.select(link.datum().defSelector);
+	ge.Link.updateSelection(link, def, self.options.link, transition);
 	return this;
 };
 
 
 /**
- * Update node element. If it was moved or resized, update its links.
+ * Update a node. If it was moved or resized, update its links.
  * @param   {Reference}       node  Changed node.
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.updateNode = function(node) {
+ge.GraphEditor.prototype.updateNode = function updateNode(node) {
 	var self = this;
-	var opt = this.options;
 
 	node = this.getElement(node);
 
-	var circle = node.select('circle');
-
+	var d = node.datum();
 	var prevTransform = node.attr('transform');
-	var prevSize = circle.attr('r');
-	var transform;
-	var size;
+	var nextTransform = 'translate('.concat(d.x, ',', d.y, ')');
+	var prevWidth = d.width;
+	var prevHeight = d.height;
 
 	var transition = function(selection) {
 		return self.transition(selection, 'drag', 'update-node');
 	};
 
-	transition(node)
-		.attr(
-			'transform',
-			function(d) {
-				transform = 'translate('.concat(d.x, ',', d.y, ')');
-				return transform;
-			}
-		);
+	ge.Node.updateSelection(node, transition, this.textSize);
 
-	if(opt.node.text.inside) {
-		if(this.getNodeSize(node.datum())) {
-			node.select('foreignObject')
-				.attr('x', function(d) { return d.textOffset; })
-				.attr('y', function(d) { return d.textOffset; })
-				.attr('width', function(d) { return d.textSize; })
-				.attr('height', function(d) { return d.textSize; })
-				.select('span')
-				.text(function(d) { return d.title; });
-		}
-	}
-	else {
-		node.select('text')
-			.attr('dx', function(d) {
-				return d.size + opt.node.text.dx;
-			})
-			.text(function(d) {
-				return d.title;
-			});
-	}
-
-	transition(circle)
-		.attr('r', function(d) { size = d.size; return size; });
-
-	if(transform !== prevTransform || size !== prevSize) {
-		node = node.datum();
+	if(nextTransform !== prevTransform
+	   || d.width !== prevWidth
+	   || d.height !== prevHeight) {
+		node = d;
 
 		var updateLink = function(d) {
 			return d.source === node || d.target === node;
@@ -296,8 +250,10 @@ ge.GraphEditor.prototype.updateNode = function(node) {
 		var defs = this.defs.filter(updateLink);
 		var links = this.links.filter(updateLink);
 
-		transition(defs)
-			.attr('d', ge.bind(this, opt.link.path));
+		ge.Link.updateSelection(links, defs, self.options.link, transition);
+
+		/*transition(defs)
+			.attr('d', function() { return d.shape.path(d); });
 
 		transition(links.select('path'))
 			.attr('d', function(d) { return d.path; });
@@ -307,15 +263,15 @@ ge.GraphEditor.prototype.updateNode = function(node) {
 
 		transition(links.select('textPath'))
 			.attr('startOffset', function(d) { return offset[d.flip]; })
-			.attr('text-anchor', function(d) { return anchor[d.flip]; });
+			.attr('text-anchor', function(d) { return anchor[d.flip]; });*/
 
-		this.updateBBox();
+		this.updateBBox(node);
 	}
 
 	return this;
 };
 
-/*ge.GraphEditor.prototype.updateSize = function(nodes, links) {
+/*ge.GraphEditor.prototype.updateSize = function updateSize(nodes, links) {
 	nodes = nodes || this.nodes;
 	links = links || this.links;
 	var opt = this.options;
@@ -360,7 +316,7 @@ ge.GraphEditor.prototype.updateNode = function(node) {
  * @param   {boolean}        [simulation=false]  True if called from the simulation tick handler.
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.update = function(simulation) {
+ge.GraphEditor.prototype.update = function update(simulation) {
 	var self = this;
 	var opt = this.options;
 	var ttype = simulation ? 'simulation' : 'drag';
@@ -369,102 +325,30 @@ ge.GraphEditor.prototype.update = function(simulation) {
 		return self.transition(selection, ttype, 'update');
 	};
 
-	if(opt.node.text.inside) {
-		this.data.nodes.forEach(ge.bind(this, this.getNodeSize));
-	}
-
-	this.defs = this.defs.data(this.data.links, ge.id);
-	this.defs.exit().remove();
-	this.defs = this.defs.enter()
-		.append('path')
-		.attr('id', function(d) { return d.defId; })
-		.merge(this.defs);
-
-	transition(this.defs).attr('d', ge.bind(this, opt.link.path));
-
-	this.links = this.links.data(this.data.links, ge.id);
-	this.links.exit().remove();
-
-	var newLinks = this.links.enter()
-		.append('g')
-		.attr('id', function(d) { return d.pathId; })
-		.classed(opt.css.link, true);
-
-	newLinks.append('path');
-
-	newLinks.append('text')
-		.attr('dx', opt.link.text.dx)
-		.attr('dy', opt.link.text.dy)
-		.append('textPath')
-		.attr('xlink:href', function(d) { return '#' + d.defId; });
-
-	this.links = newLinks.merge(this.links);
-
-	transition(this.links.select('path'))
-		.style('stroke-width', function(d) { return d.size + 'px'; })
-		.attr('d', function(d) { return d.path; });
-
-	var offset = opt.link.text.offset;
-	var anchor = opt.link.text.anchor;
-
-	transition(this.links.select('textPath'))
-		.text(function(d) { return d.title; })
-		.attr('startOffset', function(d) { return offset[d.flip]; })
-		.attr('text-anchor', function(d) { return anchor[d.flip]; });
-
 	this.nodes = this.nodes.data(this.data.nodes, ge.id);
 	this.nodes.exit().remove();
 	var newNodes = this.nodes.enter()
 		.append('g')
-		.attr('id', function(d) { return d.elementId; })
 		.classed(opt.css.node, true);
-
-	newNodes.append('circle');
-
-	if(opt.node.text.inside) {
-		newNodes.append('foreignObject')
-			.append('xhtml:div')
-			.append('xhtml:span');
-	}
-	else {
-		newNodes.append('text');
-	}
-
+	ge.Node.initSelection(newNodes);
 	this.nodes = newNodes.merge(this.nodes);
-
-	transition(this.nodes)
-		.attr(
-			'transform',
-			function(d) {
-				return 'translate('.concat(d.x, ',', d.y, ')');
-			}
-		);
-
-	if(opt.node.text.inside) {
-		var obj = this.nodes.select('foreignObject');
-
-		transition(obj)
-			.attr('x', function(d) { return d.textOffset; })
-			.attr('y', function(d) { return d.textOffset; })
-			.attr('width', function(d) { return d.textSize; })
-			.attr('height', function(d) { return d.textSize; });
-
-		transition(obj.selectAll('span'))
-			.text(function(d) { return d.title; });
-	}
-	else {
-		transition(this.nodes.select('text'))
-			.text(function(d) { return d.title; })
-			.attr('dx', function(d) {
-				return d.size + opt.node.text.dx;
-			})
-			.attr('dy', opt.node.text.dy);
-	}
-
-	transition(this.nodes.select('circle'))
-		.attr('r', function(d) { return d.size; });
-
+	ge.Node.updateSelection(this.nodes, transition, this.textSize);
 	this.nodeEvents(newNodes);
+
+	this.defs = this.defs.data(this.data.links, ge.id);
+	this.defs.exit().remove();
+	var newDefs = this.defs.enter().append('path');
+
+	this.links = this.links.data(this.data.links, ge.id);
+	this.links.exit().remove();
+	var newLinks = this.links.enter()
+		.append('g')
+		.classed(opt.css.link, true);
+
+	ge.Link.initSelection(newLinks, newDefs, opt.link);
+	this.links = this.links.merge(newLinks);
+	this.defs = this.defs.merge(newDefs);
+	ge.Link.updateSelection(this.links, this.defs, opt.link, transition);
 	this.linkEvents(newLinks);
 
 	//this.updateSize(newNodes, newLinks);
@@ -487,13 +371,13 @@ ge.GraphEditor.prototype.update = function(simulation) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ge.GraphEditor.html">GraphEditor</a></li></ul><h3>Events</h3><ul><li><a href="global.html#event:click">click</a></li><li><a href="global.html#event:link-click">link-click</a></li><li><a href="global.html#event:new-link-cancel">new-link-cancel</a></li><li><a href="global.html#event:new-link-end">new-link-end</a></li><li><a href="global.html#event:new-link-start">new-link-start</a></li><li><a href="global.html#event:node-click">node-click</a></li><li><a href="global.html#event:simulation-start">simulation-start</a></li><li><a href="global.html#event:simulation-stop">simulation-stop</a></li></ul><h3>Namespaces</h3><ul><li><a href="ge.html">ge</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ge.Angle.html">Angle</a></li><li><a href="ge.BBox.html">BBox</a></li><li><a href="ge.ContainerSize.html">ContainerSize</a></li><li><a href="ge.GraphEditor.html">GraphEditor</a></li><li><a href="ge.Link.html">Link</a></li><li><a href="ge.Node.html">Node</a></li><li><a href="ge.path.Line.html">Line</a></li><li><a href="ge.path.Path.html">Path</a></li><li><a href="ge.Point.html">Point</a></li><li><a href="ge.SaveLoad.html">SaveLoad</a></li><li><a href="ge.shape.Circle.html">Circle</a></li><li><a href="ge.shape.Rect.html">Rect</a></li><li><a href="ge.shape.Shape.html">Shape</a></li><li><a href="ge.TextSize.html">TextSize</a></li></ul><h3>Events</h3><ul><li><a href="global.html#event:click">click</a></li><li><a href="global.html#event:link-click">link-click</a></li><li><a href="global.html#event:new-link-cancel">new-link-cancel</a></li><li><a href="global.html#event:new-link-end">new-link-end</a></li><li><a href="global.html#event:new-link-start">new-link-start</a></li><li><a href="global.html#event:node-click">node-click</a></li><li><a href="global.html#event:simulation-start">simulation-start</a></li><li><a href="global.html#event:simulation-stop">simulation-stop</a></li></ul><h3>Namespaces</h3><ul><li><a href="ge.html">ge</a></li><li><a href="ge.path.html">path</a></li><li><a href="ge.shape.html">shape</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Nov 19 2017 05:09:48 GMT+0000 (UTC)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Jan 19 2019 08:17:38 GMT+0000 (UTC)
 </footer>
 
 <script> prettyPrint(); </script>

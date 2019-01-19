@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: main.js</title>
+    <title>JSDoc: Source: js/util/save-load.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: main.js</h1>
+    <h1 class="page-title">Source: js/util/save-load.js</h1>
 
     
 
@@ -26,86 +26,72 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>'use strict';
-
-/* eslint-disable no-unused-vars */
-
-/**
- * Graph editor module.
- * @namespace
- */
-var ge = exports;
-
-/**
- * Graph editor constructor.
+            <pre class="prettyprint source linenums"><code>/**
+ * Class for saving/loading JSON.
  * @class
- * @classdesc Graph editor class.
- * @param {(SVGElement|Selector|D3Selection)} svg     SVG element.
- * @param {ImportGraphData}                   data    Graph data.
- * @param {GraphOptions}                      options Graph options.
+ * @param {?number}  x  X coordinate.
+ * @param {?number}  y  Y coordinate.
  */
-ge.GraphEditor = function GraphEditor(svg, data, options) {
-	if(!svg.select) {
-		svg = d3.select(svg);
-	}
-
-	this.initOptions(options, svg)
-		.initSvg(svg)
-		.initData(data)
-		.initState();
-
+ge.SaveLoad = function SaveLoad() {
 	/**
-	 * @readonly
-	 * @member {D3Dispatch}
+	 * Class constructors by name.
+	 * @member {object}
 	 */
-	this.dispatch = d3.dispatch(
-		'node-click', 'link-click',
-		'new-link-start', 'new-link-end', 'new-link-cancel',
-		'click',
-		'simulation-start', 'simulation-stop'
-	);
-
-	/**
-	 * Graph bounding box.
-	 * @readonly
-	 * @member {BBox}
-	 */
-	this.bbox = [[0, 0], [0, 0]];
-	/**
-	 * Graph zoom behavior.
-	 * @readonly
-	 * @member {D3Zoom}
-	 */
-	this.zoom = this.zoomEvents(d3.zoom())
-		.scaleExtent([this.options.scale.min, this.options.scale.max]);
-	/**
-	 * Node drag behavior.
-	 * @readonly
-	 * @member {D3Drag}
-	 */
-	this.drag = this.dragEvents(d3.drag());
-	this.svg.call(this.zoom);
-
-	/**
-	 * Window resize event handler.
-	 * @readonly
-	 * @member {function}
-	 */
-	this.onresize = ge.bind(this, this.resized);
-	window.addEventListener('resize', this.onresize);
-
-	this.updateBBox();
-
-	setTimeout(ge.bind(this, function() {
-		this.update()
-			.resized()
-			.simulation(this.options.simulation.start);
-	}), 10);
-
-	return this;
+	this.classes = {};
 };
 
-/* eslint-enable no-unused-vars */
+/**
+ * Add a class.
+ * @param {function} constructor              Class constructor.
+ * @param {string}   [name=constructor.name]  Class name.
+ * @param {boolean}  [overwrite=false]        Overwrite if class exists.
+ */
+ge.SaveLoad.prototype.addClass = function addClass(
+	constructor,
+	name,
+	overwrite
+) {
+	name = name || constructor.name;
+	if(this.classes[name] &amp;&amp; !overwrite) {
+		throw new Error('class "' + name +'" exists');
+	}
+	this.classes[name] = constructor;
+};
+
+/**
+ * Get class by name.
+ * @param   {string}   name  Class name.
+ * @returns {function}       Class constructor.
+ */
+ge.SaveLoad.prototype.getClass = function getClass(name) {
+	var ret = this.classes[name];
+	if(!ret) {
+		throw new Error('class "' + name +'" not found');
+	}
+	return ret;
+};
+
+/**
+ * Load from JSON.
+ * @param   {object}  data     JSON data.
+ * @returns {object}
+ */
+ge.SaveLoad.prototype.fromJson = function fromJson(data) {
+	var cls = this.getClass(data['class']);
+	return new cls(data);
+};
+
+/**
+ * Save to JSON.
+ * @param   {object}  obj                          Object to save.
+ * @param   {string}  [name=obj.constructor.name]  Class name.
+ * @returns {object}
+ */
+ge.SaveLoad.prototype.toJson = function toJson(obj, name) {
+	var ret = obj.toJson();
+	ret['class'] = name || obj.constructor.name;
+	return ret;
+};
 </code></pre>
         </article>
     </section>

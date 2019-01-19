@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: main.js</title>
+    <title>JSDoc: Source: js/shape/circle.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: main.js</h1>
+    <h1 class="page-title">Source: js/shape/circle.js</h1>
 
     
 
@@ -26,86 +26,71 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>'use strict';
-
-/* eslint-disable no-unused-vars */
-
-/**
- * Graph editor module.
- * @namespace
- */
-var ge = exports;
-
-/**
- * Graph editor constructor.
+            <pre class="prettyprint source linenums"><code>/**
+ * Circle.
  * @class
- * @classdesc Graph editor class.
- * @param {(SVGElement|Selector|D3Selection)} svg     SVG element.
- * @param {ImportGraphData}                   data    Graph data.
- * @param {GraphOptions}                      options Graph options.
+ * @param {?object} [data]           JSON data.
  */
-ge.GraphEditor = function GraphEditor(svg, data, options) {
-	if(!svg.select) {
-		svg = d3.select(svg);
-	}
-
-	this.initOptions(options, svg)
-		.initSvg(svg)
-		.initData(data)
-		.initState();
-
-	/**
-	 * @readonly
-	 * @member {D3Dispatch}
-	 */
-	this.dispatch = d3.dispatch(
-		'node-click', 'link-click',
-		'new-link-start', 'new-link-end', 'new-link-cancel',
-		'click',
-		'simulation-start', 'simulation-stop'
-	);
-
-	/**
-	 * Graph bounding box.
-	 * @readonly
-	 * @member {BBox}
-	 */
-	this.bbox = [[0, 0], [0, 0]];
-	/**
-	 * Graph zoom behavior.
-	 * @readonly
-	 * @member {D3Zoom}
-	 */
-	this.zoom = this.zoomEvents(d3.zoom())
-		.scaleExtent([this.options.scale.min, this.options.scale.max]);
-	/**
-	 * Node drag behavior.
-	 * @readonly
-	 * @member {D3Drag}
-	 */
-	this.drag = this.dragEvents(d3.drag());
-	this.svg.call(this.zoom);
-
-	/**
-	 * Window resize event handler.
-	 * @readonly
-	 * @member {function}
-	 */
-	this.onresize = ge.bind(this, this.resized);
-	window.addEventListener('resize', this.onresize);
-
-	this.updateBBox();
-
-	setTimeout(ge.bind(this, function() {
-		this.update()
-			.resized()
-			.simulation(this.options.simulation.start);
-	}), 10);
-
-	return this;
+ge.shape.Circle = function Circle(data) {
+	ge.shape.Shape.call(this, data);
 };
 
-/* eslint-enable no-unused-vars */
+ge.shape.Circle.prototype = Object.create(ge.shape.Shape.prototype);
+Object.defineProperty(
+	ge.shape.Circle.prototype,
+	'constructor',
+	{ 
+		value: ge.shape.Circle,
+		enumerable: false,
+		writable: true
+	}
+);
+ge.shape.addClass(ge.shape.Circle);
+
+/**
+ * Return SVG path.
+ * @param   {ge.Node}   node   Node data.
+ * @returns {string}           SVG path.
+ */
+ge.shape.Circle.prototype.path = function path(node) {
+	var dx = node.width, rx = dx / 2, ry = node.height / 2;
+	var arc = 'a'.concat(rx, ',', ry, ',0,1,0,');
+	return 'M'.concat(-rx, ',0', arc, dx, ',0', arc, -dx, ',0');
+};
+
+/**
+ * Return point at angle.
+ * @abstract
+ * @param   {ge.Node}   node   Node data.
+ * @param   {ge.Angle}  angle  Angle.
+ * @returns {ge.Point}
+ */
+ge.shape.Circle.prototype.getPoint = function getPoint(node, angle) {
+	return new ge.Point(
+		node.x + node.width * angle.cos * 0.5,
+		node.y + node.height * angle.sin * 0.5
+	);
+};
+
+/**
+ * Resize a node to fit its title inside.
+ * @abstract
+ * @param {ge.Node}            node       Node data.
+ * @param {ge.ContainerSize}   size       Text container size.
+ * @param {ge.TextSize}        textSize   Text size calculator.
+ */
+ge.shape.Circle.prototype.doFitTitleInside = function doFitTitleInside(
+	node,
+	size/*,
+	textSize*/
+) {
+	node.width = node.height = Math.max(
+		Math.ceil(Math.sqrt(size.minArea * 2)),
+		size.minWidth,
+		size.minHeight
+	);
+	node.textWidth = node.textHeight = Math.ceil(node.width / 1.414213);
+};
 </code></pre>
         </article>
     </section>

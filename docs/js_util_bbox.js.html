@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: main.js</title>
+    <title>JSDoc: Source: js/util/bbox.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: main.js</h1>
+    <h1 class="page-title">Source: js/util/bbox.js</h1>
 
     
 
@@ -26,86 +26,37 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>'use strict';
-
-/* eslint-disable no-unused-vars */
-
-/**
- * Graph editor module.
- * @namespace
- */
-var ge = exports;
-
-/**
- * Graph editor constructor.
+            <pre class="prettyprint source linenums"><code>/**
+ * Bounding box constructor.
  * @class
- * @classdesc Graph editor class.
- * @param {(SVGElement|Selector|D3Selection)} svg     SVG element.
- * @param {ImportGraphData}                   data    Graph data.
- * @param {GraphOptions}                      options Graph options.
+ * @classdesc Bounding box class.
+ * @param {?number}  left   Left X coordinate.
+ * @param {?number}  top    Top Y coordinate.
+ * @param {?number}  right  Right X coordinate.
+ * @param {?number}  bottom Bottom Y coordinate.
  */
-ge.GraphEditor = function GraphEditor(svg, data, options) {
-	if(!svg.select) {
-		svg = d3.select(svg);
-	}
-
-	this.initOptions(options, svg)
-		.initSvg(svg)
-		.initData(data)
-		.initState();
-
+ge.BBox = function BBox(left, top, right, bottom) {
 	/**
-	 * @readonly
-	 * @member {D3Dispatch}
+	 * Left X coordinate.
+	 * @member {number}
 	 */
-	this.dispatch = d3.dispatch(
-		'node-click', 'link-click',
-		'new-link-start', 'new-link-end', 'new-link-cancel',
-		'click',
-		'simulation-start', 'simulation-stop'
-	);
-
+	this.left = +left || 0;
 	/**
-	 * Graph bounding box.
-	 * @readonly
-	 * @member {BBox}
+	 * Top Y coordinate.
+	 * @member {number}
 	 */
-	this.bbox = [[0, 0], [0, 0]];
+	this.top = +top || 0;
 	/**
-	 * Graph zoom behavior.
-	 * @readonly
-	 * @member {D3Zoom}
+	 * Right X coordinate.
+	 * @member {number}
 	 */
-	this.zoom = this.zoomEvents(d3.zoom())
-		.scaleExtent([this.options.scale.min, this.options.scale.max]);
+	this.right = +right || 0;
 	/**
-	 * Node drag behavior.
-	 * @readonly
-	 * @member {D3Drag}
+	 * Bottom Y coordinate.
+	 * @member {number}
 	 */
-	this.drag = this.dragEvents(d3.drag());
-	this.svg.call(this.zoom);
-
-	/**
-	 * Window resize event handler.
-	 * @readonly
-	 * @member {function}
-	 */
-	this.onresize = ge.bind(this, this.resized);
-	window.addEventListener('resize', this.onresize);
-
-	this.updateBBox();
-
-	setTimeout(ge.bind(this, function() {
-		this.update()
-			.resized()
-			.simulation(this.options.simulation.start);
-	}), 10);
-
-	return this;
+	this.bottom = +bottom || 0;
 };
-
-/* eslint-enable no-unused-vars */
 </code></pre>
         </article>
     </section>

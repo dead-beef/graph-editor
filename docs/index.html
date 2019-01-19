@@ -26,7 +26,7 @@
     
 
 
-    <h3>graph-editor 0.0.3</h3>
+    <h3>graph-editor 0.1.0</h3>
 
 
 
@@ -43,122 +43,27 @@
 
 
     <section>
-        <article><h1>graph-editor - graph editor library module</h1><h2>Overview</h2><p>It exports a class which should be bound to an element and provided data for <a href="https://en.wikipedia.org/wiki/Graph_%28abstract_data_type%29">Graph</a> visualisation and editing.</p>
+        <article><h1>graph-editor - graph editor frontend component</h1><p><a href="https://www.npmjs.com/package/graph-editor"><img src="https://img.shields.io/npm/v/graph-editor.svg" alt="npm"></a> <a href="https://nodejs.org/"><img src="https://img.shields.io/node/v/graph-editor.svg" alt="node"></a> <a href="https://libraries.io/npm/graph-editor/"><img src="https://img.shields.io/librariesio/github/dead-beef/graph-editor.svg" alt="Libraries.io for GitHub"></a> <a href="https://github.com/dead-beef/graph-editor/blob/master/LICENSE"><img src="https://img.shields.io/github/license/dead-beef/graph-editor.svg" alt="license"></a></p>
+<h2>Overview</h2><p>It exports a class which should be bound to an element and provided data for <a href="https://en.wikipedia.org/wiki/Graph_%28abstract_data_type%29">Graph</a> visualisation and editing.</p>
 <h2>Requirements</h2><ul>
-<li><a href="https://jquery.com/"><code>jQuery</code></a></li>
-<li><a href="https://d3js.org/"><code>D3 v4</code></a></li>
+<li><a href="https://d3js.org/"><code>D3 v5</code></a></li>
 </ul>
 <h2>Installation</h2><pre class="prettyprint source"><code>npm install graph-editor</code></pre><h2>Usage</h2><ul>
 <li><a href="https://dead-beef.github.io/graph-editor"><code>Documentation</code></a></li>
-<li><a href="https://dead-beef.github.io/graph-editor-usage-example"><code>Usage example</code></a></li>
+<li><a href="https://"><code>Usage example</code></a></li>
 </ul>
-<pre class="prettyprint source lang-js"><code>var selector = 'svg';
-
-var data = {
-    nodes: [
-        { id: 0, size: 4, title: 'node1', data: 'userdata0' },
-        { id: 1, size: 8, title: 'node2', data: 'userdata1' }
-    ],
-    links: [
-        { source: 0, target: 0, size: 2, title: 'link2', data: 'userdata2' },
-        { source: 0, target: 1, size: 4, title: 'link1', data: 'userdata3' }
-    ]
-};
-
-var options = {
-    id: null,
-    directed: false,
-
-    node: {
-        border: 2,
-        size: {
-            def: 10,
-            min: 10
-        },
-        text: {
-            dx: 0,
-            dy: 0,
-            inside: true
-        }
-    },
-
-    link: {
-        path: ge.defaultLinkPath,
-        size: {
-            def: 2
-        },
-        text: {
-            dx: 0,
-            dy: '1.1em',
-            offset: null,
-            anchor: null
-        },
-        arc: {
-            start: 180,
-            end: 270
-        }
-    },
-
-    simulation: {
-        create: ge.defaultSimulation,
-        start: false,
-        stop: true,
-        step: 1
-    },
-
-    transition: {
-        zoom: 250,
-        drag: 50,
-        simulation: 50
-    },
-
-    scale: {
-        min: 0.25,
-        max: 8.0
-    },
-
-    bbox: {
-        padding: 80
-    },
-
-    'export': {
-        node: ge.defaultExportNode,
-        link: ge.defaultExportLink
-    },
-
-    css: {
-        markers: 'ge-markers',
-        node: 'ge-node',
-        graph: 'ge-graph',
-        digraph: 'ge-digraph',
-        hide: 'ge-hidden',
-        dragline: 'ge-dragline',
-        link: 'ge-link',
-        connect: 'ge-connect',
-        selection: {
-            node: 'ge-selection',
-            link: 'ge-link-selection'
-        }
-    }
-};
-
-var graph = new ge.GraphEditor(selector, data, options);</code></pre><h2>Requirements for advanced workflow</h2><p>To be able to rebuild the project you will need</p>
-<ul>
+<h2>Development</h2><h3>Requirements</h3><ul>
 <li><a href="https://nodejs.org/"><code>Node.js</code></a></li>
 <li><a href="https://nodejs.org/"><code>NPM</code></a></li>
 <li><a href="https://git-scm.com/"><code>Git</code></a></li>
 <li><a href="https://www.gnu.org/software/make/"><code>GNU Make</code></a></li>
 </ul>
-<h2>Installation</h2><pre class="prettyprint source"><code>git clone https://github.com/dead-beef/graph-editor.git
+<h3>Installation</h3><pre class="prettyprint source lang-bash"><code>git clone https://github.com/dead-beef/graph-editor.git
 cd graph-editor
-make install</code></pre><h2>Building</h2><pre class="prettyprint source lang-bash"><code># single run
+make install</code></pre><h3>Building</h3><pre class="prettyprint source lang-bash"><code># single run
 make
 # continuous
-make watch
-# single run, minify
-make min
-# continuous, minify
-make min-watch</code></pre><h2>Testing</h2><pre class="prettyprint source lang-bash"><code># unit, single run
+make watch</code></pre><h3>Testing</h3><pre class="prettyprint source lang-bash"><code># unit, single run
 make test
 # unit, continuous
 make test-watch
@@ -167,7 +72,7 @@ TEST_BUNDLE=1 make test
 # test minified library bundle
 TEST_MIN_BUNDLE=1 make test
 # select browsers (default: Chromium)
-TEST_BROWSERS=&quot;Firefox Chrome&quot; make test</code></pre><h2>Code Linting</h2><pre class="prettyprint source"><code>make lint</code></pre><h2>Documentation</h2><pre class="prettyprint source"><code>make docs</code></pre><h2>Licenses</h2><ul>
+TEST_BROWSERS=&quot;Firefox Chrome&quot; make test</code></pre><h3>Code Linting</h3><pre class="prettyprint source"><code>make lint</code></pre><h3>Documentation</h3><pre class="prettyprint source"><code>make docs</code></pre><h2>Licenses</h2><ul>
 <li><a href="https://github.com/dead-beef/graph-editor/blob/master/LICENSE"><code>graph-editor</code></a></li>
 </ul></article>
     </section>
@@ -180,13 +85,13 @@ TEST_BROWSERS=&quot;Firefox Chrome&quot; make test</code></pre><h2>Code Linting<
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ge.GraphEditor.html">GraphEditor</a></li></ul><h3>Events</h3><ul><li><a href="global.html#event:click">click</a></li><li><a href="global.html#event:link-click">link-click</a></li><li><a href="global.html#event:new-link-cancel">new-link-cancel</a></li><li><a href="global.html#event:new-link-end">new-link-end</a></li><li><a href="global.html#event:new-link-start">new-link-start</a></li><li><a href="global.html#event:node-click">node-click</a></li><li><a href="global.html#event:simulation-start">simulation-start</a></li><li><a href="global.html#event:simulation-stop">simulation-stop</a></li></ul><h3>Namespaces</h3><ul><li><a href="ge.html">ge</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ge.Angle.html">Angle</a></li><li><a href="ge.BBox.html">BBox</a></li><li><a href="ge.ContainerSize.html">ContainerSize</a></li><li><a href="ge.GraphEditor.html">GraphEditor</a></li><li><a href="ge.Link.html">Link</a></li><li><a href="ge.Node.html">Node</a></li><li><a href="ge.path.Line.html">Line</a></li><li><a href="ge.path.Path.html">Path</a></li><li><a href="ge.Point.html">Point</a></li><li><a href="ge.SaveLoad.html">SaveLoad</a></li><li><a href="ge.shape.Circle.html">Circle</a></li><li><a href="ge.shape.Rect.html">Rect</a></li><li><a href="ge.shape.Shape.html">Shape</a></li><li><a href="ge.TextSize.html">TextSize</a></li></ul><h3>Events</h3><ul><li><a href="global.html#event:click">click</a></li><li><a href="global.html#event:link-click">link-click</a></li><li><a href="global.html#event:new-link-cancel">new-link-cancel</a></li><li><a href="global.html#event:new-link-end">new-link-end</a></li><li><a href="global.html#event:new-link-start">new-link-start</a></li><li><a href="global.html#event:node-click">node-click</a></li><li><a href="global.html#event:simulation-start">simulation-start</a></li><li><a href="global.html#event:simulation-stop">simulation-stop</a></li></ul><h3>Namespaces</h3><ul><li><a href="ge.html">ge</a></li><li><a href="ge.path.html">path</a></li><li><a href="ge.shape.html">shape</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Nov 19 2017 05:09:48 GMT+0000 (UTC)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Jan 19 2019 08:17:38 GMT+0000 (UTC)
 </footer>
 
 <script> prettyPrint(); </script>

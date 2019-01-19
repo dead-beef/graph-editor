@@ -34,7 +34,7 @@
  * @param   {D3Selection}    svg
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.initMarkers = function(svg) {
+ge.GraphEditor.prototype.initMarkers = function initMarkers(svg) {
 	/*var defs = d3.select('#' + this.options.css.markers).node();
 	if(defs !== null) {
 		return this;
@@ -47,19 +47,8 @@ ge.GraphEditor.prototype.initMarkers = function(svg) {
 
 	var defs = svg.append('svg:defs');
 
-	var arrows = [
-		'ge-arrow-default', 'ge-arrow-hover',
-		'ge-arrow-selected', 'ge-arrow-selected-hover',
-		'ge-arrow-unselected', 'ge-arrow-unselected-hover',
-		'ge-arrow-selected-node', 'ge-arrow-selected-node-hover',
-		'ge-dragline-end'
-	];
-
-	defs.selectAll('marker')
-		.data(arrows)
-		.enter()
-		.append('marker')
-		.attr('id', function(d) { return d; })
+	defs.append('marker')
+		.attr('id', 'ge-dragline-end')
 		.attr('viewBox', '0 -7 12 14')
 		.attr('refX', '7')
 		.attr('refY', '0')
@@ -85,22 +74,23 @@ ge.GraphEditor.prototype.initMarkers = function(svg) {
 };
 
 /**
- * Initialize SVG.
+ * Initialize SVG element.
  * @private
  * @param   {D3Selection}    svg
  * @this    ge.GraphEditor
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.initSvg = function(svg) {
-	svg
-		.attr('id', this.options.id)
+ge.GraphEditor.prototype.initSvg = function initSvg(svg) {
+	svg.attr('id', this.options.id)
 		.classed(this.options.css.graph, true)
 		.classed(this.options.css.digraph, this.options.directed);
 
+	this.initMarkers(svg);
+
 	var g = svg.append('g');
 	var defsContainer = svg.select('defs'); //g.append('defs');
-	var linksContainer = g.append('g');
-	var nodesContainer = g.append('g');
+	var linkContainer = g.append('g');
+	var nodeContainer = g.append('g');
 
 	/**
 	 * Graph container element.
@@ -113,19 +103,19 @@ ge.GraphEditor.prototype.initSvg = function(svg) {
 	 * @readonly
 	 * @member {D3Selection}
 	 */
-	this.defs = defsContainer.selectAll('.ge-text-path');
+	this.defs = defsContainer.selectAll('.' + this.options.css.textpath);
 	/**
 	 * Link elements.
 	 * @readonly
 	 * @member {D3Selection}
 	 */
-	this.links = linksContainer.selectAll('g');
+	this.links = linkContainer.selectAll('g');
 	/**
 	 * Node elements.
 	 * @readonly
 	 * @member {D3Selection}
 	 */
-	this.nodes = nodesContainer.selectAll('g');
+	this.nodes = nodeContainer.selectAll('g');
 	/**
 	 * 'Drag to link nodes' line.
 	 * @readonly
@@ -134,23 +124,30 @@ ge.GraphEditor.prototype.initSvg = function(svg) {
 	this.dragLine = g.append('path')
 		.classed(this.options.css.dragline, true)
 		.classed(this.options.css.hide, true)
+		.attr('marker-start', 'url(#ge-dragline-start)')
+		.attr('marker-end', 'url(#ge-dragline-end)')
 		.attr('d', 'M0,0L0,0');
 	/**
-	 * Hidden element for text size calculation.
-	 * @private
-	 * @member {D3Selection}
+	 * Text size calculator.
+	 * @readonly
+	 * @member {ge.TextSize}
 	 */
-	this.tmpText = svg.append('text')
-		.style('stroke', 'none')
-		.style('fill', 'none');
+	this.textSize = new ge.TextSize(
+		svg.append('text')
+			.classed(this.options.css.node, true)
+			.node()
+	);
+
 	/**
 	 * Graph SVG element.
 	 * @readonly
 	 * @member {D3Selection}
 	 */
 	this.svg = svg;
+
 	return this;
 };
+
 
 /**
  * Initialize graph data.
@@ -159,15 +156,15 @@ ge.GraphEditor.prototype.initSvg = function(svg) {
  * @this    ge.GraphEditor
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.initData = function(data) {
+ge.GraphEditor.prototype.initData = function initData(data) {
 	/**
-	 * Node data dictionary.
+	 * Nodes by ID.
 	 * @readonly
 	 * @member {Object&lt;ID,Node>}
 	 */
 	this.nodeById = {};
 	/**
-	 * Link data dictionary.
+	 * Links by ID.
 	 * @readonly
 	 * @member {Object&lt;ID,Link>}
 	 */
@@ -192,7 +189,7 @@ ge.GraphEditor.prototype.initData = function(data) {
  * @this    ge.GraphEditor
  * @returns {ge.GraphEditor}
  */
-ge.GraphEditor.prototype.initState = function() {
+ge.GraphEditor.prototype.initState = function initState() {
 	/**
 	 * Graph editor state.
      * @readonly
@@ -223,86 +220,6 @@ ge.GraphEditor.prototype.initState = function() {
 	};
 	return this;
 };
-
-/**
- * Initialize node data.
- * @private
- * @param   {ImportNodeData} node  Node data.
- * @returns {boolean}              False if node exists.
- */
-ge.GraphEditor.prototype.initNode = function(node) {
-	if(node.id === undefined) {
-		node.id = 1 + d3.max(this.data.nodes, function(d) { return d.id; });
-		if(isNaN(node.id)) {
-			node.id = 0;
-		}
-	}
-
-	if(this.nodeById[node.id]) {
-		return false;
-	}
-
-	node.elementId = this.options.id.concat('n', node.id);
-	node.selector = '#' + node.elementId;
-	node.size = node.size || this.options.node.size.def;
-
-	if(node.x === undefined) {
-		node.x = node.size + Math.random() * 512;
-	}
-	if(node.y === undefined) {
-		node.y = node.size + Math.random() * 512;
-	}
-	if(node.title === undefined) {
-		node.title = node.id.toString();
-	}
-
-	this.nodeById[node.id] = node;
-	return true;
-};
-
-/**
- * Initialize link data.
- * @private
- * @param   {ImportLinkData} link  Link data.
- * @returns {boolean}              False if data is invalid or link exists.
- */
-ge.GraphEditor.prototype.initLink = function(link) {
-	var source = link.source, target = link.target;
-
-	if(typeof source !== 'object') {
-		source = this.nodeById[source];
-	}
-	if(typeof target !== 'object') {
-		target = this.nodeById[target];
-	}
-
-	if(source === undefined || target === undefined) {
-		console.error(link, source, target);
-		return false;
-	}
-
-	link.source = source;
-	link.target = target;
-
-	var id = this.options.link.id(link);
-
-	if(this.linkById[id]) {
-		return false;
-	}
-
-	link.id = id;
-	link.size = link.size || this.options.link.size.def;
-	link.defId = this.options.id.concat('d', link.id);
-	link.pathId = this.options.id.concat('p', link.id);
-	link.selector = '#' + link.pathId;
-
-	if(link.title === undefined) {
-		link.title = link.id;
-	}
-
-	this.linkById[link.id] = link;
-	return true;
-};
 </code></pre>
         </article>
     </section>
@@ -313,13 +230,13 @@ ge.GraphEditor.prototype.initLink = function(link) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ge.GraphEditor.html">GraphEditor</a></li></ul><h3>Events</h3><ul><li><a href="global.html#event:click">click</a></li><li><a href="global.html#event:link-click">link-click</a></li><li><a href="global.html#event:new-link-cancel">new-link-cancel</a></li><li><a href="global.html#event:new-link-end">new-link-end</a></li><li><a href="global.html#event:new-link-start">new-link-start</a></li><li><a href="global.html#event:node-click">node-click</a></li><li><a href="global.html#event:simulation-start">simulation-start</a></li><li><a href="global.html#event:simulation-stop">simulation-stop</a></li></ul><h3>Namespaces</h3><ul><li><a href="ge.html">ge</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ge.Angle.html">Angle</a></li><li><a href="ge.BBox.html">BBox</a></li><li><a href="ge.ContainerSize.html">ContainerSize</a></li><li><a href="ge.GraphEditor.html">GraphEditor</a></li><li><a href="ge.Link.html">Link</a></li><li><a href="ge.Node.html">Node</a></li><li><a href="ge.path.Line.html">Line</a></li><li><a href="ge.path.Path.html">Path</a></li><li><a href="ge.Point.html">Point</a></li><li><a href="ge.SaveLoad.html">SaveLoad</a></li><li><a href="ge.shape.Circle.html">Circle</a></li><li><a href="ge.shape.Rect.html">Rect</a></li><li><a href="ge.shape.Shape.html">Shape</a></li><li><a href="ge.TextSize.html">TextSize</a></li></ul><h3>Events</h3><ul><li><a href="global.html#event:click">click</a></li><li><a href="global.html#event:link-click">link-click</a></li><li><a href="global.html#event:new-link-cancel">new-link-cancel</a></li><li><a href="global.html#event:new-link-end">new-link-end</a></li><li><a href="global.html#event:new-link-start">new-link-start</a></li><li><a href="global.html#event:node-click">node-click</a></li><li><a href="global.html#event:simulation-start">simulation-start</a></li><li><a href="global.html#event:simulation-stop">simulation-stop</a></li></ul><h3>Namespaces</h3><ul><li><a href="ge.html">ge</a></li><li><a href="ge.path.html">path</a></li><li><a href="ge.shape.html">shape</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Nov 19 2017 05:09:48 GMT+0000 (UTC)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Jan 19 2019 08:17:38 GMT+0000 (UTC)
 </footer>
 
 <script> prettyPrint(); </script>
