@@ -110,8 +110,9 @@ ge.Link = function Link(graph, data) {
 ge.Link.initSelection = function initSelection(links, defs, opts) {
 	defs.attr('id', function(d) { return d.defId; });
 
-	links.attr('id', function(d) { return d.pathId; });
-	links.append('path');
+	links.attr('id', function(d) { return d.elementId; });
+	links.append('path')
+		.attr('id', function(d) { return d.pathId; });
 	links.append('text')
 		.attr('dx', opts.text.dx)
 		.attr('dy', opts.text.dy)
