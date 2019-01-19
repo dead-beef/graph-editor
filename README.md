@@ -27,7 +27,7 @@ npm install graph-editor
 ## Usage
 
 - [`Documentation`](https://dead-beef.github.io/graph-editor)
-- [`Usage example`](https://)
+- [`Usage example`](https://codepen.io/deadbeef/pen/wRVMej)
 
 ## Development
 
